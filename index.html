@@ -1,4 +1,32 @@
 <html>
-	<script type="text/javascript" src='simple_model_v0.1.js'></script>
-	<body><button onclick="increment()">click me!</button></body>
+	<head>
+
+		<link rel="stylesheet" type="text/css" href="style.css" >
+		
+	</head>
+
+	<body>
+	<div><span>Capacity: </span><span  id = "capacity"></span>  charge Rate:<span  id = "charge_rate"></span></div>
+	<div ><span>System Time: </span><span id = "systemtime"></span></div>
+
+	<button id="step">Step</button>
+	<button id="control">Run</button>
+	<div id="main">
+		<div id = "sitch"></div>
+		<div id="netform"></div>
+		<div id="plot"></div>
+	
+
+
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script type="text/javascript" src='https://code.jquery.com/jquery-3.2.0.min.js'></script>
+<script type="text/javascript" src='simple_model_v0.1.js'></script>	
+
+<script>
+$("#step").click(function(){tickstep()})
+$("#control").click(function(){tickstepcontrol()})</script>
+
+	</body>
+
 </html>
