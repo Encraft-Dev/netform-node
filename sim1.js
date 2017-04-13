@@ -1,18 +1,27 @@
+//using sim.js library from http://simjs.com/   **updated version avialble @https://github.com/btelles/simjs-updated
+
 function startsim(){console.log("Starting Simulation")
-		netformSimulation(1200,1234)
+		netformSimulation(1000,1234,10)
 		}  //using minutes for now
 function stopsim(){console.log("Stopping Simulation")}
 
-var vArr = [{type:"Tesla P85D",MaxCapacity:85,cRate:20},
-			{type:"Nissan Leaf",MaxCapacity:35,cRate:5},
-			{type:"BMW i8",MaxCapacity:40,cRate:10},
-			{type:"Smart 2Four",MaxCapacity:25,cRate:2}]
+var vArr = [{type:"Tesla P85D",MaxCapacity:85,MinCharge:1,cRate:20},
+			{type:"Nissan Leaf",MaxCapacity:35,MinCharge:1,cRate:5},
+			{type:"BMW i8",MaxCapacity:40,MinCharge:1,cRate:10},
+			{type:"Smart 2Four",MaxCapacity:25,MinCharge:1,cRate:2}]
 
 var uArr = [{type:"commute1",duration:240},
 			{type:"commute2",duration:480},
 			{type:"24hrs",duration:1440}]
 
-function netformSimulation(SIMTIME,SEED){
+var Slot = {//definition of charging slot
+		type:0,
+		ttl:1,
+		vehId:0
+	}
+	
+
+function netformSimulation(SIMTIME,SEED,SLOTS){
 	//set simulation parameters
 	var sim = new Sim("Netform");
 	var random = new Random(SEED);
@@ -24,15 +33,31 @@ function netformSimulation(SIMTIME,SEED){
 
 	//add capacity check event
 
-	var Park = new Sim.Facility("park", Sim.Facility.FCFS,10)
-	var Total = new Sim.Buffer("total capacity",10000)
+	var Park = new Sim.Facility("park", Sim.Facility.FCFS,SLOTS)//this manages timing and queuing
 	Park.report = function(){console.log(this)};
+	Park.status = function(){return this.freeServers}
+	Park.inQueue = function(id){
+			q=false;
+			t=this.queue.data;
+			for (i=0;i<t.length;i++){
+					q = t[i].entity.id==id?t[i].entity.id:false;
+				}
+			return q;
+	}
 
+	var Store = new Sim.Store("slots",SLOTS) // this manages cars and slots by id.
+	var Total = new Sim.Buffer("total capacity",10000)
 	var capacity = new Sim.Event("check available capacity")
-	var charge = new Sim.Event("Charge vehicle")
+	var vehicleGo = new Sim.Event("Vehicle Go")
+	var facililyFree = new Sim.Event("Slot available")
 	//var energy =[new Sim.event("charging"),new Sim.event("discharging")]
 
+	//create slot array. this allows specific slots to have specific chargers...
+
+
 	var Vehicle = {
+		status:"Awaiting charge point",
+		log:[],
 		model:"",	
 		user:"",
 		current:0,
@@ -40,49 +65,94 @@ function netformSimulation(SIMTIME,SEED){
 		netformFactor:0,
 		arrival:0,
 		departure:0,
-		discharging:function(){},
+		facilitySlot:0,
+		atFacility:true,
+		command:0,  //will need to object at some point to enable fast,slow chage and discharg
+		available:function(){var a = false;if(this.atFacility==true && Park.inQueue(this.id)==false){a=true};return a},
+		charge:function(){ 
+			//todo - deal with charge rates, netform factor etc....
+			//todo - add discharge requirement function
+			this.status = "On Charge Point";
+			this.rate=0;
+				if (this.model.MinCharge < this.current && this.current < this.model.MaxCapacity){
+					this.status = "Charging";//TODO add others eg discharge and rate.
+					this.rate=this.model.cRate;
+					this.current += this.command * (this.model.cRate/60);
+				}
+				
+				if(this.current + this.model.cRate >=this.model.MaxCapacity){
+					this.current = this.model.MaxCapacity;
+					this.status="Fully charged";
+					this.rate=0;
+				}
+			},
 		netformFactor:function(){
 				 time_to_depart = this.departure-sim.time();//user.timeend-system.time;
 				 remaining_charge = this.model.MaxCapacity-this.current
 				// nF=((this.model.MaxCapacity-this.current)* this.user.cRate)/time_to_depart;
 				 return ((remaining_charge / (this.model.cRate/60))/time_to_depart).toFixed(1)  //time_to_end //nF //(1/nF).toFixed(2)
 			},
-		enterfacility:function(){
-	        		this.putBuffer(Total,this.model.MaxCapacity);
-	        		this.arrival = sim.time();
-	        		this.departure = this.arrival + this.user.duration;
-	        		//console.log(Total.current(),Park.queueStats());
-	        		console.log(this)
-	        		}),
+		leavefacility:function(){
+				this.atFacility=false;
+				this.status="Exited";
+        		this.departure = sim.time();//this.arrival + this.user.duration;
+        		this.facilitySlot =0;
+        		},
 	    start: function () {
-	    	//get vehicle type
-	    	this.model=vArr[(random.random()*(vArr.length-1)).toFixed(0)];
-	    	this.user=uArr[(random.random()*(uArr.length-1)).toFixed(0)];
+		    	//get vehicle type,set user and current state of charge
+		    	this.model=vArr[(random.random()*(vArr.length-1)).toFixed(0)];
+		    	this.user=uArr[(random.random()*(uArr.length-1)).toFixed(0)];
+	 			this.current=random.uniform(1, this.model.MaxCapacity);//current battery charge
+		        
+		        var useDuration = this.user.duration//TODO - add normal around this number
+		     	//arrive
+		        this.arrival=sim.time();
+		        this.useFacility(Park, useDuration)//facility manages time and departure
+		        	.done(this.leavefacility)
+		        	.setData(this.id);
+		        //set next
+		        this.setTimer( random.normal(10,5)).done(function(){//set time to next vehicle...can be more complex
+		        			sim.addEntity(Vehicle); 	
+		        	});
+		       
+		        //set my control
+		        this.setTimer(5).done(function(){//left to own devices, vehicle will attempt to charge.
+		        	if(this.available()){//if i am on a charge point
+		        			this.charge()
+		        		}
+		        	});
+		        //this.setTime(1).done(function(){logMystats()})
 
-	        var useDuration = this.user.duration//random.normal(10,5); // time to use the park
-	        this.useFacility(Park, useDuration)
-	        	.setData("id:"+this.id)
-	        	.done(this.enterfacility);
-	        this.current=random.uniform(1, this.model.MaxCapacity);
-	    	//this.send(this.modeltype,0,1)
-	    	//trigger a time after
-
-	        this.setTimer( random.normal(5,2)).done(function(){
-	        			sim.addEntity(Vehicle); 	
-	        	})
+	   
 	    	},
-	    onMessage:function(s,m){this.send(this.sim,0, s)},
-	    finalize:function(){ this.getBuffer(Total,this.model.MaxCapacity)},
+	    onMessage:function(s,m){
+	    		switch (m){
+	    			case "status":
+	    				this.send([this.status,this.rate],0,s);
+	    				
+	    			break;
+	    			default:	
+	    		}
+	    	},
+
+	    finalize:function(){},
 	}
 
+
+//controller - starts,stops and provided global functions for the sim
  	var Controller = {
+ 		vehStatus:[],
  		sendTick:function(){
  							this.send("tick",0);
  							this.setTimer(1).done(function(){this.sendTick()})
  						},
  		askStatus:function(){ 
  							this.send("status",0);
- 							this.setTimer(100).done(function(){this.askStatus()})
+ 							this.setTimer(1).done(function(){
+ 							//	console.log("status:",this.vehStatus)
+								showVehicleList(this.vehStatus);
+ 								this.vehStatus=[];
+ 								this.askStatus()})
  						},
  		start:function(){
  						console.log("controller started");
@@ -90,17 +160,17 @@ function netformSimulation(SIMTIME,SEED){
  							this.sendTick();
  						},
  		onMessage:function(sender,message){
+ 			s = sender.id;
+ 			this.vehStatus.push({s,message})
  			//on 
  			//console.log(sender.id,message);
  			//document.getElementById("log").innerHTML += "<pre>"+message.entityId+"</pre>";
- 		}
+ 		},
  	}
 
 	
 	sim.addEntity(Controller)
 	sim.addEntity(Vehicle);   
-	
-	//  do my own add vehicle..
 	
 	sim.simulate(SIMTIME);
 	console.log("Simulation End")       // start simulation
@@ -108,90 +178,19 @@ function netformSimulation(SIMTIME,SEED){
 }
 
 
-function trafficLightSimulation(GREEN_TIME, MEAN_ARRIVAL, SEED, SIMTIME) {
-    var sim = new Sim();
-    var random = new Random(SEED);
-    var trafficLights = [new Sim.Event("North-South Light"),
-                         new Sim.Event("East-West Light")]; 
-    var stats = new Sim.Population("Waiting at Intersection");
-    
-    var LightController = {
-        currentLight: 0,  // the light that is turned on currently
-        start: function () {
-            sim.log(trafficLights[this.currentLight].name + " OFF"
-                    + ", " + trafficLights[1 - this.currentLight].name + " ON");
-            sim.log("------------------------------------------");
-            // turn off the current light
-            trafficLights[this.currentLight].clear();
 
-            // turn on the other light.
-            // Note the true parameter: the event must "sustain"
-            trafficLights[1 - this.currentLight].fire(true);
-
-            // update the currentLight variable
-            this.currentLight = 1 - this.currentLight;
-
-            // Repeat every GREEN_TIME interval
-            this.setTimer(GREEN_TIME).done(this.start);
-        }
-    };
-    
-    var Traffic = {
-        start: function () {
-            this.generateTraffic("North", trafficLights[0]); // traffic for North -> South
-            this.generateTraffic("South", trafficLights[0]); // traffic for South -> North
-            this.generateTraffic("East", trafficLights[1]); // traffic for East -> West
-            this.generateTraffic("West", trafficLights[1]); // traffic for West -> East
-        },
-        generateTraffic: function (direction, light) {
-            // STATS: record that vehicle as entered the intersection
-            stats.enter(this.time());
-            sim.log("Arrive for " + direction);
-
-            // wait on the light. 
-            // The done() function will be called when the event fires 
-            // (i.e. the light turns green).
-            this.waitEvent(light).done(function () {
-                var arrivedAt = this.callbackData;
-                // STATS: record that vehicle has left the intersection
-                stats.leave(arrivedAt, this.time());
-                sim.log("Leave for " + direction + " (arrived at " + arrivedAt.toFixed(6) + ")");
-            }).setData(this.time());
-
-            // Repeat for the next car. Call this function again.
-            var nextArrivalAt = random.exponential(1.0 / MEAN_ARRIVAL);
-            this.setTimer(nextArrivalAt).done(this.generateTraffic, this, [direction, light]);
-        }
-    };
-    
-    sim.addEntity(LightController);
-    sim.addEntity(Traffic);
-   
-//    Uncomment to display logging information
-   sim.setLogger(function (str) {
-        console.log(str);
-    });
-    
-    // simulate for SIMTIME time
-    sim.simulate(SIMTIME); 
-    document.write("Number of vehicles at intersection (average) = "
-        + stats.sizeSeries.average().toFixed(3)
-        + " (+/- " + stats.sizeSeries.deviation().toFixed(3)
-        + ")\n");
-    document.write("Time spent at the intersection (average) = "
-        + stats.durationSeries.average().toFixed(3)
-        + " (+/- " + stats.durationSeries.deviation().toFixed(3)
-        + ")\n");
-    console.log(stats.durationSeries.getHistogram())
-    
-    return [stats.durationSeries.average(),
-            stats.durationSeries.deviation(),
-            stats.sizeSeries.average(),
-            stats.sizeSeries.deviation()];
-    
+function showVehicleList(list){
+	out=""
+	// sort by value
+	list.sort(function (a, b) {
+	  return a.s - b.s;
+	});
+	list.sort()
+	for (i=0;i<list.length;i++){
+		out+="<div class='veh'>" + list[i].s + ":" + list[i].message[0] + "</div>"
+	}
+	$("#list").html(out);
 }
-
-
 
 function GUID () { // Public Domain/MIT
     var d = new Date().getTime();
