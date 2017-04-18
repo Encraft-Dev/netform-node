@@ -1,7 +1,7 @@
 //set system variables
 var simulation = {
 	length:200,
-	speed:500 //used in tick timeout
+	speed:$("#timestep").val()//500 //used in tick timeout
 }
 
 var system = {
@@ -109,7 +109,7 @@ function runsystem(){
     
 			//add to vehicle array.
 	displaySlots(system.slots)
-	if(!system.paused){setTimeout(function(){ system.tick()}, simulation.speed);}
+	if(!system.paused){setTimeout(function(){ system.tick()}, $("#timestep").val());}
 	//if(!system.paused){system.tick()}
 
 	//add to button for now.

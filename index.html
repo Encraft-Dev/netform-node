@@ -6,14 +6,20 @@
 	</head>
 
 	<body>
-	<div><span>Capacity: </span><span  id = "capacity"></span>  charge Rate:<span  id = "charge_rate"></span></div>
-	<div ><span>System Time: </span><span id = "systemtime"></span></div>
-
-	<button id="step">Step</button>
-	<button id="control">Run</button>
+	<div class="totals">
+		<div><span>Capacity: </span><span  id = "capacity"></span>  charge Rate:<span  id = "charge_rate"></span></div>
+		<div ></div>
+	</div>
+	<div id="netform"></div>
+	<div id= "controlpanel">
+		<button id="step">Step</button>
+		<button id="control">Run</button>
+		<input type="number" name="timestep" id="timestep" value="100" width="20px"/>
+		<span>System Time: </span><span id = "systemtime"></span>
+	</div>
 	<div id="main">
 		<div id = "sitch"></div>
-		<div id="netform"></div>
+		
 		<div id="plot"></div>
 	
 
@@ -25,8 +31,11 @@
 
 <script>
 $("#step").click(function(){tickstep()})
-$("#control").click(function(){tickstepcontrol()})</script>
+$("#control").click(function(){tickstepcontrol()})
+$("#timestep").bind('input', function(){console.log($("#timestep").val())})
 
+
+	</script>
 	</body>
 
 </html>

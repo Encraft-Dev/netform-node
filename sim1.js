@@ -1,5 +1,25 @@
 //using sim.js library from http://simjs.com/   **updated version avialble @https://github.com/btelles/simjs-updated
 
+
+//todo ADD LOGGING AND OUTPUT SCEEN
+//ADD CHARGE DISCHARGE EVENTS..
+//START SIMPLE.. 
+//a. single requirement for discharge for 30 mins. randomly.
+//
+
+
+//system controllers for visuallisation and switching
+//
+var system = {
+	paused:true,
+	time:-1,
+	log:[],
+	run:function(){runsystem(system.time)},
+	tick:function(){this.time++;this.run() }
+}
+
+
+
 function startsim(){console.log("Starting Simulation")
 		netformSimulation(1000,1234,10)
 		}  //using minutes for now
@@ -14,24 +34,30 @@ var uArr = [{type:"commute1",duration:240},
 			{type:"commute2",duration:480},
 			{type:"24hrs",duration:1440}]
 
-var Slot = {//definition of charging slot
-		type:0,
-		ttl:1,
-		vehId:0
-	}
-	
+// var Slot = {//definition of charging slot
+// 		type:0,
+// 		ttl:1,
+// 		vehId:0
+// 	}
 
 function netformSimulation(SIMTIME,SEED,SLOTS){
 	//set simulation parameters
 	var sim = new Sim("Netform");
 	var random = new Random(SEED);
 	var stats = new Sim.Population("cars");
+	var stats_vehicles = new Sim.TimeSeries("Vehicles on bays");
+	stats_vehicles.setHistogram(0, 50, 1000)
+	var number_of_vehicles=0
 	//make events
 	//external events
 	//demand for FFR, store, import, export
 	//arrival of vehicles... trains,  airplanes.
 
 	//add capacity check event
+
+	// add logging array
+	// 
+	
 
 	var Park = new Sim.Facility("park", Sim.Facility.FCFS,SLOTS)//this manages timing and queuing
 	Park.report = function(){console.log(this)};
@@ -40,12 +66,16 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 			q=false;
 			t=this.queue.data;
 			for (i=0;i<t.length;i++){
-					q = t[i].entity.id==id?t[i].entity.id:false;
+					q = t[i].entity.id==id?true:false;
 				}
 			return q;
 	}
 
-	var Store = new Sim.Store("slots",SLOTS) // this manages cars and slots by id.
+
+	var SlotStore = new Sim.Store("slots",SLOTS) // this manages cars and slots by id.
+	var exitVehiclesStore = new Sim.Store("exited vehicles",100)
+
+
 	var Total = new Sim.Buffer("total capacity",10000)
 	var capacity = new Sim.Event("check available capacity")
 	var vehicleGo = new Sim.Event("Vehicle Go")
@@ -53,12 +83,16 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 	//var energy =[new Sim.event("charging"),new Sim.event("discharging")]
 
 	//create slot array. this allows specific slots to have specific chargers...
-
+	var Slot= {
+		type:"Standard",
+		modes:[3,7,22]
+	}
 
 	var Vehicle = {
 		status:"Awaiting charge point",
+		state:"",
 		log:[],
-		model:"",	
+		model:"",
 		user:"",
 		current:0,
 		rate:0,//negative for discharge/positive for charge
@@ -67,17 +101,31 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 		departure:0,
 		facilitySlot:0,
 		atFacility:true,
+		inQueue:true,
 		command:0,  //will need to object at some point to enable fast,slow chage and discharg
-		available:function(){var a = false;if(this.atFacility==true && Park.inQueue(this.id)==false){a=true};return a},
-		charge:function(){ 
+		charge:function(){
+			//console.log(this.id,this)
 			//todo - deal with charge rates, netform factor etc....
 			//todo - add discharge requirement function
+			if (this.atFacility && !this.inQueue){
+				
 			this.status = "On Charge Point";
 			this.rate=0;
+
+				switch(this.command){
+					case 0:this.status="On charge point";
+					break;
+					case 1:this.status="Charging";
+					break;
+					case -1:this.status="Discharging";
+					break;
+					default:
+					}
+
 				if (this.model.MinCharge < this.current && this.current < this.model.MaxCapacity){
 					this.status = "Charging";//TODO add others eg discharge and rate.
 					this.rate=this.model.cRate;
-					this.current += this.command * (this.model.cRate/60);
+					this.current = this.current + (this.command * (this.model.cRate/60));
 				}
 				
 				if(this.current + this.model.cRate >=this.model.MaxCapacity){
@@ -85,6 +133,9 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 					this.status="Fully charged";
 					this.rate=0;
 				}
+			}
+
+
 			},
 		netformFactor:function(){
 				 time_to_depart = this.departure-sim.time();//user.timeend-system.time;
@@ -94,11 +145,14 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 			},
 		leavefacility:function(){
 				this.atFacility=false;
-				this.status="Exited";
         		this.departure = sim.time();//this.arrival + this.user.duration;
         		this.facilitySlot =0;
+        		//console.log(this)
         		},
 	    start: function () {
+	    	    //number_of_vehicles++
+	    		//stats_vehicles.record(number_of_vehicles,sim.time());
+
 		    	//get vehicle type,set user and current state of charge
 		    	this.model=vArr[(random.random()*(vArr.length-1)).toFixed(0)];
 		    	this.user=uArr[(random.random()*(uArr.length-1)).toFixed(0)];
@@ -107,6 +161,7 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 		        var useDuration = this.user.duration//TODO - add normal around this number
 		     	//arrive
 		        this.arrival=sim.time();
+		       //this.putStore(SlotStore,this)
 		        this.useFacility(Park, useDuration)//facility manages time and departure
 		        	.done(this.leavefacility)
 		        	.setData(this.id);
@@ -114,22 +169,30 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 		        this.setTimer( random.normal(10,5)).done(function(){//set time to next vehicle...can be more complex
 		        			sim.addEntity(Vehicle); 	
 		        	});
-		       
-		        //set my control
-		        this.setTimer(5).done(function(){//left to own devices, vehicle will attempt to charge.
-		        	if(this.available()){//if i am on a charge point
-		        			this.charge()
-		        		}
-		        	});
-		        //this.setTime(1).done(function(){logMystats()})
+		        this.checkQueue();
+	    		},
+	    checkQueue:function(){//while in queue check and set inque = false once entered facility
+	    		if (Park.inQueue(this.id)){
+	    			this.status="Awaiting charge point!"	
+	    			this.setTimer(1).done(function(){this.checkQueue()})
+	    			this.inQueue=true;}//repeat until inqueue = false
+	    		else {this.inQueue=false;this.status="On charge point"}
 
-	   
-	    	},
+	    },
 	    onMessage:function(s,m){
+	    		if(Park.inQueue(this.id)){this.status="Awaiting charge point"}
 	    		switch (m){
 	    			case "status":
-	    				this.send([this.status,this.rate],0,s);
-	    				
+	    				this.send([this.status,this.rate,(100*this.current/this.model.MaxCapacity).toFixed(0)],0,s);
+	    			break;
+	    			case "charge":
+	    				this.command=1;this.charge();
+	    			break;
+	    			case "discharge":
+	    				this.command=-1;this.charge();
+	    			break;
+	    				case "hold":
+	    				this.command=0;this.charge();
 	    			break;
 	    			default:	
 	    		}
@@ -148,16 +211,22 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
  						},
  		askStatus:function(){ 
  							this.send("status",0);
+ 							
  							this.setTimer(1).done(function(){
- 							//	console.log("status:",this.vehStatus)
-								showVehicleList(this.vehStatus);
- 								this.vehStatus=[];
- 								this.askStatus()})
+ 								this.send("charge",0);
+ 								//	console.log("status:",this.vehStatus)
+ 								//	add to final log array....
+								//showVehicleList(this.vehStatus);//show on screen
+							
+								system.log.push(this.vehStatus)
+								this.vehStatus=[];
+							//console.log(SlotStore)
+							this.askStatus()})
  						},
  		start:function(){
- 						console.log("controller started");
+ 						//console.log("controller started");
  							this.askStatus();
- 							this.sendTick();
+ 							//this.sendTick();
  						},
  		onMessage:function(sender,message){
  			s = sender.id;
@@ -170,14 +239,18 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 
 	
 	sim.addEntity(Controller)
-	sim.addEntity(Vehicle);   
+	sim.addEntity(Vehicle);
 	
 	sim.simulate(SIMTIME);
-	console.log("Simulation End")       // start simulation
-    Park.report();  
+	console.log("Simulation End") 
+	$("#controlpanel").show()
+	//stats_vehicles.finalize(sim.time())
+	//visualise(log);
+	//console.log(stats_vehicles.getHistogram())      // start simulation
+   // Park.report();  
 }
 
-
+//output functions
 
 function showVehicleList(list){
 	out=""
@@ -192,6 +265,44 @@ function showVehicleList(list){
 	$("#list").html(out);
 }
 
+
+function runsystem(stime){
+	console.log("runsystem:",stime)
+	$("#systemtime").html(system.time);
+	visualise(system.log[stime],stime)
+	//console.log(system.log[stime])
+	if(!system.paused){setTimeout(function(){ system.tick()}, $("#timestep").val());}
+}
+
+
+function visualise(arr,systemtime){
+	out="";
+	console.log(arr)
+	for (i=arr.length-1;i>0;i--){
+		//console.log(arr)
+		out+="<div class='veh'><div class='veh_id'>" + arr[i].s + "</div><div class='veh_status'>" + arr[i].message[0] + "</div><div class='status_vis'><div class='veh_state_vis' style='width:"+arr[i].message[2]+"%'></div></div><div class='veh_state'>"+arr[i].message[1]+" kW</div></div>"
+	}
+	$("#list").html(out)
+
+}
+
+function tickstep(){system.tick()}
+
+function tickstepcontrol(){
+	if (system.paused){
+			system.paused=false;
+			system.tick();
+			$("#control").text("Pause")
+	}
+	else {
+			system.paused=true;;
+			$("#control").text("Run")
+	}
+
+}
+
+
+//common
 function GUID () { // Public Domain/MIT
     var d = new Date().getTime();
     if (typeof performance !== 'undefined' && typeof performance.now === 'function'){
