@@ -7,21 +7,36 @@
 	.veh_state{display:inline;padding-left:10px;}
 	#controlpanel{display:none;}
 	.status_vis{display:inline-block;width:400px;border:1px solid #ccc;}
-	.veh_state_vis{display:block;background-color: green;height:9px;
+	.veh_state_vis{display:block;height:9px;
 
 </style>
 </head>
 <body>
-<button id="start">Start Simulation</button>
-
+<div id="simulation">
+<label for="time">Time</label>
+<input type="number" id="time" name="time" value="1000"/>
+<label for="slots">Slots</label>
+<input type="number" id="slots" name="slots" value="25"/>
+<label for="seed">Seed</label>
+<input type="number" id="seed" name="seed" value="1234"/>
+<button id="start">Run Simulation</button>
+</div>
 <div id= "controlpanel">
+<p>View simulation</p>
 		<button id="step">Step</button>
 		<button id="control">Run</button>
 		<input type="number" name="timestep" id="timestep" value="100" width="20px"/>
 		<span>System Time: </span><span id = "systemtime"></span>
 </div>
-<div id="log"></div>
-<div id="list"></div>
+<h2>Available Capacity (kWh)</h2>
+<div id="plot"></div>
+<hr />
+<h2>On charger</h2>
+<div id="list"></div><hr />
+<h2>Queueing</h2>
+<div id="queue"></div><hr />
+<h2>Left</h2>
+<div id="exit"></div>
 
 
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
@@ -30,7 +45,7 @@
 <script type="text/javascript" src='sim1.js'></script>	
 
 <script>
-$("#start").click(function(){startsim()})
+$("#start").click(function(){startsim($("#time").val(),$("#slots").val(),$("#seed").val())})
 $("#stop").click(function(){stopsim()})
 $("#step").click(function(){tickstep()})
 $("#control").click(function(){tickstepcontrol()})
