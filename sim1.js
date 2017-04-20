@@ -157,8 +157,7 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 						this.chargeStatus=0;//default
 
 						// if netform factor requires then charge me.
-					
-
+						if (this.netFF>=1){this.command=1}
 
 						if (this.model.MinCharge < this.current && this.current < this.model.MaxCapacity){// if able to charge/discharge.
 							this.chargeStatus = this.command;//accept request // following  if statements  qualify
@@ -175,7 +174,7 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 								default:
 							}
 						//check if fully charged// dont charge // discharge should be available
-						if (this.netFF>=1){this.chargeStatus=1; this.command=1;this.rate=this.model.C_Rate1}
+						
 						
 						this.current = this.current + (this.chargeStatus * (this.rate/60));
 
@@ -206,11 +205,11 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 		selfCharge:function(){//if not given any commands then charge if netform requires.
 					//this should override any message commands..
 					this.netformFactor();
-					if(this.netFF>=1){
+					//if(this.netFF>=1){
 							this.command=1;
 							this.charge();
-						}
-					this.setTimer(1).done(this.selfCharge)//loop control
+					//	}
+					this.setTimer(1).done(this.selfCharge())//loop control
 
 		},
 		leavefacility:function(){
@@ -287,7 +286,7 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 	    			case "discharge":
 	    			//check for nff here??
 	    			if(this.netFF<1){
-	    				this.command=-1;this.charge();
+	    				this.command=-1//;this.charge();
 	    			}
 	    			break;
 	    				case "hold":
@@ -325,7 +324,7 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
  		start:function(){
  						//console.log("controller started");
  							this.askStatus();
- 							this.discharge();
+ 							//this.discharge();
  							//this.askCommand();
  							//fire random events fro discharging and charging...... including how long for...
  							//this.sendTick();
