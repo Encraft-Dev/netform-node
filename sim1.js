@@ -1,27 +1,11 @@
 //using sim.js library from http://simjs.com/   **updated version avialble @https://github.com/btelles/simjs-updated
 
 
-//todo ADD LOGGING AND OUTPUT SCEEN
 //ADD CHARGE DISCHARGE EVENTS..
 //START SIMPLE.. 
-//a. single requirement for discharge for 30 mins. randomly.
-//
 
 
-//system controllers for visuallisation and switching
-//
-var system = {
-	paused:true,
-	time:-1,
-	log:[],
-	plot1:{x:[],y:[],type:"scatter"},
-	plot2:{x:[],y:[],type:"scatter"},
-	run:function(){runsystem(system.time)},
-	tick:function(){this.time++;this.run() }
-}
-
-
-console.clear()
+console.clear()//lets start with a clean console.
 function startsim(t,s,seed){console.log("Starting Simulation");
 		$("#controlpanel").hide();
 		//netformSimulation(1000,1234,25)
@@ -29,14 +13,52 @@ function startsim(t,s,seed){console.log("Starting Simulation");
 		}  //using minutes for now
 function stopsim(){console.log("Stopping Simulation")}
 
-var vArr = [{type:"Tesla P85D",MaxCapacity:85,MinCharge:1,cRate:20,dRate:10},
-			{type:"Nissan Leaf",MaxCapacity:35,MinCharge:1,cRate:5,dRate:5},
-			{type:"BMW i8",MaxCapacity:40,MinCharge:1,cRate:10,dRate:10},
-			{type:"Smart 2Four",MaxCapacity:25,MinCharge:1,cRate:2,dRate:2}]
+// var vArr 	  = [{type:"Tesla P85D",MaxCapacity:85,MinCharge:1,C_Rate1:20,D_Rate:10},
+// 				{type:"Nissan Leaf",MaxCapacity:35,MinCharge:1,C_Rate1:5,D_Rate:5},
+// 				{type:"BMW i8",MaxCapacity:40,MinCharge:1,C_Rate1:10,D_Rate:10},
+// 				{type:"Smart 2Four",MaxCapacity:25,MinCharge:1,C_Rate1:2,D_Rate:2}]
 
-var uArr = [{type:"commute1",duration:240},
-			{type:"commute2",duration:480},
-			{type:"24hrs",duration:1440}]
+var uArr      = [{type:"commute1",duration:240},
+				{type:"commute2",duration:480},
+				{type:"24hrs",duration:1440}]
+
+var cModes =   [{ID:"mode_1_1p",Mode:1,Phase:1,A:16,V:250,Type:"AC",Smart:0,kW:3.84},
+				{ID:"mode_1_3p",Mode:1,Phase:3,A:16,V:480,Type:"AC",Smart:0,kW:11.52},
+				{ID:"mode_2_1p",Mode:2,Phase:1,A:32,V:250,Type:"AC",Smart:0,kW:7.68},
+				{ID:"mode_2_3p",Mode:2,Phase:3,A:32,V:250,Type:"AC",Smart:0,kW:23.04},
+				{ID:"mode_3_1p",Mode:3,Phase:1,A:250,V:250,Type:"AC",Smart:1,kW:62.5},
+				{ID:"mode_3_3p",Mode:3,Phase:3,A:250,V:480,Type:"AC",Smart:1,kW:180},
+				{ID:"mode_4_1p",Mode:4,Phase:1,A:400,V:600,Type:"DC",Smart:1,kW:240},
+				{ID:"TSC",mode:"TS",Phase:1,A:250,V:480,Type:"DC",Smart:1,kW:120}]
+
+var vArr = [{Make:"BMW",Model:"i3",Name:"BMW i3",Seats:5,Range:118,MaxCapacity:18.8,MinCharge:1,C_Rate1:23.04,C_Rate2:7.68,D_Rate:23.04,C_RUT:5,C_RDC:0.8,C_T1:0,C_T2:1,C_T3:0,C_T4:0,C_CS:0,C_TS:0},
+			{Make:"Ford",Model:"Focus EV",Name:"Ford Focus EV",Seats:5,Range:100,MaxCapacity:23,MinCharge:1,C_Rate1:11.52,C_Rate2:3.84,D_Rate:11.52,C_RUT:5,C_RDC:0.8,C_T1:1,C_T2:0,C_T3:0,C_T4:0,C_CS:0,C_TS:0},
+			{Make:"Mercedes",Model:"B-Class",Name:"Mercedes B-Class",Seats:5,Range:124,MaxCapacity:28,MinCharge:1,C_Rate1:23.04,C_Rate2:7.68,D_Rate:23.04,C_RUT:5,C_RDC:0.8,C_T1:0,C_T2:1,C_T3:0,C_T4:0,C_CS:0,C_TS:0},
+			{Make:"Nissan",Model:"Leaf (67)",Name:"Nissan Leaf (67)",Seats:5,Range:124,MaxCapacity:24,MinCharge:1,C_Rate1:11.52,C_Rate2:3.84,D_Rate:11.52,C_RUT:5,C_RDC:0.8,C_T1:1,C_T2:0,C_T3:0,C_T4:1,C_CS:0,C_TS:0},
+			{Make:"Nissan ",Model:"Leaf (83)",Name:"Nissan  Leaf (83)",Seats:5,Range:155,MaxCapacity:30,MinCharge:1,C_Rate1:11.52,C_Rate2:3.84,D_Rate:11.52,C_RUT:5,C_RDC:0.8,C_T1:1,C_T2:0,C_T3:0,C_T4:1,C_CS:0,C_TS:0},
+			{Make:"Renault",Model:"Zoe",Name:"Renault Zoe",Seats:5,Range:100,MaxCapacity:22,MinCharge:1,C_Rate1:23.04,C_Rate2:7.68,D_Rate:23.04,C_RUT:5,C_RDC:0.8,C_T1:0,C_T2:1,C_T3:0,C_T4:0,C_CS:0,C_TS:0},
+			{Make:"Smart",Model:"ForTwo",Name:"Smart ForTwo",Seats:2,Range:84,MaxCapacity:17,MinCharge:1,C_Rate1:23.04,C_Rate2:7.68,D_Rate:23.04,C_RUT:5,C_RDC:0.8,C_T1:0,C_T2:1,C_T3:0,C_T4:0,C_CS:0,C_TS:0},
+			{Make:"Citroen",Model:"C-Zero",Name:"Citroen C-Zero",Seats:4,Range:93,MaxCapacity:16,MinCharge:1,C_Rate1:11.52,C_Rate2:3.84,D_Rate:11.52,C_RUT:5,C_RDC:0.8,C_T1:1,C_T2:0,C_T3:0,C_T4:1,C_CS:0,C_TS:0},
+			{Make:"Mitsubishi",Model:"I-Miev",Name:"Mitsubishi I-Miev",Seats:4,Range:93,MaxCapacity:16,MinCharge:1,C_Rate1:11.52,C_Rate2:3.84,D_Rate:11.52,C_RUT:5,C_RDC:0.8,C_T1:1,C_T2:0,C_T3:0,C_T4:1,C_CS:0,C_TS:0},
+			{Make:"VW",Model:"E-up",Name:"VW E-up",Seats:4,Range:93,MaxCapacity:18,MinCharge:1,C_Rate1:23.04,C_Rate2:7.68,D_Rate:23.04,C_RUT:5,C_RDC:0.8,C_T1:0,C_T2:1,C_T3:0,C_T4:0,C_CS:1,C_TS:0},
+			{Make:"VW",Model:"E-golf",Name:"VW E-golf",Seats:5,Range:118,MaxCapacity:24,MinCharge:1,C_Rate1:23.04,C_Rate2:7.68,D_Rate:23.04,C_RUT:5,C_RDC:0.8,C_T1:0,C_T2:1,C_T3:0,C_T4:0,C_CS:1,C_TS:0},
+			{Make:"Peugeot",Model:"iON",Name:"Peugeot iON",Seats:4,Range:93,MaxCapacity:16,MinCharge:1,C_Rate1:11.52,C_Rate2:3.84,D_Rate:11.52,C_RUT:5,C_RDC:0.8,C_T1:1,C_T2:0,C_T3:0,C_T4:1,C_CS:0,C_TS:0},
+			{Make:"Tesla",Model:"Model S (60)",Name:"Tesla Model S (60)",Seats:5,Range:240,MaxCapacity:60,MinCharge:1,C_Rate1:23.04,C_Rate2:7.68,D_Rate:23.04,C_RUT:5,C_RDC:0.8,C_T1:0,C_T2:1,C_T3:0,C_T4:0,C_CS:0,C_TS:1},
+			{Make:"Tesla",Model:"Model S (85D)",Name:"Tesla Model S (85D)",Seats:5,Range:310,MaxCapacity:85,MinCharge:1,C_Rate1:23.04,C_Rate2:7.68,D_Rate:23.04,C_RUT:5,C_RDC:0.8,C_T1:0,C_T2:1,C_T3:0,C_T4:0,C_CS:0,C_TS:1},
+			{Make:"Tesla",Model:"Model S (90D)",Name:"Tesla Model S (90D)",Seats:5,Range:340,MaxCapacity:90,MinCharge:1,C_Rate1:23.04,C_Rate2:7.68,D_Rate:23.04,C_RUT:5,C_RDC:0.8,C_T1:0,C_T2:1,C_T3:0,C_T4:0,C_CS:0,C_TS:1},
+			{Make:"Tesla",Model:"Model X (208)",Name:"Tesla Model X (208)",Seats:7,Range:259,MaxCapacity:75,MinCharge:1,C_Rate1:23.04,C_Rate2:7.68,D_Rate:23.04,C_RUT:5,C_RDC:0.8,C_T1:0,C_T2:1,C_T3:0,C_T4:0,C_CS:0,C_TS:1},
+			{Make:"Tesla",Model:"Model X (250)",Name:"Tesla Model X (250)",Seats:7,Range:303,MaxCapacity:90,MinCharge:1,C_Rate1:23.04,C_Rate2:7.68,D_Rate:23.04,C_RUT:5,C_RDC:0.8,C_T1:0,C_T2:1,C_T3:0,C_T4:0,C_CS:0,C_TS:1},
+			{Make:"Kia",Model:"Soul EV",Name:"Kia Soul EV",Seats:5,Range:132,MaxCapacity:30.5,MinCharge:1,C_Rate1:11.52,C_Rate2:3.84,D_Rate:11.52,C_RUT:5,C_RDC:0.8,C_T1:1,C_T2:0,C_T3:0,C_T4:1,C_CS:0,C_TS:0},
+			{Make:"BYD",Model:"e6",Name:"BYD e6",Seats:5,Range:186,MaxCapacity:75,MinCharge:1,C_Rate1:23.04,C_Rate2:7.68,D_Rate:23.04,C_RUT:5,C_RDC:0.8,C_T1:0,C_T2:1,C_T3:0,C_T4:0,C_CS:0,C_TS:0},
+			{Make:"Mahindra",Model:"e2o",Name:"Mahindra e2o",Seats:4,Range:79,MaxCapacity:15.5,MinCharge:1,C_Rate1:23.04,C_Rate2:7.68,D_Rate:23.04,C_RUT:5,C_RDC:0.8,C_T1:0,C_T2:1,C_T3:0,C_T4:1,C_CS:0,C_TS:0},
+			{Make:"Renault",Model:"Zoe ZE",Name:"Renault Zoe ZE",Seats:5,Range:170,MaxCapacity:40,MinCharge:1,C_Rate1:23.04,C_Rate2:7.68,D_Rate:23.04,C_RUT:5,C_RDC:0.8,C_T1:0,C_T2:1,C_T3:0,C_T4:0,C_CS:0,C_TS:0}]
+// Type 1 J1772	
+// Type 2 Mennekes	
+// Type 3 Scame
+// Type 4 CHADemO
+// CCS	Combined charger system
+// TS	tesla supercharger
+
 
 // var Slot = {//definition of charging slot
 // 		type:0,
@@ -116,11 +138,12 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 		user:"",
 		current:0,
 		rate:0,//negative for discharge/positive for charge
-		//netformFactor:0,
+		//netformFactor:0
+		netFF:0,//set using netformfactor function
 		arrival:0,
 		departure:0,
 		facilitySlot:0,
-		command:0,  //will need to object at some point to enable fast,slow chage and discharge/ currently is  
+		command:0, //default is charge //will need to object at some point to enable fast,slow chage and discharge/ currently is  
 		charge:function(){
 			//console.log(this.id,this)
 			//todo - deal with charge rates, netform factor etc....
@@ -133,14 +156,18 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 						this.rate=0;//add default to do nothing...
 						this.chargeStatus=0;//default
 
+						// if netform factor requires then charge me.
+					
+
+
 						if (this.model.MinCharge < this.current && this.current < this.model.MaxCapacity){// if able to charge/discharge.
 							this.chargeStatus = this.command;//accept request // following  if statements  qualify
 							switch (this.chargeStatus){
 								case 1: //charge
-									this.rate=this.model.cRate;
+									this.rate=this.model.C_Rate1;
 								break;
 								case -1: //discharge
-									this.rate=this.model.dRate;
+									this.rate=this.model.D_Rate;
 								break;
 								case 0: //hold
 									this.rate=0;
@@ -148,39 +175,42 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 								default:
 							}
 						//check if fully charged// dont charge // discharge should be available
-						if(this.current + this.model.cRate/60 >=this.model.MaxCapacity){
-							this.current = this.model.MaxCapacity;
-							if (this.chargeStatus==1){this.chargeStatus=0;this.rate=0}
-						}
-						// if netform factor requires then charge me.
-						if (this.netformFactor()>=1){this.chargeStatus=1; this.rate=this.model.cRate}
-
+						if (this.netFF>=1){this.chargeStatus=1; this.command=1;this.rate=this.model.C_Rate1}
+						
 						this.current = this.current + (this.chargeStatus * (this.rate/60));
+
+
 						}
 
+						if(this.current >this.model.MaxCapacity){
+							this.current = this.model.MaxCapacity;
+							//if (this.chargeStatus==1){this.chargeStatus=0;this.rate=0}
+						}
+
+						if(this.current < this.model.MinCharge){
+							this.current = this.model.MinCharge;
+							//if (this.chargeStatus==-1){this.chargeStatus=0;this.rate=0}
+						}
 				break;
 				default:
 				}
 			},
 		netformFactor:function(){
-			
 				 time_to_depart = this.arrival+this.user.duration-sim.time();//user.timeend-system.time;
 				 remaining_charge = this.model.MaxCapacity-this.current
-				 time_to_full=remaining_charge/(this.model.cRate/60)
-
-				// nF=((this.model.MaxCapacity-this.current)* this.user.cRate)/time_to_depart;
-			     nff= (time_to_full/time_to_depart).toFixed(4)
-
-				 return nff  //time_to_end //nF //(1/nF).toFixed(2)
+				 time_to_full=remaining_charge/(this.model.C_Rate1/60)
+			     nff= (time_to_full/time_to_depart).toFixed(3)
+				 this.netFF = nff  //time_to_end //nF //(1/nF).toFixed(2)
+				 return true;
 			},
 		selfCharge:function(){//if not given any commands then charge if netform requires.
 					//this should override any message commands..
-					if(this.netformFactor()>=1){
+					this.netformFactor();
+					if(this.netFF>=1){
 							this.command=1;
-							this.charge()
+							this.charge();
 						}
-
-					this.setTimer(1).done(this.selfCharge)
+					this.setTimer(1).done(this.selfCharge)//loop control
 
 		},
 		leavefacility:function(){
@@ -230,31 +260,35 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 	    			case 1:
 	    				this.statusText="on point";
 	    				
+	    				
 	    			break;
 	    		}
-
-	    	// 	if(this.statusCode==0){
-	    	// 		this.status="Awaiting charge point!"
-	    	// 		this.statusCode=0;
-	    	// 		this.statusCode=Park.inQueue(this.id);
-	    	// 		}
-	    	// 	else {
-	 				// this.statusText="on point"
-	    	// 		this.statusCode=1;
-	    	// 	}
 	    },
 	    onMessage:function(s,m){
 	    		this.checkQueue()
 	    		if(Park.inQueue(this.id)){this.status="Awaiting charge point"}
 	    		switch (m){
 	    			case "status":
-	    				this.send([this.statusCode,this.rate.toFixed(0),(100*this.current/this.model.MaxCapacity).toFixed(0),this.netformFactor(),this.chargeStatus],0,s);
+
+	    				st = (100*this.current/this.model.MaxCapacity).toFixed(0)
+	    				this.send([this.statusCode,
+	    						   this.rate.toFixed(0),
+	    						   st,
+	    						   this.netFF,
+	    						   this.chargeStatus,
+	    						   this.model,
+	    						   this.user],
+	    						   0,
+	    						   s);
 	    			break;
 	    			case "charge":
 	    				this.command=1;this.charge();
 	    			break;
 	    			case "discharge":
-	    			this.command=-1;this.charge();
+	    			//check for nff here??
+	    			if(this.netFF<1){
+	    				this.command=-1;this.charge();
+	    			}
 	    			break;
 	    				case "hold":
 	    				this.command=0;this.charge();
@@ -274,22 +308,16 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
  		sendTick:function(){
  							
  							//stats_veh2.record(Park.systemStats().population,sim.time())
- 							this.send("tick",0);
+ 							//this.send("tick",0);
 
  							this.setTimer(1).done(function(){this.sendTick()})
  						},
  		askStatus:function(){
- 			               	
+ 							system.log.push([this.vehStatus,Park.caps()])	
+ 			               	this.vehStatus=[];
  							this.send("status",0);
  							this.setTimer(1).done(function(){
- 								
- 								//	console.log("status:",this.vehStatus)
- 								//	add to final log array....
-								//showVehicleList(this.vehStatus);//show on screen
-								system.log.push([this.vehStatus,Park.caps()])
-								this.vehStatus=[];
-							//console.log(SlotStore)
-							this.askStatus()
+								this.askStatus()
 							})
  						},
  		askCommand:function(){this.send("charge",0);},
@@ -304,11 +332,12 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
  							
  						},
  		discharge:function(){
- 		       this.setTimer(1).done(this.discharge)
- 			if (sim.time()>100 && sim.time()<200){
+ 		     
+ 			if (sim.time()>100 && sim.time()<SIMTIME){
  				this.send("discharge",0)
  				}
  			else {this.send("hold",0)}	
+ 			this.setTimer(1).done(this.discharge)
  		},				
  		onMessage:function(sender,message){
  			s = sender.id;
@@ -331,6 +360,20 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 	//visualise(log);
 	//console.log(stats_vehicles.getHistogram())      // start simulation
    // Park.report();  
+}
+
+// output functions (todo move to separate file)
+
+var system = {
+	paused:true,
+	time:-1,
+	log:[],
+	plot1:{name:"Max Capacity (kWh)",x:[],y:[],type:"scatter"},
+	plot2:{name:"Available Capacity (kWh)",x:[],y:[],type:"scatter"},
+	plot3:{name:"Import/Export (kW)",x:[],y:[],type:"scatter"},
+	plot4:{name:"",x:[],y:[],type:"scatter"},
+	run:function(){runsystem(system.time)},
+	tick:function(){this.time++;this.run() }
 }
 
 //output functions
@@ -363,8 +406,9 @@ function visualise(arr,systemtime){
 	on="";
 	qu="";
 	ex="";
+	ie=0;
 	n=0;q=0;
-	//console.log(arr)
+	console.log(arr)
 	dArr=arr[0]
 	for (i=dArr.length-1;i>=0;i--){
 		
@@ -372,16 +416,16 @@ function visualise(arr,systemtime){
 			if(dArr[i].message[0]<0){state="Exited"}
 			if(dArr[i].message[0]==0){state="In Queue"}
 			colour="#333";
-			if(dArr[i].message[1]<0){colour="red";}
-			if(dArr[i].message[1]>0){colour="green";}
+			if(dArr[i].message[1]*dArr[i].message[4]<0){colour="red";}
+			if(dArr[i].message[1]*dArr[i].message[4]>0){colour="green";}
 		
 		//console.log(arr)
 			o=""
-			o+="<div class='veh'><div class='veh_id'>" + dArr[i].s + "</div>";
+			o+="<div class='veh'><div class='veh_id'>" + dArr[i].s +  "</div>";
 			o+="<div class='veh_status'>" + state + "</div>";
 			if(state!="Exited"){
 				o+="<div class='status_vis'><div class='veh_state_vis' style='background-color:"+colour+";width:"+dArr[i].message[2]+"%'></div></div>"
-			o+="<div class='veh_state'>"+dArr[i].message[1]+" kW </div>"
+			o+="<div class='veh_state'>"+dArr[i].message[1]+" kW |" + dArr[i].message[3] + "|" + dArr[i].message[4] + "</div>"
 			}
 			o+="</div>"
 			
@@ -391,6 +435,10 @@ function visualise(arr,systemtime){
 			if(state=="In Queue"){qu+=o;n+=1}	
 			if(state=="Exited"){ex+=o}
 			
+			ie+=dArr[i].message[1]*dArr[i].message[4]
+
+			//add rate * chargestatus to bin for import export
+
 
 	}
 	//current
@@ -399,6 +447,9 @@ function visualise(arr,systemtime){
 	//total capacity
 	system.plot2.x.push(systemtime)
 	system.plot2.y.push(arr[1][1])
+
+	system.plot3.x.push(systemtime)
+	system.plot3.y.push(ie)
 	
 	$("#list").html(on)
 	$("#queue").html(qu)
@@ -410,7 +461,7 @@ function visualise(arr,systemtime){
 }
 
 function plot(){
-	var data = [system.plot1,system.plot2];
+	var data = [system.plot1,system.plot2,system.plot3];
 	Plotly.newPlot('plot', data);
 }
 
