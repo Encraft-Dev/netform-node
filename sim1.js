@@ -37,7 +37,7 @@ var vArr = [{Make:"BMW",Model:"i3",Name:"BMW i3",Seats:5,Range:118,MaxCapacity:1
 			{Make:"Nissan",Model:"Leaf (67)",Name:"Nissan Leaf (67)",Seats:5,Range:124,MaxCapacity:24,MinCharge:1,C_Rate1:11.52,C_Rate2:3.84,D_Rate:11.52,C_RUT:5,C_RDC:0.8,C_T1:1,C_T2:0,C_T3:0,C_T4:1,C_CS:0,C_TS:0},
 			{Make:"Nissan ",Model:"Leaf (83)",Name:"Nissan  Leaf (83)",Seats:5,Range:155,MaxCapacity:30,MinCharge:1,C_Rate1:11.52,C_Rate2:3.84,D_Rate:11.52,C_RUT:5,C_RDC:0.8,C_T1:1,C_T2:0,C_T3:0,C_T4:1,C_CS:0,C_TS:0},
 			{Make:"Renault",Model:"Zoe",Name:"Renault Zoe",Seats:5,Range:100,MaxCapacity:22,MinCharge:1,C_Rate1:23.04,C_Rate2:7.68,D_Rate:23.04,C_RUT:5,C_RDC:0.8,C_T1:0,C_T2:1,C_T3:0,C_T4:0,C_CS:0,C_TS:0},
-			{Make:"Smart",Model:"ForTwo",Name:"Smart ForTwo",Seats:2,Range:84,MaxCapacity:17,MinCharge:1,C_Rate1:23.04,C_Rate2:7.68,D_Rate:23.04,C_RUT:5,C_RDC:0.8,C_T1:0,C_T2:1,C_T3:0,C_T4:0,C_CS:0,C_TS:0},
+			{Make:"Smart",Model:"ForTwo",Name:"Smart ForTwo",Seats:2,Range:84,MaxCapacity:17,MinCharge:3,C_Rate1:23.04,C_Rate2:7.68,D_Rate:23.04,C_RUT:5,C_RDC:0.8,C_T1:0,C_T2:1,C_T3:0,C_T4:0,C_CS:0,C_TS:0},
 			{Make:"Citroen",Model:"C-Zero",Name:"Citroen C-Zero",Seats:4,Range:93,MaxCapacity:16,MinCharge:1,C_Rate1:11.52,C_Rate2:3.84,D_Rate:11.52,C_RUT:5,C_RDC:0.8,C_T1:1,C_T2:0,C_T3:0,C_T4:1,C_CS:0,C_TS:0},
 			{Make:"Mitsubishi",Model:"I-Miev",Name:"Mitsubishi I-Miev",Seats:4,Range:93,MaxCapacity:16,MinCharge:1,C_Rate1:11.52,C_Rate2:3.84,D_Rate:11.52,C_RUT:5,C_RDC:0.8,C_T1:1,C_T2:0,C_T3:0,C_T4:1,C_CS:0,C_TS:0},
 			{Make:"VW",Model:"E-up",Name:"VW E-up",Seats:4,Range:93,MaxCapacity:18,MinCharge:1,C_Rate1:23.04,C_Rate2:7.68,D_Rate:23.04,C_RUT:5,C_RDC:0.8,C_T1:0,C_T2:1,C_T3:0,C_T4:0,C_CS:1,C_TS:0},
@@ -52,6 +52,9 @@ var vArr = [{Make:"BMW",Model:"i3",Name:"BMW i3",Seats:5,Range:118,MaxCapacity:1
 			{Make:"BYD",Model:"e6",Name:"BYD e6",Seats:5,Range:186,MaxCapacity:61.4,MinCharge:1,C_Rate1:23.04,C_Rate2:7.68,D_Rate:23.04,C_RUT:5,C_RDC:0.8,C_T1:0,C_T2:1,C_T3:0,C_T4:0,C_CS:0,C_TS:0},
 			{Make:"Mahindra",Model:"e2o",Name:"Mahindra e2o",Seats:4,Range:79,MaxCapacity:15.5,MinCharge:1,C_Rate1:23.04,C_Rate2:7.68,D_Rate:23.04,C_RUT:5,C_RDC:0.8,C_T1:0,C_T2:1,C_T3:0,C_T4:1,C_CS:0,C_TS:0},
 			{Make:"Renault",Model:"Zoe ZE",Name:"Renault Zoe ZE",Seats:5,Range:170,MaxCapacity:40,MinCharge:1,C_Rate1:23.04,C_Rate2:7.68,D_Rate:23.04,C_RUT:5,C_RDC:0.8,C_T1:0,C_T2:1,C_T3:0,C_T4:0,C_CS:0,C_TS:0}]
+
+var  Cp = {"0":0.2,"1":0.2,"2":0.2,"3":0.2,"4":0.2,"5":0.2,"6":0.2,"7":0.2,"8":0.2,"9":0.25,"10":0.25,"11":0.25,"12":0.3,"13":0.3,"14":0.35,"15":0.5,"16":0.55,"17":0.6,"18":0.65,"19":0.7,"20":0.75,"21":0.8,"22":0.83,"23":0.85,"24":0.9,"25":0.95,"26":1,"27":1,"28":1,"29":1,"30":1,"31":0.98,"32":0.95,"33":0.92,"34":0.9,"35":0.85,"36":0.8,"37":0.7,"38":0.65,"39":0.55,"40":0.45,"41":0.4,"42":0.35,"43":0.3,"44":0.25,"45":0.2,"46":0.2,"47":0.2}
+
 // Type 1 J1772	
 // Type 2 Mennekes	
 // Type 3 Scame
@@ -153,14 +156,25 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 			//
 			switch(this.statusCode){
 				case 1: //on charge point
+						this.netformFactor();
+						//this.rate=0;//add default to do nothing...
+						//this.chargeStatus=0;//default
+						if(this.current >this.model.MaxCapacity){
+							this.current = this.model.MaxCapacity;
+							this.rate=0;//add default to do nothing...
+							this.chargeStatus=0;//default
+						}
 
-						this.rate=0;//add default to do nothing...
-						this.chargeStatus=0;//default
+						if(this.current < this.model.MinCharge){
+							this.current = this.model.MinCharge;
+							this.rate=0;//add default to do nothing...
+							this.chargeStatus=0;//default
+						}
 
 						// if netform factor requires then charge me.
-						if (this.netFF>=1){this.command=1}
+						if (this.netFF>=1){this.command=1;this.chargeStatus=1}
 
-						if (this.model.MinCharge < this.current && this.current < this.model.MaxCapacity){// if able to charge/discharge.
+						if (this.model.MinCharge <= this.current && this.current <= this.model.MaxCapacity){// if able to charge/discharge.
 							this.chargeStatus = this.command;//accept request // following  if statements  qualify
 							switch (this.chargeStatus){
 								case 1: //charge
@@ -175,22 +189,22 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 								default:
 							}
 						//check if fully charged// dont charge // discharge should be available
-						
-						
+						};
+
 						this.current = this.current + (this.chargeStatus * (this.rate/60));
 
 
-						}
+						// if(this.current >this.model.MaxCapacity){
+						// 	this.current = this.model.MaxCapacity;
+						// 	this.rate=0;//add default to do nothing...
+						// 	this.chargeStatus=0;//default
+						// }
 
-						if(this.current >this.model.MaxCapacity){
-							this.current = this.model.MaxCapacity;
-							//if (this.chargeStatus==1){this.chargeStatus=0;this.rate=0}
-						}
-
-						if(this.current < this.model.MinCharge){
-							this.current = this.model.MinCharge;
-							//if (this.chargeStatus==-1){this.chargeStatus=0;this.rate=0}
-						}
+						// if(this.current < this.model.MinCharge){
+						// 	this.current = this.model.MinCharge;
+						// 	this.rate=0;//add default to do nothing...
+						// 	this.chargeStatus=0;//default
+						//}
 				break;
 				default:
 				}
@@ -208,10 +222,16 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 					this.netformFactor();
 					if(this.netFF>=1){
 							this.command=1;
+						if(this.current >this.model.MaxCapacity){
+							this.current = this.model.MaxCapacity;
+						}
+
+						if(this.current < this.model.MinCharge){
+							this.current = this.model.MinCharge;
+						}
 							this.charge();
 						}
-					this.setTimer(1).done(this.selfCharge)//loop control
-
+					// this.setTimer(1).done(this.selfCharge)//loop control
 		},
 		leavefacility:function(){
 			
@@ -241,8 +261,14 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 		        //set next 
 		        this.checkQueue();
 		        this.selfCharge();
-		        this.setTimer( random.normal(10,5)).done(function(){//set time to next vehicle...can be more complex
-		        			sim.addEntity(Vehicle); 	
+		        this.setTimer(0.1).done(this.selfCharge())//loop control
+
+		        //figure out time and cp cap...
+		        
+				x =(Cp[Math.floor(sim.time()/30)]*SLOTS)/30//  here isqwi?&&*******
+****************
+		        this.setTimer( random.normal(x,2)).done(function(){//set time to next vehicle...can be more complex
+		        			sim.addEntity(Vehicle);
 		        	});
 	    		},
 	    checkQueue:function(){//while in queue check and set inque = false once entered facility
@@ -287,9 +313,9 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 	    			break;
 	    			case "discharge":
 	    			//check for nff here??
-	    			if(this.netFF<1){
-	    				this.command=-1//;this.charge();
-	    			}
+	    			//if(this.netFF<1){
+	    				this.command=-1;this.charge();
+	    			//}
 	    			break;
 	    				case "hold":
 	    				this.command=0;this.charge();
@@ -307,10 +333,6 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
  		log:[],
  		vehStatus:[],
  		sendTick:function(){
- 							
- 							//stats_veh2.record(Park.systemStats().population,sim.time())
- 							//this.send("tick",0);
-
  							this.setTimer(1).done(function(){this.sendTick()})
  						},
  		askStatus:function(){
@@ -326,7 +348,7 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
  		start:function(){
  						//console.log("controller started");
  							this.askStatus();
- 							//this.discharge();
+ 							this.discharge();
  							//this.askCommand();
  							//fire random events fro discharging and charging...... including how long for...
  							//this.sendTick();
@@ -334,11 +356,13 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
  						},
  		discharge:function(){
  		     
- 			if (sim.time()>100 && sim.time()<SIMTIME){
+ 			if (sim.time()>100 && sim.time()<200){
  				this.send("discharge",0)
  				}
- 			else {this.send("hold",0)}	
- 			this.setTimer(1).done(this.discharge)
+ 			else {this.send("hold",0)}
+ 			this.setTimer(1).done(function(){this.discharge()})
+ 			//if export cap then ask for each avialable then  share between 
+
  		},				
  		onMessage:function(sender,message){
  			s = sender.id;
