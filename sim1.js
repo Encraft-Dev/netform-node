@@ -53,7 +53,7 @@ var vArr = [{Make:"BMW",Model:"i3",Name:"BMW i3",Seats:5,Range:118,MaxCapacity:1
 			{Make:"Mahindra",Model:"e2o",Name:"Mahindra e2o",Seats:4,Range:79,MaxCapacity:15.5,MinCharge:1,C_Rate1:23.04,C_Rate2:7.68,D_Rate:23.04,C_RUT:5,C_RDC:0.8,C_T1:0,C_T2:1,C_T3:0,C_T4:1,C_CS:0,C_TS:0},
 			{Make:"Renault",Model:"Zoe ZE",Name:"Renault Zoe ZE",Seats:5,Range:170,MaxCapacity:40,MinCharge:1,C_Rate1:23.04,C_Rate2:7.68,D_Rate:23.04,C_RUT:5,C_RDC:0.8,C_T1:0,C_T2:1,C_T3:0,C_T4:0,C_CS:0,C_TS:0}]
 
-var  Cp = {"0":0.2,"1":0.2,"2":0.2,"3":0.2,"4":0.2,"5":0.2,"6":0.2,"7":0.2,"8":0.2,"9":0.25,"10":0.25,"11":0.25,"12":0.3,"13":0.3,"14":0.35,"15":0.5,"16":0.55,"17":0.6,"18":0.65,"19":0.7,"20":0.75,"21":0.8,"22":0.83,"23":0.85,"24":0.9,"25":0.95,"26":1,"27":1,"28":1,"29":1,"30":1,"31":0.98,"32":0.95,"33":0.92,"34":0.9,"35":0.85,"36":0.8,"37":0.7,"38":0.65,"39":0.55,"40":0.45,"41":0.4,"42":0.35,"43":0.3,"44":0.25,"45":0.2,"46":0.2,"47":0.2}
+var  Cp = {"0":0.1,"1":0.15,"2":0.15,"3":0.2,"4":0.2,"5":0.2,"6":0.2,"7":0.2,"8":0.2,"9":0.25,"10":0.25,"11":0.25,"12":0.3,"13":0.3,"14":0.35,"15":0.5,"16":0.55,"17":0.6,"18":0.65,"19":0.7,"20":0.75,"21":0.8,"22":0.83,"23":0.85,"24":0.9,"25":0.95,"26":1,"27":1,"28":1,"29":1,"30":1,"31":0.98,"32":0.95,"33":0.92,"34":0.9,"35":0.85,"36":0.8,"37":0.7,"38":0.65,"39":0.55,"40":0.45,"41":0.4,"42":0.35,"43":0.3,"44":0.25,"45":0.2,"46":0.2,"47":0.2}
 
 // Type 1 J1772	
 // Type 2 Mennekes	
@@ -273,13 +273,30 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 		        this.setTimer(0.1).done(this.selfCharge())//loop control
 
 		        //figure out time and cp cap...
+		        //
+		        ////need to compare with next period...
+		  //       period = Math.floor(sim.time()/30)
+		  //       nextPeriod = period+1 > 47 ? 0: period+1
+		  //       previousPeriod = period-1 > 0 ? period-1:47
 
-				x =30/(Cp[Math.floor(sim.time()/30)]*SLOTS)//  here isqwi?&&*******
-				
+
+		  //       //console.log(period,nextPeriod)
+		  //       periodPop = Cp[period]*SLOTS
+		  //       previousPeriodPop = sim.time()<30 ? 0: Cp[previousPeriod]*SLOTS
+		  //       addPop = periodPop - previousPeriodPop
+		  //       // console.log(periodPop,previousPeriodPop,addPop)
+		  //       //now deal with negative
+		  //       addPop =  addPop<=0?0.1:addPop
 		        
-		        this.setTimer(random.normal(x,2)).done(function(){//set time to next vehicle...can be more complex
-		        			sim.addEntity(Vehicle);
-		        	});
+				// x =30/addPop//  here isqwi?&&*******
+				// //console.log( period,this.id,addPop,x,"£hell")
+		        
+				//always add vehcile at beginning of period to ensure 
+
+
+		        // this.setTimer(random.normal(x,2)).done(function(){//set time to next vehicle...can be more complex
+		        // 			sim.addEntity(Vehicle);
+		        // 	});
 	    		},
 	    checkQueue:function(){//while in queue check and set inque = false once entered facility
 	    		//console.log(sim.time(),this.id,Park.inQueue(this.id))
@@ -297,6 +314,7 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 	    			case 1:
 	    				this.statusText="on point";
 	    			break;
+
 	    		}
 	    },
 	    onMessage:function(s,m){
@@ -354,11 +372,38 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 							})
  						},
  		askCommand:function(){this.send("charge",0);},
+ 		periodTick:function(){//set 30min related items
+ 								period = Math.floor(sim.time()/30)
+ 								period =  period > 47 ? 0: period
+		        				nextPeriod = period+1 > 47 ? 0: period+1
+		       					previousPeriod = period-1 > 0 ? period-1:47
+		        				periodPop = Cp[period]*SLOTS
+		        				previousPeriodPop = sim.time()<30 ? 0: Cp[previousPeriod]*SLOTS
+		        				addPop = periodPop - previousPeriodPop
+		        				addPop =  addPop<=0?0:addPop
+		        				this.vehArrival(addPop,sim.time(),sim.time()+30)
+ 								//console.log(period,periodPop,previousPeriodPop,addPop)
+			 					this.setTimer(30).done(function(){//do it again
+			 								this.periodTick();
+			 					})
+ 		},
+ 		vehArrival:function(pop,start,stop){//deals with 30 tick period...
+ 			//frquency for next
+ 			//console.log(sim.time(),pop,start,stop)
 
+ 			if (sim.time()<stop){
+ 					this.setTimer(random.normal(30/pop,1)).done(function(){//set time to next vehicle...can be more complex
+		        			sim.addEntity(Vehicle);
+		        			this.vehArrival(pop,start,stop);
+		        	});
+			}
+ 		},
  		start:function(){
  						//console.log("controller started");
  							this.askStatus();
  							this.discharge();
+ 							this.periodTick();
+
  							//this.askCommand();
  							//fire random events fro discharging and charging...... including how long for...
  							//this.sendTick();
@@ -384,9 +429,9 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 	sim.addEntity(Controller)
 	sim.addEntity(Vehicle);
 	sim.simulate(SIMTIME);
-	console.log(Park)
+	//console.log(Park)
 	console.log("Simulation End")
-	console.log(sim)
+	//console.log(sim)
 	system.simtime=SIMTIME
 	$("#controlpanel").show()
 	//stats_vehicles.finalize(sim.time())
@@ -403,10 +448,16 @@ var system = {
 	simDateTime:0,
 	time:-1,
 	log:[],
-	plot1:{name:"Max Capacity (kWh)",x:[],y:[],type:"scatter"},
-	plot2:{name:"Available Capacity (kWh)",x:[],y:[],type:"scatter"},
-	plot3:{name:"Import/Export (kW)",x:[],y:[],type:"scatter"},
-	plot4:{name:"Population",x:[],y:[],type:"scatter"},
+	plots:{
+			capacityCurrent:{name:"Available Capacity (kWh)",x:[],y:[],type:"scatter"},
+			capacityMax:{name:"Max Capacity (kWh)",x:[],y:[],type:"scatter"},
+			energyFlow:{name:"Import/Export (kW)",x:[],y:[],type:"scatter"},
+			population:{name:"Population",x:[],y:[],type:"scatter"},
+		},
+	// plot1:{name:"Available Capacity (kWh)",x:[],y:[],type:"scatter"},
+	// plot2:{name:"Max Capacity (kWh)",x:[],y:[],type:"scatter"},
+	// plot3:{name:"Import/Export (kW)",x:[],y:[],type:"scatter"},
+	// plot4:{name:"Population",x:[],y:[],type:"scatter"},
 	run:function(){runsystem(system.time)},
 	tick:function(){this.time++;this.run() }
 }
@@ -467,7 +518,7 @@ function visualise(arr,systemtime){
 	ex="";
 	ie=0;
 	n=0;q=0;
-	console.log(arr)
+	//console.log(arr)
 	dArr=arr.Veh
 	
 	for (i=dArr.length-1;i>=0;i--){
@@ -507,34 +558,44 @@ function visualise(arr,systemtime){
 	//
 	dt = getTimefromSystem(system.time)
 	
-	system.plot1.x.push(dt)
-	system.plot1.y.push(arr.Cap.currentCap)
+	system.plots.capacityCurrent.x.push(dt)
+	system.plots.capacityCurrent.y.push(arr.Cap.currentCap)
 	//total capacity
-	system.plot2.x.push(dt)
-	system.plot2.y.push(arr.Cap.maximumCap)
+	system.plots.capacityMax.x.push(dt)
+	system.plots.capacityMax.y.push(arr.Cap.maximumCap)
 
-	system.plot3.x.push(dt)
-	system.plot3.y.push(ie)
+	system.plots.energyFlow.x.push(dt)
+	system.plots.energyFlow.y.push(ie)
 
-	system.plot4.x.push(dt)
-	system.plot4.y.push(arr.Park.onSlot)
+	system.plots.population.x.push(dt)
+	system.plots.population.y.push(arr.Park.onSlot)
 	
 	$("#list").html(on)
 	$("#queue").html(qu)
 	$("#exit").html(ex)
 
-   plot();
-
-
+   system.time  == 0?plot():replot();
 }
 
+function replot(){
+		Plotly.redraw('plot');
+		Plotly.redraw('plot2');
+		Plotly.redraw('plot3');
+}
 function plot(){
-	var data = [system.plot1,system.plot2,system.plot3];
-	Plotly.newPlot('plot', data);
+		var layout = {
+		  showlegend: true,
+		  legend: {
+		    x: 0.1  ,
+		    y: 1.2
+		  }
+		}
 
-	var data2 = [system.plot4];
-	Plotly.newPlot('plot2', data2);
+	
 
+	Plotly.newPlot('plot', [system.plots.capacityCurrent,system.plots.capacityMax],layout);
+	Plotly.newPlot('plot2', [system.plots.energyFlow],layout);
+	Plotly.newPlot('plot3', [system.plots.population],layout);
 }
 
 function tickstep(){system.tick()}
