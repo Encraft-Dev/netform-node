@@ -18,9 +18,9 @@ function stopsim(){console.log("Stopping Simulation")}
 // 				{type:"BMW i8",MaxCapacity:40,MinCharge:1,C_Rate1:10,D_Rate:10},
 // 				{type:"Smart 2Four",MaxCapacity:25,MinCharge:1,C_Rate1:2,D_Rate:2}]
 
-var uArr     = [{type:"commute1",duration:240},
-		    	{type:"commute2",duration:480},
-				{type:"24hrs",duration:1440}]
+var uArr     = [{type:"commute1",duration:240,cap_pref:0.8,cap_min:0.6},
+		    	{type:"commute2",duration:480,cap_pref:0.8,cap_min:0.6},
+				{type:"24hrs",duration:1440,cap_pref:0.8,cap_min:0.6}]
 
 var cModes =   [{ID:"mode_1_1p",Mode:1,Phase:1,A:16,V:250,Type:"AC",Smart:0,kW:3.84},
 				{ID:"mode_1_3p",Mode:1,Phase:3,A:16,V:480,Type:"AC",Smart:0,kW:11.52},
@@ -162,34 +162,56 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 			//todo - deal with charge rates, netform factor etc....
 			//todo - add discharge requirement function
 			//
+			
+			//add in charge profile... 
+			// function should give a % on rate to ensure ramp up and ramp down...
+			//rate throttle.... 
+			//first 5 mins... split by map up time
+			//when at RDC cap then drop to rate 2
+
+
+
 			switch(this.statusCode){
 				case 1: //on charge point
-						this.netformFactor();
-						//this.rate=0;//add default to do nothing...
-						//this.chargeStatus=0;//default
+						//this.netformFactor();
+						//this.rate=this.model.C_Rate2;//add default to do nothing...
+						//this.chargeStatus=2;//default
+
+						rd=1//rate direction + charging - discharging
+						this.chargeStatus=this.command //default to request
+
 						if(this.current >this.model.MaxCapacity){
 							this.current = this.model.MaxCapacity;
-							this.rate=0;//add default to do nothing...
-							this.chargeStatus=0;//default
+							//this.rate=0;//add default to do nothing...
+							//this.chargeStatus=0;//default
 						}
 
 						if(this.current < this.model.MinCharge){
 							this.current = this.model.MinCharge;
-							this.rate=0;//add default to do nothing...
-							this.chargeStatus=0;//default
+							//this.rate=0;//add default to do nothing...
+							//this.chargeStatus=0;//default
 						}
 
 						// if netform factor requires then charge me.
-						if (this.netFF>=1){this.command=1;this.chargeStatus=1}
+						if (this.netformFactor()>=1){this.chargeStatus=1}//fire netform....
+						if((this.current/this.model.MaxCapacity)>this.model.C_RDC){this.chargeStatus=2}//slow drop towards top.
 
 						if (this.model.MinCharge <= this.current && this.current <= this.model.MaxCapacity){// if able to charge/discharge.
-							this.chargeStatus = this.command;//accept request // following  if statements  qualify
+						//	this.chargeStatus = this.command;//accept request // following  if statements  qualify
+							//
+						
+						
 							switch (this.chargeStatus){
+								case 2:
+									this.rate=this.model.C_Rate2;
+								break;
+								//	console.log(this.rate)
 								case 1: //charge
 									this.rate=this.model.C_Rate1;
 								break;
 								case -1: //discharge
 									this.rate=this.model.D_Rate;
+									rd=-1
 								break;
 								case 0: //hold
 									this.rate=0;
@@ -198,48 +220,79 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 							}
 						//check if fully charged// dont charge // discharge should be available
 						};
+						
+						//console.log(sim.time(),this.id,this.current,this.rate)
+						this.current += rd * this.rate/60 ;
+						
 
-						this.current = this.current + (this.chargeStatus * (this.rate/60));
-
-
-						// if(this.current >this.model.MaxCapacity){
-						// 	this.current = this.model.MaxCapacity;
-						// 	this.rate=0;//add default to do nothing...
-						// 	this.chargeStatus=0;//default
-						// }
-
-						// if(this.current < this.model.MinCharge){
-						// 	this.current = this.model.MinCharge;
-						// 	this.rate=0;//add default to do nothing...
-						// 	this.chargeStatus=0;//default
-						//}
-				break;
-				default:
-				}
-			},
-		netformFactor:function(){
-				 time_to_depart = this.onSlotTime+this.user.duration-sim.time(); //this.arrival+this.user.duration-sim.time();//user.timeend-system.time;
-				 remaining_charge = this.model.MaxCapacity-this.current
-				 time_to_full=remaining_charge/(this.model.C_Rate1/60)
-			     nff= (time_to_full/time_to_depart).toFixed(3)
-				 this.netFF = nff  //time_to_end //nF //(1/nF).toFixed(2)
-				 return true;
-			},
-		selfCharge:function(){//if not given any commands then charge if netform requires.
-					//this should override any message commands..
-					this.netformFactor();
-					if(this.netFF>=1){
-							this.command=1;
-						if(this.current >this.model.MaxCapacity){
+						if(this.current > this.model.MaxCapacity){
 							this.current = this.model.MaxCapacity;
+							this.rate=0;//add default to do nothing...
+							this.chargeStatus=0;//default
 						}
 
 						if(this.current < this.model.MinCharge){
 							this.current = this.model.MinCharge;
+							this.rate=0;//add default to do nothing...
+							this.chargeStatus=0;//default
 						}
-							this.charge();
-						}
-					// this.setTimer(1).done(this.selfCharge)//loop control
+
+						this.command=2
+				break;
+				default:
+				}
+
+			},
+		netformFactor:function(){
+				 time_to_depart = this.onSlotTime+this.user.duration-sim.time(); //this.arrival+this.user.duration-sim.time();//user.timeend-system.time;
+
+				 //include top RDC current drop
+				 charge_throttle_threshold = this.model.MaxCapacity*this.model.C_RDC
+				 //charge_above_throttle = this.model.MaxCapacity -  charge_throttle_threshold
+
+				 //remain_charge_high = (charge_throttle_threshold)-this.current
+				 //remain_charge_high =  remain_charge_high
+
+				 //calc remaining time in high rate
+				  remain_charge_high = charge_throttle_threshold-this.current
+				  
+				  //remain_time_high = remain_charge_high * this.model.C_Rate1/60
+				 
+				  remain_time_high = remain_charge_high > 0 ?
+				  						remain_charge_high * this.model.C_Rate1/60:
+				  						0;
+				  							  						
+				  										 //calc remaining above threshold
+				  //remain_charge_low = this.model.MaxCapacity - charge_throttle_threshold 
+				  remain_charge_low = this.current >=charge_throttle_threshold ? 
+				  	   					this.model.MaxCapacity-this.current:
+				  						this.model.MaxCapacity-charge_throttle_threshold;
+
+
+				  remain_time_low = remain_charge_low*this.model.C_Rate2/60  
+				  						
+				 // console.log(this.id,this.current,charge_throttle_threshold,remain_charge_high,remain_time_high,remain_charge_low,remain_time_low)				
+				 //remaining_charge = this.model.MaxCapacity-this.current
+				 //time_to_full=remaining_charge/(this.model.C_Rate1/60)
+			     time_to_full = remain_time_low + remain_time_high
+
+			     nff= (time_to_full/time_to_depart).toFixed(3)
+				 this.netFF = nff  //time_to_end //nF //(1/nF).toFixed(2)
+				 return nff//true;
+			},
+		selfCharge:function(){//if not given any commands then charge if netform requires.
+					//this should override any message commands..
+					//this.netformFactor();
+					//if(this.netFF>=1){
+					//		this.command=1;
+					//	}
+					//	else {this.command=2}
+					//this.command=2;
+					this.checkQueue();
+					//this.command=2;
+					this.charge()
+					this.setTimer(1).done(function(){this.selfCharge()});//loop control
+					
 		},
 		leavefacility:function(){
 			
@@ -248,6 +301,8 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
         		this.statusCode = -1;
         		this.statusText="Exited";
         		this.chargeStatus=0;
+        		this.rate=0;
+
         	
         		},
 	    start: function () {
@@ -270,33 +325,8 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 		        //set next 
 		        this.checkQueue();
 		        this.selfCharge();
-		        this.setTimer(0.1).done(this.selfCharge())//loop control
+		       
 
-		        //figure out time and cp cap...
-		        //
-		        ////need to compare with next period...
-		  //       period = Math.floor(sim.time()/30)
-		  //       nextPeriod = period+1 > 47 ? 0: period+1
-		  //       previousPeriod = period-1 > 0 ? period-1:47
-
-
-		  //       //console.log(period,nextPeriod)
-		  //       periodPop = Cp[period]*SLOTS
-		  //       previousPeriodPop = sim.time()<30 ? 0: Cp[previousPeriod]*SLOTS
-		  //       addPop = periodPop - previousPeriodPop
-		  //       // console.log(periodPop,previousPeriodPop,addPop)
-		  //       //now deal with negative
-		  //       addPop =  addPop<=0?0.1:addPop
-		        
-				// x =30/addPop//  here isqwi?&&*******
-				// //console.log( period,this.id,addPop,x,"£hell")
-		        
-				//always add vehcile at beginning of period to ensure 
-
-
-		        // this.setTimer(random.normal(x,2)).done(function(){//set time to next vehicle...can be more complex
-		        // 			sim.addEntity(Vehicle);
-		        // 	});
 	    		},
 	    checkQueue:function(){//while in queue check and set inque = false once entered facility
 	    		//console.log(sim.time(),this.id,Park.inQueue(this.id))
@@ -324,25 +354,28 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 	    			case "status":
 
 	    				st = (100*this.current/this.model.MaxCapacity).toFixed(0)
-	    				this.send([this.statusCode,
-	    						   this.rate.toFixed(0),
-	    						   st,
-	    						   this.netFF,
-	    						   this.chargeStatus,
-	    						   this.model,
-	    						   this.user,
-	    						   this.arrival,
-	    						   this.departureTime],
+	    				this.send({statusCode:this.statusCode,
+	    						   rate:this.rate.toFixed(0),
+	    						   percent:st,
+	    						   netform:	this.netFF,//this.netformFactor(),//this.netFF,
+	    						   chargeStatus:this.chargeStatus,
+	    						   model:this.model,
+	    						   user:this.user,
+	    						   arrival:this.arrival,
+	    						   departure:this.departureTime},
 	    						   0,
 	    						   s);
 	    			break;
 	    			case "charge":
-	    				this.command=1;this.charge();
+	    			//when import is required...
+	    				//this.command=1;this.charge();
+	    				//add in automatic charge at slow rate to 60% lowest expected??.. before high rate if NFF
 	    			break;
 	    			case "discharge":
+	    			//when export is required
 	    			//check for nff here??
 	    			//if(this.netFF<1){
-	    				this.command=-1;this.charge();
+	    				this.command=-1;//this.charge();
 	    			//}
 	    			break;
 	    				case "hold":
@@ -360,6 +393,7 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
  	var Controller = {
  		log:[],
  		vehStatus:[],
+ 		dischargeEvents:[],
  		sendTick:function(){
  							this.setTimer(1).done(function(){this.sendTick()})
  						},
@@ -399,20 +433,38 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 			}
  		},
  		start:function(){
+ 							//this.setDischargeEvents();//set up discharge requests.
  						//console.log("controller started");
- 							this.askStatus();
- 							this.discharge();
- 							this.periodTick();
+ 							this.askStatus();//set data logging going
+ 				
+ 							this.discharge();//set discharge going
+ 							this.periodTick();//set half houly update going
 
  							//this.askCommand();
  							//fire random events fro discharging and charging...... including how long for...
  							//this.sendTick();
  						},
+ 		setDischargeEvents:function(){
+ 			this.dischargeEvents.push({start:50,stop:80,capacity:100})
+ 			this.dischargeEvents.push({start:90,stop:200,capacity:100})
+ 		},
  		discharge:function(){
- 			if (sim.time()>100 && sim.time()<200){
+ 			//function needs to have array of discharge events
+ 			//loop through events and discharge as required...
+ 			disTrigger=false;
+ 			disCap=0;
+ 			 for(i=0;i<this.dischargeEvents.length;i++){
+ 				 	 	d=this.dischargeEvents[i]
+ 				 	
+	 			 	if (sim.time()>d.start && sim.time()<d.stop){
+		 			 	disTrigger=true;
+		 			 	disCap+=d.capacity;
+	 			 	}
+ 			 }
+ 			if (disTrigger){
  				this.send("discharge",0)
  				}
- 			else {this.send("hold",0)}
+ 			//else {this.send("hold",0)}
  			this.setTimer(1).done(function(){this.discharge()})
  			//if export cap then ask for each avialable then  share between 
 
@@ -433,6 +485,7 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 	console.log("Simulation End")
 	//console.log(sim)
 	system.simtime=SIMTIME
+	sim.finalize()
 	$("#controlpanel").show()
 	//stats_vehicles.finalize(sim.time())
 	//visualise(log);
@@ -524,21 +577,23 @@ function visualise(arr,systemtime){
 	for (i=dArr.length-1;i>=0;i--){
 		
 			state="On charger"
-			if(dArr[i].message[0]<0){state="Exited"}
-			if(dArr[i].message[0]==0){state="In Queue"}
+			if(dArr[i].message.statusCode<0){state="Exited"}
+			if(dArr[i].message.statusCode==0){state="In Queue"}
 			colour="#333";
-			if(dArr[i].message[1]*dArr[i].message[4]<0){colour="red";}
-			if(dArr[i].message[1]*dArr[i].message[4]>0){colour="green";}
-		
-			battmaxcap = dArr[i].message[5].MaxCapacity
+
+			if(dArr[i].message.chargeStatus==-1){colour="red";}
+			if(dArr[i].message.chargeStatus==1){colour="darkgreen";}
+			if(dArr[i].message.chargeStatus==2){colour="lightgreen";}
+			
+			battmaxcap = dArr[i].message.model.MaxCapacity
 		//console.log(arr)
 			o=""
 			o+="<div class='veh'><div class='veh_id'>" + dArr[i].s +  "</div>";
-			o+="<div class='veh_status'>" + dArr[i].message[5].Name + "</div>";
+			o+="<div class='veh_status'>" + dArr[i].message.model.Name + "</div>";
 			o+="<div class='veh_status'>" + state + "</div>";
 			//if(state!="Exited"){
-			o+="<div class='veh_maxcap'><div class='status_vis' style='width:"+battmaxcap+"%'><div class='veh_state_vis' style='background-color:"+colour+";width:"+dArr[i].message[2]+"%'></div></div></div>"
-			o+="<div class='veh_state'>"+dArr[i].message[1]+" kW |" + dArr[i].message[3] + "|" + dArr[i].message[4] + "</div>"
+			o+="<div class='veh_maxcap'><div class='status_vis' style='width:"+battmaxcap+"%'><div class='veh_state_vis' style='background-color:"+colour+";width:"+dArr[i].message.percent+"%'></div></div></div>"
+			o+="<div class='veh_state'>"+dArr[i].message.rate+" kW | NF:" + dArr[i].message.netform + "|" +dArr[i].message.chargeStatus +  "</div>"
 			//}
 			o+="</div>"
 			
@@ -548,7 +603,7 @@ function visualise(arr,systemtime){
 			if(state=="In Queue"){qu+=o;n+=1}	
 			if(state=="Exited"){ex+=o}
 			
-			ie+=dArr[i].message[1]*dArr[i].message[4]
+			ie+=dArr[i].message.chargeStatus*dArr[i].message.rate
 
 			//add rate * chargestatus to bin for import export
 
@@ -578,9 +633,9 @@ function visualise(arr,systemtime){
 }
 
 function replot(){
-		Plotly.redraw('plot');
-		Plotly.redraw('plot2');
-		Plotly.redraw('plot3');
+		Plotly.redraw('plot_capacity');
+		Plotly.redraw('plot_energy_flow');
+		Plotly.redraw('plot_population');
 }
 function plot(){
 		var layout = {
@@ -593,9 +648,9 @@ function plot(){
 
 	
 
-	Plotly.newPlot('plot', [system.plots.capacityCurrent,system.plots.capacityMax],layout);
-	Plotly.newPlot('plot2', [system.plots.energyFlow],layout);
-	Plotly.newPlot('plot3', [system.plots.population],layout);
+	Plotly.newPlot('plot_capacity', [system.plots.capacityCurrent,system.plots.capacityMax],layout);
+	Plotly.newPlot('plot_energy_flow', [system.plots.energyFlow],layout);
+	Plotly.newPlot('plot_population', [system.plots.population],layout);
 }
 
 function tickstep(){system.tick()}
