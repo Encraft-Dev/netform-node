@@ -180,7 +180,7 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 			switch(this.statusCode){
 				case 1: //on charge point
 						//*******************************
-						this.negotiation();//this is the good stuff
+						this.negotiation(this.NF_vehStatus);//this is the good stuff
 						//*********************************
 
 						rd=1//rate direction + charging - discharging and ramp time
@@ -208,7 +208,7 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 								break;
 								//	console.log(this.rate)
 								case 1: //charge
-									this.rate=this.model.C_Rate1;	
+									this.rate=this.model.C_Rate1;
 									this.chargeStart++;
 									if(this.chargeStart<this.model.C_RUT){
 										this.rate=this.rate*this.chargeStart/this.model.C_RUT
@@ -250,9 +250,29 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 				}
 			//this.log.push(sim.time(),this.chargeStatus,this.rate,this.current)	
 			},
+		negotiation:function(v){
+			//console.log(sim.time(),this.id,this.NF_vehStatus)
+			aRate=0;  //message.
+			
+			for(i=0;i<v.length;i++){
+				if(this.id==4){console.log(v[i])}
+				aRate= (1*aRate) + (1*v[i].message.rate);
+				//put in discharge factor....
+				//console.log(sim.time(),this.id,a[i])
+			}
+			if(this.id==4){console.log(aRate)}
+					//this is the key to the whole thing.
+					//we need to check everyone is ahppy with what they are going to do......
+					//
+					//1. add up netforms
+					
+					//2. if import headroom then modulate everyone else to keep under headroom 
+					//3. if no import headroom then get excess from netforms
+					//4. discharge all at modulated rate for cover excess.
+	    },
 		netformFactor:function(){
 			//TODO: include ramp up time
-			//logic 1: slow charge unless 
+			//logic 1: slow charge unless
 				 time_to_depart = this.onSlotTime+this.user.duration-sim.time(); //this.arrival+this.user.duration-sim.time();//user.timeend-system.time;
 
 				 //include top RDC current drop
@@ -355,21 +375,13 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 
 	    		}
 	    },
-	    negotiation:function(){
-					//this is the key to the whole thing.
-					//we need to check everyone is ahppy with what they are going to do......
-					//
-					//1. add up netforms
-					//2. if import headroom then modulate everyone else to keep under headroom 
-					//3. if no import headroom then get excess from netforms
-					//4. discharge all at modulated rate for cover excess.
-	    },
+	
 	    onMessage:function(s,m){
 	    		this.checkQueue()
 	    		if(Park.inQueue(this.id)){this.status="Awaiting charge point"}
 	    		switch (m.c){
 	    			case "status":
-	    				NF_vehStatus = m.data;
+	    				this.NF_vehStatus = m.data;
 	    				st = (100*this.current/this.model.MaxCapacity).toFixed(0)
 	    				this.send({statusCode:this.statusCode,
 	    						   rate:this.rate.toFixed(0),
