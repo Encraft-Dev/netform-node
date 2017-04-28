@@ -14,14 +14,28 @@
 </style>
 </head>
 <body>
+<h1>Netform Simulation</h1>
+
 <div id="simulation">
-<label for="time">Time</label>
-<input type="number" id="time" name="time" value="1440"/>
-<label for="slots">Slots</label>
-<input type="number" id="slots" name="slots" value="25"/>
-<label for="seed">Seed</label>
-<input type="number" id="seed" name="seed" value="1234"/>
-<button id="start">Run Simulation</button>
+	<div>
+		<label for="time">Time</label>
+		<input type="number" id="time" name="time" value="1440"/>
+		<label for="slots">Slots</label>
+		<input type="number" id="slots" name="slots" value="25"/>
+		<label for="seed">Seed</label>
+		<input type="number" id="seed" name="seed" value="1234"/>
+	</div>
+	<div>
+		<label for="discharge">Discharge Events</label><input type="checkbox" id="Discharge" name="discharge" checked/>
+		<label for="slow_charge">Constant Slow Charge</label><input type="checkbox" id="Slow_Charge" name="slow_charge" checked/>
+		<label for="export_cap">Export Cap</label>
+		<input type="number" id="exportCap" name="export_cap" value="1000"/>
+		<label for="import_cap">Import Cap</label>
+		<input type="number" id="importCap" name="import_cap" value="1000"/>
+	</div>
+	<div>	<button id="start">Run Simulation</button>
+	</div>
+
 </div>
 <div id= "controlpanel">
 <p>View simulation</p>
@@ -56,7 +70,10 @@ $("#stop").click(function(){stopsim()})
 $("#step").click(function(){tickstep()})
 $("#control").click(function(){tickstepcontrol()})
 $("#timestep").bind('input', function(){console.log($("#timestep").val())})
-
+$("#Discharge").change(function(){systemControl("discharge",$("#Discharge").prop("checked"))})
+$("#Slow_Charge").change(function(){systemControl("slow_charge",$("#Slow_Charge").prop("checked"))})
+$("#Slow_Charge").change(function(){systemControl("export_cap",$("#exportCap").val())})
+$("#Slow_Charge").change(function(){systemControl("import_cap",$("#importCap").val())})
 </script>
 
 	</body>
