@@ -150,8 +150,12 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 		statusCode:0,// 0 - in queue, 1-on charge point , -1 - exited
 		chargeStatus:0, // 0 = not charging  // 1 = mode 1 charging   2= mode 2 charging // -1 mode 1 discharging  // -2 mode 2 discharging
 		chargeStart:0,// time from start charging (for ramp up time)
+		netformStatus:0,//0=not affect, number = modulation
+		netformModulation:1,
+		prediction:{},//provides netform control for modulating rate/discharge...
 		state:"",
 		NF_vehStatus:[],
+		Constraints:[],
 		log:[],
 		model:"",
 		user:"",
@@ -165,102 +169,174 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 		departureTime:0,
 		facilitySlot:0,
 		command:0, //default is charge //will need to object at some point to enable fast,slow chage and discharge/ currently is  
-		charge:function(){
-			//console.log(this.id,this)
-			//todo - deal with charge rates, netform factor etc....
-			//todo - add discharge requirement function
-			//
-			
-			//add in charge profile... 
-			// function should give a % on rate to ensure ramp up and ramp down...
-			//rate throttle.... 
-			//first 5 mins... split by map up time
-			//when at RDC cap then drop to rate 2
-
+		charge:function(live){//live uses NF modulator, and updates this..  --- not live updates predition object..
+			//if(this.id==2){console.log(live,sim.time(),this.current,this.prediction)}
 			switch(this.statusCode){
 				case 1: //on charge point
-						//*******************************
-						this.negotiation(this.NF_vehStatus);//this is the good stuff
-						//*********************************
+						//capture current conditions for prediction run/
+						rate=this.rate
+						current=this.current
+						chargeStatus=this.chargeStatus
+						chargeStart=this.chargeStart
 
-						rd=1//rate direction + charging - discharging and ramp time
-
+					
+						//run negotiation to set modulator....
+						//
+						//
+						//this.netformModulation = this.negotiation()
+						
 						//add ramp up time (use rd???)
-						this.chargeStatus=this.command //default to request
+						chargeStatus=this.command //default to request
 
-
+						
 						// if netform factor requires then charge me.
-						if (this.netformFactor()>=1){this.chargeStatus=1}//fire netform....
-						if((this.current/this.model.MaxCapacity)>this.model.C_RDC && this.chargeStatus>0){this.chargeStatus=2}//slow drop towards top.
-						if(this.chargeStatus==0 && system.control.slow_charge){this.chargeStatus=2}
+						if (this.netformFactor()>=1){chargeStatus=1}//fire netform....
+						if((current/this.model.MaxCapacity)>this.model.C_RDC && chargeStatus>0){chargeStatus=2}//slow drop towards top.
+						if(chargeStatus==0 && system.control.slow_charge){chargeStatus=2}
 
-						if (this.model.MinCharge <= this.current && this.current <= this.model.MaxCapacity){// if able to charge/discharge.
+
+						if (this.model.MinCharge <= current && current <= this.model.MaxCapacity){// if able to charge/discharge.
 						//	this.chargeStatus = this.command;//accept request // following  if statements  qualify
-							//
-							switch (this.chargeStatus){
+							//rd=1//rate direction + charging - discharging and ramp time
+							switch (chargeStatus){
 								case 2:
-									this.rate=this.model.C_Rate2;
-									this.chargeStart++;
-									if(this.chargeStart<this.model.C_RUT){
-										this.rate=this.rate*this.chargeStart/this.model.C_RUT
+									rate=this.model.C_Rate2;
+									chargeStart++;
+									if(chargeStart<this.model.C_RUT){
+										rate=rate*chargeStart/this.model.C_RUT
+									//	if(this.id==2){console.log(rate)}
 									}
-
 								break;
-								//	console.log(this.rate)
 								case 1: //charge
-									this.rate=this.model.C_Rate1;
-									this.chargeStart++;
-									if(this.chargeStart<this.model.C_RUT){
-										this.rate=this.rate*this.chargeStart/this.model.C_RUT
+									rate=this.model.C_Rate1;
+									chargeStart++;
+									if(chargeStart<this.model.C_RUT){
+										rate=rate*chargeStart/this.model.C_RUT
 									}
 								break;
 								case -1: //discharge
-									this.rate=this.model.D_Rate;
-									rd=-1
-									this.chargeStart=0
+									rate=-1*this.model.D_Rate;
+									// rd=-1
+									chargeStart=0
 								break;
 								case 0: //hold
-									this.rate=0;
-									this.chargeStart=0
+									rate=0;
+									chargeStart=0
 								break;
 								default:
 							}
-						//check if fully charged// dont charge // discharge should be available
 						};
-						
-						//console.log(sim.time(),this.id,this.current,this.rate)
-						this.current += rd * this.rate/60 ;
+						l=live?this.negotiation():false
+						modulation_rate=live?this.netformModulation:1; //set the factor is live run, use 1 if prediction run.
 
-						//if(this.id==7){console.log(sim.time(),this.chargeStatus,this.current)}
-						if(this.current > this.model.MaxCapacity && rd>0){
-							this.current = this.model.MaxCapacity;
-							this.rate=0;//add default to do nothing...
-							this.chargeStatus=0;//default
+						//rate=modulation_rate*rate
+						//chargeStatus=modulation_status
+
+						if(this.id==2){console.log(sim.time(),rate,modulation_rate,chargeStatus)}
+
+							current +=  rate/60 ;
+						
+						if(current > this.model.MaxCapacity && rate>0){
+							current = this.model.MaxCapacity;
+							rate=0;//add default to do nothing...
+							chargeStatus=0;//default
 							}
 
-						if(this.current < this.model.MinCharge && rd<0){
-							this.current = this.model.MinCharge;
-							this.rate=0;//add default to do nothing...
-							this.chargeStatus=0;//default
+						if(current < this.model.MinCharge && rate<0){
+							current = this.model.MinCharge;
+							rate=0;//add default to do nothing...
+							chargeStatus=0;//default
 							}
+
+						//if not prediction
+						if(live){
+						this.rate=rate
+						this.current=current
+						this.chargeStatus=chargeStatus
+						this.chargeStart=chargeStart
+						return true;
+						}
+						else
+						{
+							this.prediction = {
+								rate:rate,
+								current:current,
+								chargeStatus:chargeStatus,
+								chargeStart:chargeStart,
+								netform:this.netFF
+							}
+						return false;
+						}
 						
-						//this.command=2
+						//console.log(sim.time(),this.id,this.NF_vehStatus)
+						// //*******************************
+						// neg=this.negotiation()
+						// this.rate=neg.rate;
+						// this.chargeStatus=neg.chargeStatus
+						// //this is the good stuff
+						// //*********************************
+						// //
 				break;
 				default:
 				}
-			//this.log.push(sim.time(),this.chargeStatus,this.rate,this.current)	
 			},
-		negotiation:function(v){
-			//console.log(sim.time(),this.id,this.NF_vehStatus)
+		negotiation:function(){
+			v=this.NF_vehStatus
+			//if(this.id==4){console.log(v)}
+			//oRate=this.rate;
+			//oCS=this.chargeStatus;
+
+		
 			aRate=0;  //message.
-			
+			nfRate=0;
+			rate=0;
+			nfList=[]
+			list=[];
+			nfMod=1;//modulate rate.... nf
+			//Mod=1;//modulate rate other
+			//if(this.id==4){sim.time(),console.log(v)}
+			//set up data streams
 			for(i=0;i<v.length;i++){
-				if(this.id==4){console.log(v[i])}
-				aRate= (1*aRate) + (1*v[i].message.rate);
-				//put in discharge factor....
-				//console.log(sim.time(),this.id,a[i])
+				x=v[i].message.prediction;
+				rd=(x.chargeStatus>=0?1:-1)
+				aRate += (rd*1*x.rate);//get max rate..
+				if(x.netform>=1){//add netform >1 to arr
+					nfList.push(x);
+					nfRate+=(rd*1*x.rate)}
+				else{
+					list.push(x);
+					rate+=(rd*1*x.rate)};
 			}
-			if(this.id==4){console.log(aRate)}
+			//check against capacity (import)
+			//if(this.Constraints[0])
+			
+			if(this.Constraints && aRate>=this.Constraints.importCap){
+				//check if netforms can charge...
+				//if netforms can charge then modulate other
+				//
+				if(this.id==3){console.log(sim.time(),this.current,nfRate,this.netformModulation)}
+				if(nfRate<this.Constraints.importCap && this.netFF<1){
+						
+					//get modulation for none NF 
+					nfMod = (this.Constraints.importCap-nfRate)/rate
+				//		rate=this.rate*modrequired
+				//oCS=this.chargeStatus>0?0:this.chargeStatus
+				}
+
+				//if cap is too low for netforms then switch off all, 
+
+				//if netforms cant charge then modulate netforms/discharge others.  - this is where the negiation may come in....
+
+		
+			//if(this.id==4){console.log(this.netformModulation)}	
+			}
+			this.netformModulation=nfMod
+			this.netformStatus=this.ChargeStatus
+
+		
+		//return true//{rate:this.netformModulation,status:this.ChargeStatus}
+			//if(this.id==4){console.log(nfList,nfRate,list,rate,aRate)}
+
 					//this is the key to the whole thing.
 					//we need to check everyone is ahppy with what they are going to do......
 					//
@@ -269,6 +345,7 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 					//2. if import headroom then modulate everyone else to keep under headroom 
 					//3. if no import headroom then get excess from netforms
 					//4. discharge all at modulated rate for cover excess.
+		
 	    },
 		netformFactor:function(){
 			//TODO: include ramp up time
@@ -318,7 +395,9 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 					//this.command=2;
 					this.checkQueue();
 					//this.command=2;
-					this.charge()
+				
+					this.charge(true)
+					this.charge(false);//do prediction...
 					this.setTimer(1).done(function(){this.selfCharge()});//loop control
 					
 		},
@@ -382,6 +461,8 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 	    		switch (m.c){
 	    			case "status":
 	    				this.NF_vehStatus = m.data;
+	    				this.Constraints = m.control;
+
 	    				st = (100*this.current/this.model.MaxCapacity).toFixed(0)
 	    				this.send({statusCode:this.statusCode,
 	    						   rate:this.rate.toFixed(0),
@@ -391,7 +472,9 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 	    						   model:this.model,
 	    						   user:this.user,
 	    						   arrival:this.arrival,
-	    						   departure:this.departureTime},
+	    						   departure:this.departureTime,
+	    						   prediction:this.prediction
+	    							},
 	    						   0,
 	    						   s);
 	    			break;
@@ -420,17 +503,16 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
  		vehStatus:[],
  		vehlog:[],
  		dischargeEvents:[],
- 		Constraints:[{exportCap:system.export_cap,importCap:system.import_cap}],
+ 		Constraints:{},
  		sendTick:function(){
  							this.setTimer(1).done(function(){this.sendTick()})
  						},
  		askStatus:function(){
  							system.log.push({Veh:this.vehStatus,Cap:Park.caps(),Park:Park.status()})
- 							//console.log(this.vehStatus)
-
-
  			               	this.vehStatus=[];
- 							this.send({c:"status",data:this.vehStatus},0);
+
+ 			               	//request data from vehicle...
+ 							this.send({c:"status",data:this.vehStatus,control:this.Constraints},0);
  							this.setTimer(1).done(function(){
 								this.askStatus()
 							})
@@ -465,6 +547,7 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
  		start:function(){
  							if(system.control.discharge){this.setDischargeEvents()};//set up discharge requests.
  						//console.log("controller started");
+ 							this.Constraints = {exportCap:system.control.export_cap,importCap:system.control.import_cap}
  							this.askStatus();//set data logging going
  				
  							this.discharge();//set discharge going
@@ -530,11 +613,15 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 //
 //
 // system controls
-function systemControl(con,sta){system.control[con]=sta}
+function systemControl(con,sta){
+	console.log(con,sta)
+	system.control[con]=sta
+
+}
 // output functions (todo move to separate file)
 
 var system = {
-	control:{discharge:true,slow_charge:true,import_cap:1000,export_cap:1000},
+	control:{discharge:true,slow_charge:true,import_cap:40,export_cap:40},
 	paused:true,
 	simtime:0,
 	simDateTime:0,
@@ -694,7 +781,7 @@ function plot(){
 	Plotly.newPlot('plot_population', [system.plots.population],layout);
 }
 
-function tickstep(){system.tick()}
+function tickstep(v){system.tick()}
 
 function tickstepcontrol(){
 	if (system.paused){
