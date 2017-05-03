@@ -2,11 +2,13 @@
 <head>
 <title>Netform</title>
 <style>
+	body{margin-bottom: 100px}
 	.veh{}
 	.veh_id{display:inline-block;padding-left:10px;width:20px;}
 	.veh_status{display:inline-block;padding-left:10px;width:200px;}
 	.veh_state{display:inline;padding-left:10px;}
-	#controlpanel{display:none;}
+	#controlpanel{display:none;bottom:0;position:fixed;width:100%;border:1px solid #ccc;background:white;z-index:1000;}
+	.controls{display:none;}
 	.status_vis{display:inline-block;border:1px solid #ccc;}
 	.veh_maxcap{display:inline-block;width:400px;}
 	.veh_state_vis{display:block;height:9px;}
@@ -37,13 +39,14 @@
 	</div>
 
 </div>
+<p class="controls">View simulation (controls below when ready)</p>
 <div id= "controlpanel">
-<p>View simulation</p>
 		<button id="step_bk"><<</button>
 		<button id="step">>></button>
 		<button id="control">Run</button>
 		<input type="number" name="timestep" id="timestep" value="100" width="20px"/>
 		<span>System Time: </span><span id = "systemtime"></span>
+		<span> | Event:</span><span id="systemevents"></span>
 </div>
 <h2>Population</h2>
 <div id="plot_population"></div>
@@ -76,6 +79,8 @@ $("#Discharge").change(function(){systemControl("discharge",$("#Discharge").prop
 $("#Slow_Charge").change(function(){systemControl("slow_charge",$("#Slow_Charge").prop("checked"))})
 $("#exportCap").change(function(){systemControl("export_cap",$("#exportCap").val())})
 $("#importCap").change(function(){systemControl("import_cap",$("#importCap").val())})
+$("#importCap").val(system.control.import_cap)
+$("#exportCap").val(system.control.export_cap)
 </script>
 
 	</body>
