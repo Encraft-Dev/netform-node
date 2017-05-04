@@ -45,6 +45,7 @@
 		<button id="step">>></button>
 		<button id="control">Run</button>
 		<input type="number" name="timestep" id="timestep" value="100" width="20px"/>
+		<input type="number" name="jumpto" id="jumpto" value=0 width="20px/>"
 		<span>System Time: </span><span id = "systemtime"></span>
 		<span> | Event:</span><span id="systemevents"></span>
 </div>
@@ -63,10 +64,12 @@
 <div id="exit"></div>
 
 
-<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-<script type="text/javascript" src='https://code.jquery.com/jquery-3.2.0.min.js'></script>
-<script type="text/javascript" src='assets/js/sim-0.26.js'></script>	
-<script type="text/javascript" src='sim1.js'></script>	
+<script src="assets/js/plotly-latest.min.js"></script>
+<script type="text/javascript" src='assets/js/jquery-3.2.0.min.js'></script>
+<script type="text/javascript" src='assets/js/sim-0.26.js'></script>
+<script type="text/javascript"  src='modules/data.js'></script>	
+<script type="text/javascript"  src='modules/system.js'></script>	
+<script type="text/javascript"  src='modules/simulation.js'></script>	
 
 <script>
 $("#start").click(function(){startsim($("#time").val(),$("#slots").val(),$("#seed").val())})
@@ -81,6 +84,7 @@ $("#exportCap").change(function(){systemControl("export_cap",$("#exportCap").val
 $("#importCap").change(function(){systemControl("import_cap",$("#importCap").val())})
 $("#importCap").val(system.control.import_cap)
 $("#exportCap").val(system.control.export_cap)
+$("#jumpto").change(function(){jumptotime($("#jumpto").val())})
 </script>
 
 	</body>
