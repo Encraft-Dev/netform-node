@@ -322,15 +322,14 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 		//this.id==2?
 		return{rate:this.netformModulation,status:this.netformStatus}
 			//if(this.id==4){console.log(nfList,nfRate,list,rate,aRate)}
-
-					//this is the key to the whole thing.
-					//we need to check everyone is ahppy with what they are going to do......
-					//
-					//1. add up netforms
-					
-					//2. if import headroom then modulate everyone else to keep under headroom 
-					//3. if no import headroom then get excess from netforms
-					//4. discharge all at modulated rate for cover excess.
+			//this is the key to the whole thing.
+			//we need to check everyone is happy with what they are going to do......
+			//
+			//1. add up netforms
+			
+			//2. if import headroom then modulate everyone else to keep under headroom 
+			//3. if no import headroom then get excess from netforms
+			//4. discharge all at modulated rate for cover excess.
 		
 	    },
 		netformFactor:function(){
@@ -380,11 +379,8 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
         		this.statusText="Exited";
         		this.chargeStatus=0;
         		this.rate=0;
-
-        	
         		},
 	    start: function () {
-
 	    	    //number_of_vehicles++
 	    		//stats_vehicles.record(number_of_vehicles,sim.time());
 		    	//get vehicle type,set user and current state of charge
@@ -456,6 +452,7 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 	    			break;
 	    			case "discharge":
 	    				this.command=-1;//this.charge();
+
 	    			break;
 	    				case "hold":
 	    				this.command=0;
@@ -529,8 +526,9 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
  							//this.sendTick();
  						},
  		setDischargeEvents:function(){
- 			this.dischargeEvents.push({type:"Discharge",start:50,stop:80,capacity:100})
+ 			this.dischargeEvents.push({type:"Discharge",start:50,stop:80,capacity:20})
  			this.dischargeEvents.push({type:"Discharge",start:90,stop:200,capacity:100})
+ 			this.dischargeEvents.push({type:"Discharge",start:480,stop:550,capacity:100})
  		},
  		discharge:function(){
  			//function needs to have array of discharge events
@@ -542,11 +540,11 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
  				 	
 	 			 	if (sim.time()>d.start && sim.time()<d.stop){
 		 			 	disTrigger=true;
-		 			 	disCap+=d.capacity;
+		 			 	disCap=disCap<d.capacity?disCap:d.capacity;
 	 			 	}
  			 }
  			if (disTrigger){
- 				this.send({c:"discharge",data:this.vehStatus},0)
+ 				this.send({c:"discharge",data:this.vehStatus,capacity:disCap},0)
  			}
  			else {this.send({c:"hold",data:this.vehStatus},0)}
  			this.setTimer(1).done(function(){this.discharge()})
