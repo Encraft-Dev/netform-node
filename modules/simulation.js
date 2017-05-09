@@ -60,8 +60,26 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 				}
 			//console.log(id,q,sim.time(),this.queue.data)
 			return q;
-	}
+	};
+	Park.solarGeneration = {
+		profile:{},
+		init:function(){
+			//get profile and adjust for system size.
+			for(i=0;i<profile_solar.length;i++){
+				monthly = profile_solar[i].Monthly*system.control.solar_output
+				data=[];
+				for (j=0;j<24;j++){
+					data.push(profile_solar[i][j]*monthly)
+					data.push(profile_solar[i][j]*monthly)//do again for 23 period data
+				}
 
+				this.profile[profile_solar[i].Month]={"monthly":monthly,"data":data}
+			}
+		},
+	}
+	Park.batteryStorage = {}
+
+	Park.solarGeneration.init()
 	//var SlotStore = new Sim.Store("slots",SLOTS) // this manages cars and slots by id.
 	//var exitVehiclesStore = new Sim.Store("exited vehicles",100)
 
@@ -77,6 +95,7 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 		type:"Standard",
 		modes:[3,7,22]
 	}
+
 
 	var Vehicle = {
 		statustext:"Awaiting charge point",
@@ -524,6 +543,8 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
  							//this.askCommand();
  							//fire random events fro discharging and charging...... including how long for...
  							//this.sendTick();
+ 							//add solar unit
+ 							//add 
  						},
  		setDischargeEvents:function(){
  			this.dischargeEvents.push({type:"Discharge",start:50,stop:80,capacity:20})
@@ -566,7 +587,8 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 	sim.addEntity(Controller)
 	sim.addEntity(Vehicle);
 	sim.simulate(SIMTIME);
-	//console.log(Park)
+	system.tempsolar=Park.solarGeneration.profile.May
+	console.log(Park.solarGeneration.profile.May)
 	console.log("Simulation End")
 	//console.log(sim)
 	system.simtime=SIMTIME

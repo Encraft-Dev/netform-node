@@ -19,12 +19,40 @@ function systemControl(con,sta){
 }
 // output functions (todo move to separate file)
 
+function solarMCSAPI(size,outputid){
+
+			
+
+ 			API_MCS24.location.postcode.value="wr49rp"
+            API_MCS24.panels[0].electrical_rating.value=size*1000
+            API_MCS24.panels[0].pitch.value=15
+            API_MCS24.panels[0].panel_count.value=1      
+
+
+
+	$.post( "http://api-encraft.rhcloud.com/mcs24", API_MCS24)
+  		.done(function( data ) {
+  			
+  			system.control.solar_output=data.annual_electrical_output.value
+    		$("#"+outputid).val(system.control.solar_output);
+ 		 });
+
+}
 
 
 var system = {
-	control:{discharge:true,slow_charge:true,import_cap:20,export_cap:50},
+	control:{
+			discharge:true,
+			slow_charge:true,
+			import_cap:20,
+			export_cap:50,
+			solar_cap:0,
+			solar_output:0
+		},
+	tempsolar:{},
 	events:[],
 	paused:true,
+	simStartDate: new Date(2017,4,1,0,0,0),
 	simtime:0,
 	simDateTime:0,
 	time:-1,
@@ -34,6 +62,7 @@ var system = {
 			capacityMax:{name:"Max Capacity (kWh)",x:[],y:[],type:"scatter"},
 			energyFlow:{name:"Import/Export (kW)",x:[],y:[],type:"scatter"},
 			population:{name:"Population",x:[],y:[],type:"scatter"},
+			solar:{name:"Solar generation",x:[],y:[],type:"scatter"}
 		},
 	run:function(){runsystem(system.time)},
 	tick:function(step){
@@ -185,7 +214,8 @@ function visualise(arr,systemtime){
 	system.plots.energyFlow.y=[]
 	system.plots.population.x=[]
 	system.plots.population.y=[]
-
+	system.plots.solar.x=[]
+	system.plots.solar.y=[]
 
 	for (i=0;i<system.time;i++){
 		t=getTimefromSystem(i)
@@ -208,6 +238,13 @@ function visualise(arr,systemtime){
 
 		system.plots.population.x.push(t)
 	    system.plots.population.y.push(system.log[i].Park.onSlot)
+
+	    //add solar prediction...
+	    period = Math.floor(i/30)
+ 		period =  period > 47 ? 0: period
+ 		system.plots.solar.x.push(t)
+ 		system.plots.solar.y.push(system.tempsolar.data[period])
+
 	}
 	//system.plots.capacityCurrent.x.push(dt)
 	//system.plots.capacityCurrent.y.push(arr.Cap.currentCap)
@@ -235,6 +272,7 @@ function replot(){
 		Plotly.redraw('plot_capacity');
 		Plotly.redraw('plot_energy_flow');
 		Plotly.redraw('plot_population');
+		Plotly.redraw('plot_solar');
 }
 function plot(){
 		var layout = {
@@ -250,38 +288,7 @@ function plot(){
 	Plotly.newPlot('plot_capacity', [system.plots.capacityCurrent,system.plots.capacityMax],layout);
 	Plotly.newPlot('plot_energy_flow', [system.plots.energyFlow],layout);
 	Plotly.newPlot('plot_population', [system.plots.population],layout);
+	Plotly.newPlot('plot_solar', [system.plots.solar],layout);
 }
-
-
-//common
-function GUID () { // Public Domain/MIT
-    var d = new Date().getTime();
-    if (typeof performance !== 'undefined' && typeof performance.now === 'function'){
-        d += performance.now(); //use high-precision timer if available
-    }
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        var r = (d + Math.random() * 16) % 16 | 0;
-        d = Math.floor(d / 16);
-        return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-    });
-}
-
-function getTimefromSystem(sTime){
-	hour = Math.floor(sTime/60)
-	minutes = sTime % 60
-
-	system.simDateTime = new Date(2017,4,1,hour,minutes,0)
-	return system.simDateTime
-}
-
-function Right(str, n){
-    if (n <= 0)
-       return "";
-    else if (n > String(str).length)
-       return str;
-    else {
-       var iLen = String(str).length;
-       return String(str).substring(iLen, iLen - n);
-    }
-}
+//GUI
 

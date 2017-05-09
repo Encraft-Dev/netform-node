@@ -31,59 +31,84 @@
 								<button class="btn btn-default" id="start">Run Simulation</button>
 							</div>
 						</div>
-						<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
+						<div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
 							<div class="form-group">
-								<input  type="checkbox" id="Discharge" name="discharge" checked/>
-								<label for="discharge">Discharge Events</label><br/>
-								<input   type="checkbox" id="Slow_Charge" name="slow_charge" checked/>
-								<label for="slow_charge">Constant Slow Charge</label>
-								
-								
-							</div>
-						</div>
-					</div><!-- row -->
-					<div class="row">
-						<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
-							<div class="form-group">
-								<label for="time">Time</label>
-								<input class="form-control" type="number" id="time" name="time" value="1440"/>
-							</div>
-						</div>
-						<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
-							<div class="form-group">
-								<label for="slots">Slots</label>
-								<input class="form-control" type="number" id="slots" name="slots" value="25"/>
-							</div>	
-						</div>
-						<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
-							<div class="form-group"><label for="seed">Seed</label>
-								<input class="form-control" type="number" id="seed" name="seed" value="1234"/>
-							</div>	
-						</div>
-						<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
-							<div class="form-group">
-								<label for="export_cap">Export Cap</label>
-								<input  class="form-control" type="number" id="exportCap" name="export_cap" value="40"/>
-							</div>
-						</div>
-						<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
-							<div class="form-group">
-								<label for="import_cap">Import Cap</label>
-								<input  class="form-control" type="number" id="importCap" name="import_cap" value="40"/>
+								<p class="controls">View simulation (controls below when ready)</p>
 							</div>
 						</div>
 						
+					</div><!-- row -->
+					<div class="row">
+						<!-- Nav tabs -->
+						 <ul class="nav nav-tabs" role="tablist">
+						    <li role="presentation" class="active"><a href="#sim_settings" aria-controls="sim_settings" role="tab" data-toggle="tab">Settings</a></li>
+						    <li role="presentation"><a href="#sim_constraints" aria-controls="sim_constraints" role="tab" data-toggle="tab">Constraints</a></li>
+						    <li role="presentation"><a href="#sim_additional" aria-controls="sim_additional" role="tab" data-toggle="tab">Other Tech</a></li>
+						 </ul>
+						 <div class="tab-content">
+							<div role="tabpanel" class="tab-pane active" id="sim_settings">
+								<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
+									<div class="form-group">
+										<input  type="checkbox" id="Discharge" name="discharge" checked/>
+										<label for="discharge">Discharge Events</label><br/>
+										<input   type="checkbox" id="Slow_Charge" name="slow_charge" checked/>
+										<label for="slow_charge">Constant Slow Charge</label>
+									</div>
+								</div>
+								 <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
+									<div class="form-group">
+										<label for="time">Length of Simulation (minutes)</label>
+										<input class="form-control" type="number" id="time" name="time" value="1440"/>
+									</div>
+								</div>
+								<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2" >
+									<div class="form-group">
+										<label for="slots">Available Charging Slots</label>
+										<input class="form-control" type="number" id="slots" name="slots" value="25"/>
+									</div>	
+								</div>
+								<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
+									<div class="form-group"><label for="seed">Simulation Seed</label>
+										<input class="form-control" type="number" id="seed" name="seed" value="1234"/>
+									</div>	
+								</div>
+								
+							</div><!-- tabpanel -->
+							<div role="tabpanel" class="tab-pane" id="sim_constraints">	
+								<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
+									<div class="form-group">
+										<label for="export_cap">Export Cap</label>
+										<input class="form-control" type="number" id="exportCap" name="export_cap"/>
+									</div>
+								</div>
+								<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
+									<div class="form-group">
+										<label for="import_cap">Import Cap</label>
+										<input class="form-control" type="number" id="importCap" name="import_cap"/>
+									</div>
+								</div>
+							</div><!-- tab panel -->
+							<div role="tabpanel"  class="tab-pane" id="sim_additional">	
+								<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
+									<div class="form-group">
+										<label for="solar_cap">Solar Peak Capacity kW</label>
+										<input class="form-control" type="number" id="solarCap" name="solar_cap" />
+										<input hidden id="solarOut" type="number"/>
+									</div>
+								</div>
+
+							</div><!-- tab panel -->
+						</div><!-- tab content -->
 					</div><!-- row -->
 				</div><!-- form -->
 
 				
 			</div>
-			<p class="controls">View simulation (controls below when ready)</p>
+			
 		</div>
 
 
 	</div>
-
 
 
 
@@ -105,15 +130,25 @@
 			</div>
 		</div>
 	</div>
-</div>
-
-<div class="panel panel-info">
-	<div class="panel-heading">Energy flow (kW)</div>
-	<div class="panel-body">
-		<div id="plot_energy_flow"></div>
+</div><!-- row -->
+<div class="row">
+	<div class="col-md-6">
+		<div class="panel panel-info">
+			<div class="panel-heading">Energy flow (kW)</div>
+			<div class="panel-body">
+				<div id="plot_energy_flow"></div>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-6">
+		<div class="panel panel-info">
+			<div class="panel-heading">Solar Generation (kW)</div>
+			<div class="panel-body">
+				<div id="plot_solar"></div>
+			</div>
+		</div>
 	</div>
 </div>
-
 <div class="row">
 <div class="col-md-12">
 	<div class="panel panel-info">
@@ -177,14 +212,15 @@
 			</div>
 		</div>
 
-
-
-<script src="assets/js/plotly-latest.min.js"></script>
+<script type="text/javascript" src="assets/js/plotly-latest.min.js"></script>
+<script type="text/javascript" src="assets/js/date.js"></script>
 <script type="text/javascript" src='assets/js/jquery-3.2.0.min.js'></script>
+<script type="text/javascript" src='assets/bootstrap/js/bootstrap.min.js'></script>
 <script type="text/javascript" src='assets/js/sim-0.26.js'></script>
-<script type="text/javascript"  src='modules/data.js'></script>	
-<script type="text/javascript"  src='modules/system.js'></script>	
-<script type="text/javascript"  src='modules/simulation.js'></script>	
+<script type="text/javascript"  src='modules/data.js'></script>
+<script type="text/javascript"  src='modules/system.js'></script>
+<script type="text/javascript"  src='modules/simulation.js'></script>
+<script type="text/javascript"  src='modules/common.js'></script>
 
 <script>
 $("#start").click(function(){startsim($("#time").val(),$("#slots").val(),$("#seed").val())})
@@ -199,6 +235,10 @@ $("#Discharge").change(function(){systemControl("discharge",$("#Discharge").prop
 $("#Slow_Charge").change(function(){systemControl("slow_charge",$("#Slow_Charge").prop("checked"))})
 $("#exportCap").change(function(){systemControl("export_cap",$("#exportCap").val())})
 $("#importCap").change(function(){systemControl("import_cap",$("#importCap").val())})
+$("#solarCap").change(function(){
+		systemControl("solar_cap",$("#solarCap").val());
+		solarMCSAPI($("#solarCap").val(),"solarOut")
+	});
 $("#importCap").val(system.control.import_cap)
 $("#exportCap").val(system.control.export_cap)
 $("#jumpto").change(function(){jumptotime($("#jumpto").val())})
