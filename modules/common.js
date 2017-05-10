@@ -30,3 +30,23 @@ function Right(str, n){
        return String(str).substring(iLen, iLen - n);
     }
 }
+
+
+function readSingleFile(e) {
+  var file = e.target.files[0];
+  if (!file) {
+    return;
+  }
+
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var contents = e.target.result;
+    processContents(contents);
+  };
+  reader.readAsText(file);
+}
+
+function processContents(contents) {
+  console.log(contents)
+}
+

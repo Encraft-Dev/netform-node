@@ -292,3 +292,16 @@ function plot(){
 }
 //GUI
 
+function saveSettingsfile(){
+	//for each input in simulation div...
+	out={}
+	$("#simulation input").each(function(d){
+		out[this.id]=this.value
+	})
+	 var data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(out))
+	 var dl = document.createElement('a');
+  	dl.setAttribute('href', data);
+ 	dl.setAttribute('download',"this.json");
+  	dl.click();
+}
+
