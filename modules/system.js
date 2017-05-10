@@ -46,8 +46,8 @@ var system = {
 			slow_charge:true,
 			import_cap:20,
 			export_cap:50,
-			solar_cap:0,
-			solar_output:0
+			solar_cap:200,
+			solar_output:175800
 		},
 	tempsolar:{},
 	events:[],
@@ -151,12 +151,14 @@ function visualise(arr,systemtime){
 
 			
 			battmaxcap = dArr[i].message.model.MaxCapacity
+			Qicon = dArr[i].message.netform>=1?"glyphicon-tasks":"";
 		//console.log(arr)
 		//
 		o=""
 		o+="<tr>"
 		o+="<td>" + dArr[i].s +  "</td>"
 		o+="<td>" + dArr[i].message.model.Name + "</td>"
+		o+="<td><span class='glyphicon "+ Qicon+"'></span></td>"
 		o+="<td>" + state  +  "</td>"
 		o+="<td style='width:60%'>"
 		o+="<div class='status_vis' style='width:"+battmaxcap+"%'>"
@@ -234,16 +236,15 @@ function visualise(arr,systemtime){
 		}
 
 		system.plots.energyFlow.x.push(t)
-		system.plots.energyFlow.y.push(lie)
+		system.plots.energyFlow.y.push(lie-system.log[i].Park.GenSolar)
 
 		system.plots.population.x.push(t)
 	    system.plots.population.y.push(system.log[i].Park.onSlot)
 
 	    //add solar prediction...
-	    period = Math.floor(i/30)
- 		period =  period > 47 ? 0: period
+
  		system.plots.solar.x.push(t)
- 		system.plots.solar.y.push(system.tempsolar.data[period])
+ 		system.plots.solar.y.push(system.log[i].Park.GenSolar)
 
 	}
 	//system.plots.capacityCurrent.x.push(dt)
@@ -298,10 +299,16 @@ function saveSettingsfile(){
 	$("#simulation input").each(function(d){
 		out[this.id]=this.value
 	})
-	 var data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(out))
+	 var data = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(out))
 	 var dl = document.createElement('a');
   	dl.setAttribute('href', data);
- 	dl.setAttribute('download',"this.json");
+ 	dl.setAttribute('download',$("#seed").val()+".nfm");
   	dl.click();
 }
 
+function setSettings(setting){
+	for (var s in setting){
+		$("#"+s).val(setting[s])
+	
+	}
+}

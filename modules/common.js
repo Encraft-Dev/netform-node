@@ -47,6 +47,10 @@ function readSingleFile(e) {
 }
 
 function processContents(contents) {
-  console.log(contents)
+  var settings = JSON.parse(contents)
+  //set all fields in simulation
+  setSettings(settings)
+
+
 }
 

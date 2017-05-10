@@ -48,15 +48,13 @@
 						    <li role="presentation" class="active"><a href="#sim_settings" aria-controls="sim_settings" role="tab" data-toggle="tab">Settings</a></li>
 						    <li role="presentation"><a href="#sim_constraints" aria-controls="sim_constraints" role="tab" data-toggle="tab">Constraints</a></li>
 						    <li role="presentation"><a href="#sim_events" aria-controls="sim_events" role="tab" data-toggle="tab">Events</a></li>
+						     <li role="presentation"><a href="#sim_vehicle" aria-controls="sim_vehicle" role="tab" data-toggle="tab">Vehicles</a></li>
 						    <li role="presentation"><a href="#sim_additional" aria-controls="sim_additional" role="tab" data-toggle="tab">Other Tech</a></li>
 						 </ul>
 						 <div class="tab-content container-fluid">
 							<div role="tabpanel" class="tab-pane active" id="sim_settings">
 								<div class="row">
-									<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 form-group">
-											<input   type="checkbox" id="Slow_Charge" name="slow_charge" checked/>
-											<label for="slow_charge">Constant Slow Charge</label>
-									</div>
+									
 									 <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 form-group">
 											<input class="form-control" type="number" id="time" name="time" value="1440"/>
 											<label for="time">Length of Simulation (minutes)</label>
@@ -69,52 +67,57 @@
 											<input class="form-control" type="number" id="seed" name="seed" value="1234"/>
 											<label for="seed">Simulation Seed</label>
 									</div>
+									<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 form-group">
+										<button type="button" id="fileSave" class="btn btn-default">
+											<span class="glyphicon glyphicon-save"></span>
+										</button>
+										<label class="btn btn-default btn-file">
+												<span class="glyphicon glyphicon-open"></span>
+												<input class="form-control" type="file" id="file-input" style="display: none;" />
+										</label>
+									</div>
 								</div><!-- row -->
 								<div class="row">
-									<h4 class="col-xs-2 col-sm-2 col-md-2 col-lg-2">Save /Load simulation</h4>
-								</div>
+									
+								</div><!-- row -->
 								<div class="row">
-									<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 form-group">
-										<button type="button" id="fileSave" class="btn btn-default">Save Settings</button>
-									</div>
-									<div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 form-group">
-										<input class="form-control" type="file" id="file-input" />
-									</div>
+									
+									
 								</div><!-- row -->
 
 							</div><!-- tabpanel -->
 							<div role="tabpanel" class="tab-pane" id="sim_constraints">	
 								<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
 									<div class="form-group">
-										<label for="export_cap">Export Cap</label>
 										<input class="form-control" type="number" id="exportCap" name="export_cap"/>
+										<label for="export_cap">Export Cap</label>
 									</div>
 								</div>
 								<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
 									<div class="form-group">
-										<label for="import_cap">Import Cap</label>
 										<input class="form-control" type="number" id="importCap" name="import_cap"/>
+										<label for="import_cap">Import Cap</label>
 									</div>
 								</div>
 							</div><!-- tab panel -->
 							<div role="tabpanel"  class="tab-pane" id="sim_events">	
-								<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
-									<div class="form-group">
+								<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 form-group">
 									<input  type="checkbox" id="Discharge" name="discharge" checked/>
 										<label for="discharge">Discharge Events</label>
-									</div>
 								</div>
-
+							</div><!-- tab panel -->
+							<div role="tabpanel"  class="tab-pane" id="sim_vehicle">	
+									<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 form-group">
+											<input   type="checkbox" id="Slow_Charge" name="slow_charge" checked/>
+											<label for="slow_charge">Constant Slow Charge</label>
+									</div>
 							</div><!-- tab panel -->
 							<div role="tabpanel"  class="tab-pane" id="sim_additional">	
-								<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
-									<div class="form-group">
+								<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 form-group">
+										<input class="form-control" type="number" id="solarCap" name="solar_cap" value="200" />
 										<label for="solar_cap">Solar Peak Capacity kW</label>
-										<input class="form-control" type="number" id="solarCap" name="solar_cap" />
-										<input hidden id="solarOut" type="number"/>
-									</div>
+										<input hidden id="solarOut" type="number" value="175800"/>
 								</div>
-
 							</div><!-- tab panel -->
 						</div><!-- tab content -->
 					</div><!-- row -->

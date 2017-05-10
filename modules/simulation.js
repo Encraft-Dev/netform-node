@@ -49,7 +49,7 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 			pe=t-this.stats.population;
 			// s=sim.entities
 
-			return {SlotsFree:f,onSlot:ps,Queue:pq,Exited:pe,Total:t}
+			return {SlotsFree:f,onSlot:ps,Queue:pq,Exited:pe,Total:t,GenSolar:this.solarGeneration.tickOutput("May",sim.time())}
 	}
 	Park.total= 0;
 	Park.inQueue = function(id){
@@ -65,6 +65,7 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 		profile:{},
 		init:function(){
 			//get profile and adjust for system size.
+			//turn daily into actual..
 			for(i=0;i<profile_solar.length;i++){
 				monthly = profile_solar[i].Monthly*system.control.solar_output
 				data=[];
@@ -76,6 +77,19 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 				this.profile[profile_solar[i].Month]={"monthly":monthly,"data":data}
 			}
 		},
+		periodOutput:function(month,period){
+			//console.log(this.profile[month],this.profile[month].data[10])
+			return this.profile[month].data[period]/Date.getDaysInMonth(2017, Date.getMonthNumberFromName(month))
+		},
+		tickOutput:function(month,tick){
+			//interpolate solar output to each minute (tick)
+			period = Math.floor(tick/30)
+ 			period =  period > 47 ? 0: period
+ 			genSolar =  Park.solarGeneration.periodOutput(month,period)
+
+
+			return this.profile[month].data[period]/Date.getDaysInMonth(2017, Date.getMonthNumberFromName(month))
+		}
 	}
 	Park.batteryStorage = {}
 
@@ -163,6 +177,7 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 								case 2:
 									rate=netformModulation*this.model.C_Rate2;
 									chargeStart++;
+									chargeStart=chargeStart<0?1:chargeStart;
 									if(chargeStart<this.model.C_RUT){
 										rate=rate*chargeStart/this.model.C_RUT
 									//	if(this.id==2){console.log(rate)}
@@ -171,13 +186,20 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 								case 1: //charge
 									rate=netformModulation*this.model.C_Rate1;
 									chargeStart++;
+									chargeStart=chargeStart<0?1:chargeStart;
 									if(chargeStart<this.model.C_RUT){
 										rate=rate*chargeStart/this.model.C_RUT
 									}
 								break;
 								case -1: //discharge at default
 									rate=(netformModulation*-1*this.model.D_Rate);
-									chargeStart=0
+									chargeStart--;
+									chargeStart=chargeStart>0?-1:chargeStart;
+									
+
+										if(chargeStart>-this.model.C_RUT){
+										rate=rate*-1*chargeStart/this.model.C_RUT
+									}
 								break;
 								case 0: //hold
 									rate=0;
@@ -277,7 +299,7 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 					
 				
 			}
-				//(this.id==7&&sim.time()>500&&sim.time()<510)?console.log(sim.time(),JSON.parse(JSON.stringify(tList))):false
+			//(this.id==6&&sim.time()>475&&sim.time()<490)?console.log(sim.time(),cStatus,this.statusCode):false
 			//check against capacity (import)
 			//if(this.Constraints[0])
 			//
@@ -294,7 +316,9 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 			//1.discharge of xxx for x mins
 			//2.charge of xxx for x mins
 
-
+			period = Math.floor(sim.time()/30)
+ 			period =  period > 47 ? 0: period
+ 			genSolar =  Park.solarGeneration.periodOutput("May",period)
 
 			importcap=this.Constraints.importCap;
 			exportcap=-this.Constraints.exportCap;
@@ -306,24 +330,27 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 			NFStatus=this.netformStatus
 			nonNFStatus=this.netformStatus
 
+			//genSolar=0
+			//adjust capacity limits for solar generation
+			importcap=importcap+genSolar
+			exportcap=exportcap-genSolar
 
 			if(this.Constraints && aRate>=importcap){
 				//scenario 2: NF is good, other modulate,,
 				nonNFModRate = (importcap-nfRate)/rate;  // first modulate non nf leaving nf
-				NFmodRate=1;	
-			//	(this.id==6&&sim.time()>500&&sim.time()<550)?console.log(sim.time(),JSON.parse(JSON.stringify(nfList)),rate,aRate,nfRate,nonNFModRate,NFmodRate,this.netFF,this.netFFPredicted):false
+				NFmodRate=1;
 				//scenario 3: NF is over > stop other, modulate NF
 				if (nfRate>importcap){
 						nonNFModRate=0;
 						nonNFStatus=0;
-						NFmodRate=importcap/nfRate
+						NFmodRate=(importcap)/nfRate
 						//console.log(sim.time(),NFmodRate)
 					}
 			}
 
 			if(this.Constraints && aRate<=exportcap ){
 				//scenario 4: discharge cap	
-				nonNFModRate = exportcap/aRate;  // first modulate non nf leaving nf				
+				nonNFModRate = (exportcap)/aRate;  // first modulate non nf leaving nf				
 			}
 
 
@@ -495,6 +522,9 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
  							this.setTimer(1).done(function(){this.sendTick()})
  						},
  		askStatus:function(){
+				 			period = Math.floor(sim.time()/30)
+				 			period =  period > 47 ? 0: period
+				 			genSolar =  Park.solarGeneration.periodOutput("May",period)
  							system.log.push({Veh:this.vehStatus,Cap:Park.caps(),Park:Park.status()})
  			               	this.vehStatus=[];
 
@@ -587,8 +617,8 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 	sim.addEntity(Controller)
 	sim.addEntity(Vehicle);
 	sim.simulate(SIMTIME);
-	system.tempsolar=Park.solarGeneration.profile.May
-	console.log(Park.solarGeneration.profile.May)
+	//system.tempsolar=Park.solarGeneration.profile.May
+	//console.log(Park.solarGeneration.periodOutput("May",10))
 	console.log("Simulation End")
 	//console.log(sim)
 	system.simtime=SIMTIME
