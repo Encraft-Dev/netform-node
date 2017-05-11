@@ -7,6 +7,10 @@ var uArr     = [{type:"commute1",duration:240,cap_pref:0.8,cap_min:0.6},
 		    	{type:"commute2",duration:480,cap_pref:0.8,cap_min:0.6},
 				{type:"24hrs",duration:1440,cap_pref:0.8,cap_min:0.6}]
 
+
+
+
+
 var cModes =   [{ID:"mode_1_1p",Mode:1,Phase:1,A:16,V:250,Type:"AC",Smart:0,kW:3.84},
 				{ID:"mode_1_3p",Mode:1,Phase:3,A:16,V:480,Type:"AC",Smart:0,kW:11.52},
 				{ID:"mode_2_1p",Mode:2,Phase:1,A:32,V:250,Type:"AC",Smart:0,kW:7.68},

@@ -53,8 +53,8 @@ var system = {
 	events:[],
 	paused:true,
 	simStartDate: new Date(2017,4,1,0,0,0),
+	simDateTime: new Date(2017,4,1,0,0,0),
 	simtime:0,
-	simDateTime:0,
 	time:-1,
 	log:[],
 	plots:{
@@ -98,11 +98,13 @@ function playbackSpeed(v){
 }
 
 function runsystem(stime){
-	//console.log("runsystem:",stime)
-	$("#systemtime").html(system.time + " | " + getTimefromSystem(system.time));
+	
+	system.simDateTime = new Date(system.simStartDate.getTime())
+	system.simDateTime.addMinutes(system.time)
+	$("#systemtime").html(system.time + " | " + system.simDateTime); //getTimefromSystem(system.time));
 	$("#jumpto").val(system.time);
 	document.title = 'Netform' + "  |" + system.time + "/" + system.simtime ;
-	visualise(system.log[stime],stime)
+	visualise(system.log[system.time],system.time)
 	//console.log(system.log[stime])
 	if(!system.paused){if(stime<system.simtime){
 						setTimeout(function(){ 
@@ -127,6 +129,11 @@ function showVehicleList(list){
 }
 
 function visualise(arr,systemtime){
+
+	system.simDateTime = new Date(system.simStartDate.getTime())
+	system.simDateTime.addMinutes(system.time)
+	$("#systemtime").html(system.time + " | " + system.simDateTime); //getTimefromSystem(system.time));
+
 	out="";
 	on="";
 	qu="";
@@ -186,7 +193,7 @@ function visualise(arr,systemtime){
 			if(state=="In Queue"){qu+=o;n+=1}	
 			if(state=="Exited"){ex+=o}
 			
-			ie+=1*dArr[i].message.rate
+			//ie+=1*dArr[i].message.rate
 
 			//add rate * chargestatus to bin for import export
 
@@ -206,7 +213,7 @@ function visualise(arr,systemtime){
 	
 	//current
 	//
-	dt = getTimefromSystem(system.time)
+	//dt = system.simDateTime   // getTimefromSystem(system.time)
 	//set graphs to contain all data to time..
 	system.plots.capacityCurrent.x=[]
 	system.plots.capacityCurrent.y=[]
@@ -219,8 +226,9 @@ function visualise(arr,systemtime){
 	system.plots.solar.x=[]
 	system.plots.solar.y=[]
 
-	for (i=0;i<system.time;i++){
-		t=getTimefromSystem(i)
+	for (i=1;i<=systemtime;i++){
+		dt=new Date(system.simStartDate.getTime())
+		t= dt.addMinutes(i)  //getTimefromSystem(i)
 		system.plots.capacityCurrent.x.push(t)
 		system.plots.capacityCurrent.y.push(system.log[i].Cap.currentCap)
 
@@ -230,13 +238,17 @@ function visualise(arr,systemtime){
 
 		//loop thorugh all vehicles and check rates 
 		lie=0//loop ie
-		for(j=0;j<system.log[i].Veh.length;j++){
-			lie = system.log[i].Veh[j].message.statusCode==1?lie+=1*system.log[i].Veh[j].message.rate:lie;
+		//system.time==806?console.log(system.log[i].Veh):false
+		for(v=0;v<system.log[i].Veh.length;v++){
+
+				//system.time==806?console.log(systemtime,i,v,system.log[i].Veh[v].message.statusCode,system.log[i].Veh[v].s,system.log[i].Veh[v].message.rate,system.log[i].Veh[v].message.statusCode):false
+			lie += system.log[i].Veh[v].message.statusCode==1?(1*system.log[i].Veh[v].message.rate):0;
 		
 		}
+        //system.time==806?console.log(lie):false
 
 		system.plots.energyFlow.x.push(t)
-		system.plots.energyFlow.y.push(lie-system.log[i].Park.GenSolar)
+		system.plots.energyFlow.y.push(lie)//-system.log[i].Park.GenSolar)
 
 		system.plots.population.x.push(t)
 	    system.plots.population.y.push(system.log[i].Park.onSlot)
