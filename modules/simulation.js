@@ -94,22 +94,47 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 	Park.batteryStorage = {}
 
 	Park.solarGeneration.init()
-	//var SlotStore = new Sim.Store("slots",SLOTS) // this manages cars and slots by id.
-	//var exitVehiclesStore = new Sim.Store("exited vehicles",100)
-
-	//var dischargeEvent = new Sim.Event("discharging")
-	//var Capacity = new Sim.Buffer("total capacity",10000)
 	
-	//var vehicleGo = new Sim.Event("Vehicle Go")
-	//var facililyFree = new Sim.Event("Slot available")
-	//var energy =[new Sim.event("charging"),new Sim.event("discharging")]
-
 	//create slot array. this allows specific slots to have specific chargers...
 	var Slot= {
 		type:"Standard",
 		modes:[3,7,22]
 	}
 
+	var generation={//todo - currently not used,,, needs to include multiple solar arrays/generation
+		profile:{},
+		start:function(){
+			//get profile and adjust for system size.
+			//turn daily into actual..
+			//get solar profile data
+			
+			for(i=0;i<profile_solar.length;i++){
+				monthly = profile_solar[i].Monthly*system.control.solar_output
+				data=[];
+				for (j=0;j<24;j++){
+					data.push(profile_solar[i][j]*monthly)
+					data.push(profile_solar[i][j]*monthly)//do again for 23 period data
+				}
+
+				this.profile[profile_solar[i].Month]={"monthly":monthly,"data":data}
+			}
+		},
+		periodOutput:function(month,period){
+			//console.log(this.profile[month],this.profile[month].data[10])
+			return this.profile[month].data[period]/Date.getDaysInMonth(2017, Date.getMonthNumberFromName(month))
+		},
+		tickOutput:function(month,tick){
+			//interpolate solar output to each minute (tick)
+			period = Math.floor(tick/30)
+ 			period =  period > 47 ? 0: period
+ 			genSolar =  Park.solarGeneration.periodOutput(month,period)
+
+
+			return this.profile[month].data[period]/Date.getDaysInMonth(2017, Date.getMonthNumberFromName(month))
+		}
+	}
+
+	var storage={}
 
 	var Vehicle = {
 		statustext:"Awaiting charge point",
@@ -136,7 +161,7 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 		departureTime:0,
 		facilitySlot:0,
 		command:0, //default is charge //will need to object at some point to enable fast,slow chage and discharge/ currently is  
-		charge:function(live){//live uses NF modulator, and updates this..  --- not live updates predition object..
+		charge:function(live){//live uses NF modulator, and updates this..  --- not live updates prediction object..
 			//if(this.id==2){console.log(live,sim.time(),this.current,this.prediction)}
 			switch(this.statusCode){
 
@@ -178,24 +203,26 @@ function netformSimulation(SIMTIME,SEED,SLOTS){
 									rate=netformModulation*this.model.C_Rate2;
 									chargeStart++;
 									chargeStart=chargeStart<0?1:chargeStart;
-									if(chargeStart<this.model.C_RUT){
-										rate=rate*chargeStart/this.model.C_RUT
-									//	if(this.id==2){console.log(rate)}
-									}
+									rate=chargeStart<this.model.C_RUT?(rate*chargeStart/this.model.C_RUT):rate;
+									// if(chargeStart<this.model.C_RUT){
+									// 	rate=rate*chargeStart/this.model.C_RUT
+									// //	if(this.id==2){console.log(rate)}
+									// }
 								break;
 								case 1: //charge
 									rate=netformModulation*this.model.C_Rate1;
 									chargeStart++;
 									chargeStart=chargeStart<0?1:chargeStart;
-									if(chargeStart<this.model.C_RUT){
-										rate=rate*chargeStart/this.model.C_RUT
-									}
+									rate=chargeStart<this.model.C_RUT?(rate*chargeStart/this.model.C_RUT):rate;
+									// if(chargeStart<this.model.C_RUT){
+									// 	rate=rate*chargeStart/this.model.C_RUT
+									// }
 								break;
 								case -1: //discharge at default
 									rate=(netformModulation*-1*this.model.D_Rate);
 									chargeStart--;
 									chargeStart=chargeStart>0?-1:chargeStart;
-									
+									rate=chargeStart<this.model.C_RUT?(rate*chargeStart/this.model.C_RUT):rate;
 
 										if(chargeStart>-this.model.C_RUT){
 										rate=rate*-1*chargeStart/this.model.C_RUT
