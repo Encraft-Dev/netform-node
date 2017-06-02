@@ -1,8 +1,0 @@
-#main {border:1px solid #eee;margin:20px;}
-.slot_id {width:30px; display:inline-block;}
-.details {display:inline;height:20px;}
-.status {display:inline-block; width:10px;height:10px; border:1px solid #ccc;}
-.Charging {background-color: red}
-.Parked {}
-.Available {background-color: green}
-.slot{height:20px;}

@@ -1,0 +1,273 @@
+<html>
+<head>
+<title>Netform</title>
+<!-- <link href="assets/bootstrap/css/bootstrap.min.css" rel="stylesheet"/> -->
+<link href="style/bootstrap_themes/yeti.css" rel="stylesheet"/>
+
+<style>
+	body{margin-bottom: 100px}
+	.veh{}
+	.veh_id{display:inline-block;padding-left:10px;width:20px;}
+	.veh_status{display:inline-block;padding-left:10px;width:200px;}
+	.veh_state{display:inline;padding-left:10px;}
+	#controlpanel{display:none;bottom:0;left:0;padding:5px;position:fixed;width:100%;border:1px solid #ccc;background:white;z-index:1000;}
+	.controls{display:none;}
+	.status_vis{display:inline-block;border:1px solid #ccc;}
+	.veh_maxcap{display:inline-block;width:400px;}
+	.veh_state_vis{display:block;height:9px;}
+
+
+	/*yeti override...*/
+	.tab-pane{padding-top:40px;}
+</style>
+</head>
+<body >
+<div class="container-fluid">
+	<h1>Netform Simulation</h1>
+	<div class="panel panel-success">
+		<div class="panel-heading">Simulation Control</div>
+		<div class="panel-body">
+			<div id="simulation">
+				<div class="form">
+					<div class="row">
+						<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
+							<div class="form-group">
+								<button class="btn btn-default" id="start">Run Simulation</button>
+							</div>
+						</div>
+						<div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+							<div class="form-group">
+								<p class="controls">View simulation (controls below when ready)</p>
+							</div>
+						</div>
+						
+					</div><!-- row -->
+					<div class="row">
+						<!-- Nav tabs -->
+						 <ul class="nav nav-tabs" role="tablist">
+						    <li role="presentation" class="active"><a href="#sim_settings" aria-controls="sim_settings" role="tab" data-toggle="tab">Settings</a></li>
+						    <li role="presentation"><a href="#sim_constraints" aria-controls="sim_constraints" role="tab" data-toggle="tab">Constraints</a></li>
+						    <li role="presentation"><a href="#sim_events" aria-controls="sim_events" role="tab" data-toggle="tab">Events</a></li>
+						     <li role="presentation"><a href="#sim_vehicle" aria-controls="sim_vehicle" role="tab" data-toggle="tab">Vehicles</a></li>
+						    <li role="presentation"><a href="#sim_additional" aria-controls="sim_additional" role="tab" data-toggle="tab">Other Tech</a></li>
+						 </ul>
+						 <div class="tab-content container-fluid">
+							<div role="tabpanel" class="tab-pane active" id="sim_settings">
+								<div class="row">
+									
+									 <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 form-group">
+											<input class="form-control" type="number" id="time" name="time" value="1440"/>
+											<label for="time">Length of Simulation (minutes)</label>
+									</div>
+									<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 form-group" >
+											<input class="form-control" type="number" id="slots" name="slots" value="25"/>
+											<label for="slots">Available Charging Slots</label>
+									</div>
+									<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 form-group">
+											<input class="form-control" type="number" id="seed" name="seed" value="1234"/>
+											<label for="seed">Simulation Seed</label>
+									</div>
+									<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 form-group">
+										<button type="button" id="fileSave" class="btn btn-default">
+											<span class="glyphicon glyphicon-save"></span>
+										</button>
+										<label class="btn btn-default btn-file">
+												<span class="glyphicon glyphicon-open"></span>
+												<input class="form-control" type="file" id="file-input" style="display: none;" />
+										</label>
+									</div>
+								</div><!-- row -->
+								<div class="row">
+									
+								</div><!-- row -->
+								<div class="row">
+									
+									
+								</div><!-- row -->
+
+							</div><!-- tabpanel -->
+							<div role="tabpanel" class="tab-pane" id="sim_constraints">	
+								<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
+									<div class="form-group">
+										<input class="form-control" type="number" id="exportCap" name="export_cap"/>
+										<label for="export_cap">Export Cap</label>
+									</div>
+								</div>
+								<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
+									<div class="form-group">
+										<input class="form-control" type="number" id="importCap" name="import_cap"/>
+										<label for="import_cap">Import Cap</label>
+									</div>
+								</div>
+							</div><!-- tab panel -->
+							<div role="tabpanel"  class="tab-pane" id="sim_events">	
+								<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 form-group">
+									<input  type="checkbox" id="Discharge" name="discharge" checked/>
+										<label for="discharge">Discharge Events</label>
+								</div>
+							</div><!-- tab panel -->
+							<div role="tabpanel"  class="tab-pane" id="sim_vehicle">	
+									<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 form-group">
+											<input   type="checkbox" id="Slow_Charge" name="slow_charge" checked/>
+											<label for="slow_charge">Constant Slow Charge</label>
+									</div>
+							</div><!-- tab panel -->
+							<div role="tabpanel"  class="tab-pane" id="sim_additional">	
+								<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 form-group">
+										<input class="form-control" type="number" id="solarCap" name="solar_cap" value="200" />
+										<label for="solar_cap">Solar Peak Capacity kW</label>
+										<input hidden id="solarOut" type="number" value="175800"/>
+								</div>
+							</div><!-- tab panel -->
+						</div><!-- tab content -->
+					</div><!-- row -->
+				</div><!-- form -->
+
+				
+			</div>
+			
+		</div>
+
+
+	</div>
+
+
+
+<div class="row">
+	<div class="col-md-6">
+		<div class="panel panel-info">
+			<div class="panel-heading">Population</div>
+			<div class="panel-body">
+				<div id="plot_population"></div>
+			</div>
+		</div>
+	</div>
+
+	<div class="col-md-6">
+		<div class="panel panel-info">
+			<div class="panel-heading">Available Capacity (kWh)</div>
+			<div class="panel-body">
+				<div id="plot_capacity""></div>
+			</div>
+		</div>
+	</div>
+</div><!-- row -->
+<div class="row">
+	<div class="col-md-6">
+		<div class="panel panel-info">
+			<div class="panel-heading">Energy flow (kW)</div>
+			<div class="panel-body">
+				<div id="plot_energy_flow"></div>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-6">
+		<div class="panel panel-info">
+			<div class="panel-heading">Solar Generation (kW)</div>
+			<div class="panel-body">
+				<div id="plot_solar"></div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="row">
+<div class="col-md-12">
+	<div class="panel panel-info">
+		<div class="panel-heading">Vehicles</div>
+		<div class="panel-body">
+			<div class="panel">
+				<div class="panel-body">
+					<h4>On Charger</h4>
+					<table id="list" class="table table-condensed"></table>
+				</div>
+			</div>
+			<div class="panel">
+				<div class="panel-body">
+					<h4>Queueing</h4>
+					<table id="queue" class="table table-condensed"></table>
+				</div>
+			</div>
+			<div class="panel">
+				<div class="panel-body">
+					<h4>Departed</h4>
+					<table id="exit" class="table table-condensed"></table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>	
+
+</div>
+</div><!-- end container -->
+
+
+<!-- Floating Controls -->
+		<div class="panel-info" id= "controlpanel">
+			<div class="panel-heading" id="systemtime">Visualisation Controls</div>
+			<div class="panel-body">
+				<div class="form-inline">
+					<div class="form-group">
+						<button class="btn btn-default" id="control">Run  </button>
+					</div>
+					<div class="input-group">
+						<input type="number"  hidden name="timestep" id="timestep" value="100" width="20px"/>
+						<div class="btn-group">
+							<button type="button" class="btn btn-default" id="faster"><span class="glyphicon glyphicon-plus"></span></button>
+							<button type="button" class="btn btn-default" id="slower"><span class="glyphicon glyphicon-minus"></span></button>
+						</div>
+					</div>
+					<div class="btn-group">
+						<button type="button" class="btn btn-default" id="step_bk"><span class="glyphicon glyphicon-backward"></span></button>
+						<button type="button" class="btn btn-default" id="step"><span class="glyphicon glyphicon-forward"></span></button>
+					</div>
+
+					 <div class="input-group">
+	      				<span class="input-group-btn">
+	       				<button class="btn btn-default" type="button">Jump to</button>
+	      				</span>
+	      				<input type="number" id="jumpto" name="jumpto" value=0 class="form-control" placeholder="Jump to...">
+	   				 </div><!-- /input-group -->
+					<span> | Event:</span><span id="systemevents"></span>
+
+				</div>
+			</div>
+		</div>
+
+<script type="text/javascript" src="/js/plotly-latest.min.js"></script>
+<script type="text/javascript" src="js/date.js"></script>
+<script type="text/javascript" src='js/jquery-3.2.0.min.js'></script>
+<script type="text/javascript" src='bootstrap/js/bootstrap.min.js'></script>
+<<!-- script type="text/javascript" src='js/sim-0.26.js'></script> -->
+<script type="text/javascript"  src='modules/data.js'></script>
+<script type="text/javascript"  src='modules/system.js'></script>
+<script type="text/javascript"  src='modules/simulation.js'></script>
+<script type="text/javascript"  src='modules/common.js'></script>
+
+<script>
+$("#start").click(function(){startsim($("#time").val(),$("#slots").val(),$("#seed").val())})
+$("#stop").click(function(){stopsim()})
+$("#step").click(function(){tickstep(1)})
+$("#step_bk").click(function(){tickstep(-1)})
+$("#control").click(function(){tickstepcontrol()})
+$("#faster").click(function(){playbackSpeed(1)})
+$("#slower").click(function(){playbackSpeed(-1)})
+$("#timestep").bind('input', function(){console.log($("#timestep").val())})
+$("#Discharge").change(function(){systemControl("discharge",$("#Discharge").prop("checked"))})
+$("#Slow_Charge").change(function(){systemControl("slow_charge",$("#Slow_Charge").prop("checked"))})
+$("#exportCap").change(function(){systemControl("export_cap",$("#exportCap").val())})
+$("#importCap").change(function(){systemControl("import_cap",$("#importCap").val())})
+$("#solarCap").change(function(){
+		systemControl("solar_cap",$("#solarCap").val());
+		solarMCSAPI($("#solarCap").val(),"solarOut")
+	});
+$("#importCap").val(system.control.import_cap)
+$("#exportCap").val(system.control.export_cap)
+$("#jumpto").change(function(){jumptotime($("#jumpto").val())})
+$("#file-input").change(function(e){readSingleFile(e)})
+$("#fileSave").click(function(){saveSettingsfile()})
+
+</script>
+
+	</body>
+
+</html>
