@@ -284,7 +284,7 @@ function plot(){
 		  }
 		}
 
-	
+
 
 	Plotly.newPlot('plot_capacity', [system.plots.capacityCurrent,system.plots.capacityMax],layout);
 	Plotly.newPlot('plot_energy_flow', [system.plots.energyFlow],layout);
@@ -292,13 +292,26 @@ function plot(){
 	Plotly.newPlot('plot_solar', [system.plots.solar],layout);
 }
 //GUI
+function fireSim(){
+	data = getSettings();
+	$.post( "/api", function( data ) {
+  console.log("done")
+});
+}
+
+
+function getSettings(div){
+	out={}
+		$("#simulation input").each(function(d){
+			out[this.id]=this.value
+		})
+		return out
+}
 
 function saveSettingsfile(){
 	//for each input in simulation div...
-	out={}
-	$("#simulation input").each(function(d){
-		out[this.id]=this.value
-	})
+	out=getSettings()
+	
 	 var data = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(out))
 	 var dl = document.createElement('a');
   	dl.setAttribute('href', data);
