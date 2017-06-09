@@ -1,0 +1,17 @@
+[{
+    "type": "commute1",
+    "duration": 240,
+    "cap_pref": 0.8,
+    "cap_min": 0.6
+}, {
+    "type": "commute2",
+    "duration": 480,
+    "cap_pref": 0.8,
+    "cap_min": 0.6
+}, {
+    "type": "24hrs",
+    "duration": 1440,
+    "cap_pref": 0.8,
+    "cap_min": 0.6
+}]
+

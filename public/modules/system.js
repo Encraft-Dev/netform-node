@@ -3,6 +3,7 @@ function startsim(t,s,seed){console.log("Starting Simulation");
 		$("#controlpanel").hide();
 		//netformSimulation(1000,1234,25)
 		netformSimulation(t,seed,s)
+	
 		$("#start").addClass("disabled")
 		}  //using minutes for now
 function stopsim(){console.log("Stopping Simulation")}
@@ -21,14 +22,10 @@ function systemControl(con,sta){
 
 function solarMCSAPI(size,outputid){
 
-			
-
  			API_MCS24.location.postcode.value="wr49rp"
             API_MCS24.panels[0].electrical_rating.value=size*1000
             API_MCS24.panels[0].pitch.value=15
             API_MCS24.panels[0].panel_count.value=1      
-
-
 
 	$.post( "http://api-encraft.rhcloud.com/mcs24", API_MCS24)
   		.done(function( data ) {
@@ -294,15 +291,19 @@ function plot(){
 //GUI
 function fireSim(){
 	data = getSettings();
-	$.post( "/api", function( data ) {
-  console.log("done")
-});
+	console.log(data)
+	$.post( "/api", data)
+		.done(function(d){
+			console.log(d)
+				$("#controlpanel").show()
+				$(".controls").show()
+		}) 
 }
 
 
 function getSettings(div){
 	out={}
-		$("#simulation input").each(function(d){
+		$("#simulationInputs input").each(function(d){
 			out[this.id]=this.value
 		})
 		return out

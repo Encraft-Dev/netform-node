@@ -34,7 +34,7 @@
 							</button>
 							<label class="btn btn-default btn-file">
 									<span class="glyphicon glyphicon-open"></span>
-									<input class="form-control" type="file" id="file-input" style="display: none;" />
+									<input class="form-control" type="file" id="fileInput" style="display: none;" />
 							</label>
 						</div>
 
@@ -50,7 +50,7 @@
 						</div>
 						
 					</div><!-- row -->
-					<div class="row">
+					<div class="row" id="simulationInputs">
 						<!-- Nav tabs -->
 						 <ul class="nav nav-tabs" role="tablist">
 						    <li role="presentation" class="active"><a href="#sim_settings" aria-controls="sim_settings" role="tab" data-toggle="tab">Settings</a></li>
@@ -64,15 +64,15 @@
 								<div class="row">
 									
 									 <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 form-group">
-											<input class="form-control" type="number" id="time" name="time" value="1440"/>
+											<input class="form-control" type="number" id="simLength" name="time" value="1440"/>
 											<label for="time">Length of Simulation (minutes)</label>
 									</div>
 									<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 form-group" >
-											<input class="form-control" type="number" id="slots" name="slots" value="25"/>
+											<input class="form-control" type="number" id="simSlots" name="slots" value="25"/>
 											<label for="slots">Available Charging Slots</label>
 									</div>
 									<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 form-group">
-											<input class="form-control" type="number" id="seed" name="seed" value="1234"/>
+											<input class="form-control" type="number" id="simSeed" name="seed" value="1234"/>
 											<label for="seed">Simulation Seed</label>
 									</div>
 									
@@ -87,28 +87,32 @@
 
 							</div><!-- tabpanel -->
 							<div role="tabpanel" class="tab-pane" id="sim_constraints">	
+								<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 form-group">
+									<input  type="checkbox" id="allowConstraints" name="discharge" checked/>
+										<label for="discharge">Use Constraints?</label>
+								</div>
 								<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
 									<div class="form-group">
-										<input class="form-control" type="number" id="exportCap" name="export_cap"/>
+										<input class="form-control" type="number" id="constraintsExportCap" name="export_cap"/>
 										<label for="export_cap">Export Cap</label>
 									</div>
 								</div>
 								<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
 									<div class="form-group">
-										<input class="form-control" type="number" id="importCap" name="import_cap"/>
+										<input class="form-control" type="number" id="constraintsImportCap" name="import_cap"/>
 										<label for="import_cap">Import Cap</label>
 									</div>
 								</div>
 							</div><!-- tab panel -->
 							<div role="tabpanel"  class="tab-pane" id="sim_events">	
 								<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 form-group">
-									<input  type="checkbox" id="Discharge" name="discharge" checked/>
+									<input  type="checkbox" id="eventsDischarge" name="discharge" checked/>
 										<label for="discharge">Discharge Events</label>
 								</div>
 							</div><!-- tab panel -->
 							<div role="tabpanel"  class="tab-pane" id="sim_vehicle">	
 									<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 form-group">
-											<input   type="checkbox" id="Slow_Charge" name="slow_charge" checked/>
+											<input   type="checkbox" id="allowSlowCharge" name="slow_charge" checked/>
 											<label for="slow_charge">Constant Slow Charge</label>
 									</div>
 							</div><!-- tab panel -->

@@ -1,0 +1,122 @@
+{
+    "location": {
+        "postcode": {
+            "definition": "",
+            "message": "",
+            "value": ""
+        },
+        "irradiance_region": {
+            "definition": "",
+            "message": "",
+            "value": 0
+        },
+        "zone_number": {
+            "definition": "",
+            "message": "",
+            "value": 0
+        }
+    },
+    "panels": [{
+        "id": {
+            "definition": "",
+            "message": "",
+            "value": ""
+        },
+        "manufacturer": {
+            "definition": "",
+            "message": "",
+            "value": ""
+        },
+        "model": {
+            "definition": "",
+            "message": "",
+            "value": ""
+        },
+        "panel_count": {
+            "definition": "",
+            "message": "",
+            "value": 0
+        },
+        "electrical_rating": {
+            "definition": "",
+            "message": "",
+            "value": 0
+        },
+        "installed_capacity": {
+            "definition": "",
+            "message": "",
+            "value": 0
+        },
+        "area_required": {
+            "definition": "",
+            "message": "",
+            "value": 0
+        },
+        "area_available": {
+            "definition": "",
+            "message": "",
+            "value": 0
+        },
+        "pitch": {
+            "definition": "",
+            "message": "",
+            "value": 30
+        },
+        "orientation": {
+            "definition": "System uses azimuth, not value. Use value to store the acutal orientation but complete azimuth for calculations.",
+            "message": "",
+            "value": 0,
+            "rounded_value": 0,
+            "azimuth": 0
+        },
+        "annual_electrical_output": {
+            "definition": "",
+            "message": "",
+            "value": 0
+        },
+        "irradiance": {
+            "definition": "",
+            "message": "",
+            "value": 0
+        },
+        "shade": {
+            "number_of_segments": {
+                "definition": "",
+                "message": "",
+                "value": 0
+            },
+            "horizon": {
+                "definition": "",
+                "message": "",
+                "value": []
+            },
+            "factor": {
+                "definition": "",
+                "message": "",
+                "value": 0
+            }
+        }
+    }],
+    "annual_electrical_output": {
+        "definition": "",
+        "message": "",
+        "value": 0
+    },
+    "installed_capacity": {
+        "definition": "",
+        "message": "",
+        "value": 0
+    },
+    "irradiance": {
+        "definition": "",
+        "message": "",
+        "value": 0
+    },
+    "system": {
+        "lifespan": {
+            "definition": "",
+            "message": "",
+            "value": 25
+        }
+    }
+}

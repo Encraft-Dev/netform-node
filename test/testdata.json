@@ -1,0 +1,12 @@
+{
+    "simLength": "1440",
+    "simSlots": "30",
+    "simSeed": "1234",
+    "allowConstraints": "on",
+    "constraintsExportCap": "",
+    "constraintsImportCap": "",
+    "eventsDischarge": "on",
+    "allowSlowCharge": "on",
+    "solarCap": "200",
+    "solarOut": "175800"
+}

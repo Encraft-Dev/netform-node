@@ -1,0 +1,73 @@
+[{
+    "ID": "mode_1_1p",
+    "Mode": 1,
+    "Phase": 1,
+    "A": 16,
+    "V": 250,
+    "Type": "AC",
+    "Smart": 0,
+    "kW": 3.84
+}, {
+    "ID": "mode_1_3p",
+    "Mode": 1,
+    "Phase": 3,
+    "A": 16,
+    "V": 480,
+    "Type": "AC",
+    "Smart": 0,
+    "kW:": 11.52
+}, {
+    "ID": "mode_2_1p",
+    "Mode": 2,
+    "Phase": 1,
+    "A": 32,
+    "V": 250,
+    "Type": "AC",
+    "Smart": 0,
+    "kW": 7.68
+}, {
+    "ID": "mode_2_3p",
+    "Mode": 2,
+    "Phase": 3,
+    "A": 32,
+    "V": 250,
+    "Type": "AC",
+    "Smart": 0,
+    "kW": 23.04
+}, {
+    "ID": "mode_3_1p",
+    "Mode": 3,
+    "Phase": 1,
+    "A": 250,
+    "V": 250,
+    "Type": "AC",
+    "Smart": 1,
+    "kW": 62.5
+}, {
+    "ID": "mode_3_3p",
+    "Mode": 3,
+    "Phase": 3,
+    "A": 250,
+    "V": 480,
+    "Type": "AC",
+    "Smart": 1,
+    "kW": 180
+}, {
+    "ID": "mode_4_1p",
+    "Mode": 4,
+    "Phase": 1,
+    "A": 400,
+    "V": 600,
+    "Type": "DC",
+    "Smart": 1,
+    "kW": 240
+}, {
+    "ID": "TSC",
+    "Mode": "TS",
+    "Phase": 1,
+    "A": 250,
+    "V": 480,
+    "Type": "DC",
+    "Smart": 1,
+    "kW": 120
+}]
