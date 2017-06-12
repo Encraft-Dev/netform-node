@@ -54,6 +54,7 @@ var system = {
 	simDateTime:0,
 	time:-1,
 	log:[],
+	veh_maxchargerate:100, //default 100
 	plots:{
 			capacityCurrent:{name:"Available Capacity (kWh)",x:[],y:[],type:"scatter"},
 			capacityMax:{name:"Max Capacity (kWh)",x:[],y:[],type:"scatter"},
@@ -70,7 +71,10 @@ var system = {
 
 
 //output functions
-function jumptotime(t){system.time=t;visualise(system.log[system.time],system.time)}
+function jumptotime(t){
+	console.log(t)
+	console.log(system)
+	system.time=t;visualise(system.log[system.time],system.time)}
 
 
 function tickstep(v){system.tick(v)}
@@ -130,7 +134,7 @@ function visualise(arr,systemtime){
 	ex="";
 	ie=0;
 	n=0;q=0;
-	//console.log(arr)
+	console.log(arr)
 	dArr=arr.Veh
 
 	for (i=dArr.length-1;i>=0;i--){
@@ -291,10 +295,11 @@ function plot(){
 //GUI
 function fireSim(){
 	data = getSettings();
-	console.log(data)
+	console.log("getting simulation results.")
 	$.post( "/api", data)
 		.done(function(d){
-			console.log(d)
+			system.log=d[0]
+			veh_maxchargerate=d[1]
 				$("#controlpanel").show()
 				$(".controls").show()
 		}) 
