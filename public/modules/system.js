@@ -80,6 +80,7 @@ function jumptotime(t){
 function tickstep(v){system.tick(v)}
 
 function tickstepcontrol(){
+	console.log(s)
 	if (system.paused){
 			system.paused=false;
 			system.tick(1);
@@ -298,11 +299,26 @@ function fireSim(){
 	console.log("getting simulation results.")
 	$.post( "/api", data)
 		.done(function(d){
+			console.log("results received")
+			console.log(d)
 			system.log=d[0]
 			veh_maxchargerate=d[1]
 				$("#controlpanel").show()
 				$(".controls").show()
+			
+			$.get("/results/"+d[0]+"/system/0.json")
+				.done(function(v){
+					system.time=0;system.log[0]=v;visualise(system.log,0)
+					softloadSystem(1,1440);
+				})
 		}) 
+}
+
+var softloadSystem = function(start, end){
+	for (i==start;i<=end;i++){
+		
+	}
+
 }
 
 
