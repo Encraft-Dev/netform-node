@@ -51,6 +51,7 @@ var writesettings = function (dirPath,data){
 }
 
 exports.test = function test(){return 'Hello'}
+
 exports.simulate = function(simData){
 
 	var settings = [] //simulation settings
@@ -129,6 +130,9 @@ var Park = new Sim.Facility("park", Sim.Facility.FCFS,simData.simSlots)//this ma
  		init:function(){
  			//get profile and adjust for system size.
  			//turn daily into actual..
+ 			////get system size from data settings file
+
+
  			for(i=0;i<profile_solar.length;i++){
  				monthly = profile_solar[i].Monthly*simData.solarOut
  				data=[];
@@ -723,7 +727,7 @@ var Park = new Sim.Facility("park", Sim.Facility.FCFS,simData.simSlots)//this ma
 	//console.log(stats_vehicles.getHistogram())      // start simulation
    // Park.report();  
   
-   return [simID,veh_maxchargerate] //Controller.log
+   return [simID,[settings,vehicleslist]] //Controller.log
 
 }//end function
 

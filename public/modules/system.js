@@ -27,7 +27,7 @@ function solarMCSAPI(size,outputid){
             API_MCS24.panels[0].pitch.value=15
             API_MCS24.panels[0].panel_count.value=1      
 
-	$.post( "http://api-encraft.rhcloud.com/mcs24", API_MCS24)
+	$.post( "https://api-encraft.rhcloud.com/mcs24", API_MCS24)
   		.done(function( data ) {
   			
   			system.control.solar_output=data.annual_electrical_output.value
@@ -48,6 +48,7 @@ var system = {
 		},
 	tempsolar:{},
 	events:[],
+	simid:0,
 	paused:true,
 	simStartDate: new Date(2017,4,1,0,0,0),
 	simtime:0,
@@ -72,15 +73,14 @@ var system = {
 
 //output functions
 function jumptotime(t){
-	console.log(t)
-	console.log(system)
+	
 	system.time=t;visualise(system.log[system.time],system.time)}
 
 
 function tickstep(v){system.tick(v)}
 
 function tickstepcontrol(){
-	console.log(s)
+	
 	if (system.paused){
 			system.paused=false;
 			system.tick(1);
@@ -128,6 +128,10 @@ function showVehicleList(list){
 	$("#list").html(out);
 }
 
+var getModelfromUser = function(s){
+	return system.vehicleList.filter(function(o){return o.id==s})
+}
+
 function visualise(arr,systemtime){
 	out="";
 	on="";
@@ -135,15 +139,17 @@ function visualise(arr,systemtime){
 	ex="";
 	ie=0;
 	n=0;q=0;
-	console.log(arr)
+	//console.log("---",arr)
 	dArr=arr.Veh
-
 	for (i=dArr.length-1;i>=0;i--){
+			//attach vehicle to user
+			dArr[i].message.model = getModelfromUser(dArr[i].s)
+
 
 			state="On charger"
 			if(dArr[i].message.statusCode<0){state="Exited"}
 			if(dArr[i].message.statusCode==0){state="In Queue"}
-			
+
 			colour="#ccc";
 			alpha = dArr[i].message.rate<0?-1*dArr[i].message.rate/veh_maxchargerate:dArr[i].message.rate/veh_maxchargerate;
 			if(dArr[i].message.chargeStatus<0){colour="rgba(100,0,0," + alpha + ")";}
@@ -151,7 +157,6 @@ function visualise(arr,systemtime){
 			// if(dArr[i].message.chargeStatus==2){colour="lightgreen";}
 			if(dArr[i].message.chargeStatus>0){colour="rgba(0,100,0," + alpha + ")";}
 
-			
 			battmaxcap = dArr[i].message.model.MaxCapacity
 			Qicon = dArr[i].message.netform>=1?"glyphicon-tasks":"";
 		//console.log(arr)
@@ -297,30 +302,75 @@ function plot(){
 function fireSim(){
 	data = getSettings();
 	console.log("getting simulation results.")
+	$(".sim_running").show()
+	$(".sim_loading").hide()
+	$(".sim_controls").hide()
+
+
 	$.post( "/api", data)
 		.done(function(d){
+			$(".sim_running").show()
+			$(".sim_loading").hide()
+			$(".sim_controls").hide()
+
 			console.log("results received")
 			console.log(d)
-			system.log=d[0]
+			system.simid=d[0]
 			veh_maxchargerate=d[1]
-				$("#controlpanel").show()
-				$(".controls").show()
+			
 			
 			$.get("/results/"+d[0]+"/system/0.json")
 				.done(function(v){
-					system.time=0;system.log[0]=v;visualise(system.log,0)
-					softloadSystem(1,1440);
+					$(".sim_running").hide()
+					$(".sim_loading").show()
+					$(".sim_controls").hide()
+					system.vehicleList=d[1][1]
+					system.time=0;
+					system.log[0]=v;
+					console.log("loaded")
+					visualise(system.log[0],0)
+					softloadSystem(d[0],1,1440);
 				})
 		}) 
 }
 
-var softloadSystem = function(start, end){
-	for (i==start;i<=end;i++){
+var softloadSystem = function(id,start, end){
+	var count = 0
+	for (i=start;i<=end;i++){
+		(function(x){
+					$.get("/results/"+id+"/system/"+x+".json")
+					.done(function(v){
+						count++
+						console.log(count)
+						updateProgress(count, end)
+						system.log[x]=v});
+				})(i)
+
 		
 	}
 
 }
 
+var updateProgress = function (count,max){
+	$("#loading_progress").attr("style","width:"+(100*(count/max))+"%")
+	if(count/max == 1){
+		processData()
+		// $("#controlpanel").show()
+		// $(".controls").show()
+			$(".sim_running").hide()
+					$(".sim_loading").hide()
+					$(".sim_controls").show()
+	}
+}
+
+var processData = function(){
+		system.log.forEach(function(sl){
+			sl.Veh.forEach(function(v){
+				 v.message.model=getModelfromUser(v.s).model
+			});
+		})
+
+}
 
 function getSettings(div){
 	out={}
