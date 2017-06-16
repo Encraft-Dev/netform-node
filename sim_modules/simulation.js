@@ -9,12 +9,23 @@
 //var res=_eval('module.exports = require("'+__dirname+'/sim-0.26.js")',true)
 //console.clear()//lets start with a clean console.
 //var simjs= require('simjs')
+
+
+require("datejs")
+fs = require('graceful-fs')
+path = require('path');
+var appDir = path.dirname(require.main.filename);
+var zlib = require('zlib')
+
+
+
+
 var Simjs = require('./sim-0.26.js');
 var Sim=Simjs.Sim;
 Sim.Random =Simjs.Random;
 
-require("datejs")
-fs = require('graceful-fs')
+
+
 var cModes = require('../data/charging_modes.json')
 var vArr = require('../data/vehicles.json')
 var uArr = require('../data/user_types.json')
@@ -24,31 +35,44 @@ var CarPark = require('../data/profile_parking.json')
 var Cp=CarPark.commuterCP
 
 //var testData = require('../test/testdata.json')
-var resultsFolder = "./public/results/"
-
-
-var veh_maxchargerate = 0
-for(i=0;i<vArr.length;i++){
-	veh_maxchargerate = vArr[i].C_Rate1 > veh_maxchargerate ? vArr[i].C_Rate1 : veh_maxchargerate;
-}
+var resultsFolder = path.join(appDir,"results")
+if (!fs.existsSync(resultsFolder)){fs.mkdirSync(resultsFolder)}
+// var veh_maxchargerate = 0
+// for(i=0;i<vArr.length;i++){
+// 	veh_maxchargerate = vArr[i].C_Rate1 > veh_maxchargerate ? vArr[i].C_Rate1 : veh_maxchargerate;
+// }
 
 var logwrite = function(logObj,name){
-	fs.appendFileSync(resultsFolder + name+".json", "," + JSON.stringify(logObj))
+	fs.appendFileSync(resultsFolder+name+".json", "," + JSON.stringify(logObj))
 }
 
-var writetimelog = function(dirPath,timestamp,data){
+
+
+var writetimelog = function(dirPath,name,data){
 	if (!fs.existsSync(dirPath)){
 		    fs.mkdirSync(dirPath);
 		}
-	fs.writeFile(dirPath +  timestamp +".json",JSON.stringify(data))
+	//fs.writeFile(path.format({dir:dirPath,base:timestamp +".json"}),JSON.stringify(data))
+	//myzip = zlib.gzip(JSON.stringify(data))
+	
+
+	zlib.gzip(JSON.stringify(data), function (error, result) {
+	   if (error) throw error;
+	     fs.writeFile(path.format({dir:dirPath,base:name +".json.gz"}),result, function(err) {
+		  if (err) throw err;
+		  console.log(name)
+		})//writefile
+	});//zlib
 }
 
-var writesettings = function (dirPath,data){
-	if (!fs.existsSync(dirPath)){
-		    fs.mkdirSync(dirPath);
-		}
-	fs.writeFile(dirPath + "settings.json",JSON.stringify(data))
-}
+// var writesettings = function (dirPath,data){
+// 	if (!fs.existsSync(dirPath)){
+// 		    fs.mkdirSync(dirPath);
+// 		}
+// 	fs.writeFile(path.format({ root: dirPath,  base: "settings.json"}),JSON.stringify(data))
+// }
+
+//zlib.gzip(JSON.stringify(data), (_, buf) -> fs.writeFile(path.format({ root: resultsFolder,  base: "settings.json.gz"}), buf))
 
 exports.test = function test(){return 'Hello'}
 
@@ -62,14 +86,9 @@ exports.simulate = function(simData){
 	var sim = new Sim(simID);
 	var random = new Sim.Random(simData.simSeed);
 	var number_of_vehicles=0
-	var simdir = resultsFolder+simID+"/"
-	if (!fs.existsSync(simdir)){
-		    fs.mkdirSync(simdir);
-		}
-	var vehdir = simdir + "veh/"
-	
-
-	var systemdir = simdir + "system/"
+	var simdir = path.join(resultsFolder,simID.toString())
+	var vehdir = path.join(simdir,"veh")
+	var systemdir = path.join(simdir,"system")
 	
 	if (!fs.existsSync(simdir)){fs.mkdirSync(simdir)}
 	if (!fs.existsSync(vehdir)){fs.mkdirSync(vehdir)}
@@ -325,6 +344,7 @@ var Park = new Sim.Facility("park", Sim.Facility.FCFS,simData.simSlots)//this ma
 					
  						if((current/this.model.MaxCapacity)>this.model.C_RDC && chargeStatus>0){chargeStatus=2}//slow drop towards top.
  						if(chargeStatus==0 && simData.allowSlowCharge){chargeStatus=2}
+ 							//console.log(simData)
  						//do negotiation here...
  						//
  						neg=live?this.negotiation(chargeStatus,rate):{"status":chargeStatus,"rate":rate}
@@ -704,11 +724,12 @@ var Park = new Sim.Facility("park", Sim.Facility.FCFS,simData.simSlots)//this ma
 	//system.simtime=SIMTIME
 	//system.events=Controller.dischargeEvents
 	sim.finalize()
-	console.log("Simulation End")
 	
-	writesettings(simdir,[settings,vehicleslist])
+	
+	writetimelog(simdir,"settings",[settings,vehicleslist])
 
-
+    console.log("Simulation End")
+  
 
 // 	var fs = require('fs');
 // 	fs.writeFileSync("../public/results/test", "Hey there!", function(err) {
@@ -726,7 +747,9 @@ var Park = new Sim.Facility("park", Sim.Facility.FCFS,simData.simSlots)//this ma
 	//visualise(log);
 	//console.log(stats_vehicles.getHistogram())      // start simulation
    // Park.report();  
-  
+  // while(!fs.existsSync(path.format({dir:simdir,base:"settings.json.gz"}))){
+  // 	console.log("waiting for file to be written")
+  // }
    return [simID,[settings,vehicleslist]] //Controller.log
 
 }//end function

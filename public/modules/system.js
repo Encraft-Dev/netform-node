@@ -8,8 +8,6 @@ function startsim(t,s,seed){console.log("Starting Simulation");
 		}  //using minutes for now
 function stopsim(){console.log("Stopping Simulation")}
 
-
-
 //
 //
 // system controls
@@ -51,11 +49,11 @@ var system = {
 	simid:0,
 	paused:true,
 	simStartDate: new Date(2017,4,1,0,0,0),
-	simtime:0,
+	simtime:getSettings().simLength,
 	simDateTime:0,
 	time:-1,
 	log:[],
-	veh_maxchargerate:100, //default 100
+	veh_maxchargerate:0, //default 100
 	plots:{
 			capacityCurrent:{name:"Available Capacity (kWh)",x:[],y:[],type:"scatter"},
 			capacityMax:{name:"Max Capacity (kWh)",x:[],y:[],type:"scatter"},
@@ -106,9 +104,10 @@ function runsystem(stime){
 	document.title = 'Netform' + "  |" + system.time + "/" + system.simtime ;
 	visualise(system.log[stime],stime)
 	//console.log(system.log[stime])
-	if(!system.paused){if(stime<system.simtime){
-						setTimeout(function(){ 
-							system.tick(1)}, $("#timestep").val())};
+	//console.log(stime)
+	if(!system.paused){
+				if(stime<system.simtime){
+						setTimeout(function(){system.tick(1)}, $("#timestep").val())};
 					 }
 }
 
@@ -143,7 +142,7 @@ function visualise(arr,systemtime){
 	dArr=arr.Veh
 	for (i=dArr.length-1;i>=0;i--){
 			//attach vehicle to user
-			dArr[i].message.model = getModelfromUser(dArr[i].s)
+			//dArr[i].message.model = getModelfromUser(dArr[i].s)[0].model
 
 
 			state="On charger"
@@ -151,7 +150,7 @@ function visualise(arr,systemtime){
 			if(dArr[i].message.statusCode==0){state="In Queue"}
 
 			colour="#ccc";
-			alpha = dArr[i].message.rate<0?-1*dArr[i].message.rate/veh_maxchargerate:dArr[i].message.rate/veh_maxchargerate;
+			alpha = dArr[i].message.rate<0?-1*dArr[i].message.rate/system.veh_maxchargerate:dArr[i].message.rate/system.veh_maxchargerate;
 			if(dArr[i].message.chargeStatus<0){colour="rgba(100,0,0," + alpha + ")";}
 			// if(dArr[i].message.chargeStatus==1){colour="darkgreen";}
 			// if(dArr[i].message.chargeStatus==2){colour="lightgreen";}
@@ -314,7 +313,7 @@ function fireSim(){
 			$(".sim_controls").hide()
 
 			console.log("results received")
-			console.log(d)
+			//console.log(d)
 			system.simid=d[0]
 			veh_maxchargerate=d[1]
 			
@@ -341,7 +340,7 @@ var softloadSystem = function(id,start, end){
 					$.get("/results/"+id+"/system/"+x+".json")
 					.done(function(v){
 						count++
-						console.log(count)
+						//console.log(count)
 						updateProgress(count, end)
 						system.log[x]=v});
 				})(i)
@@ -354,7 +353,8 @@ var softloadSystem = function(id,start, end){
 var updateProgress = function (count,max){
 	$("#loading_progress").attr("style","width:"+(100*(count/max))+"%")
 	if(count/max == 1){
-		processData()
+		processData();
+		visualise(system.log[0],0)
 		// $("#controlpanel").show()
 		// $(".controls").show()
 			$(".sim_running").hide()
@@ -366,9 +366,12 @@ var updateProgress = function (count,max){
 var processData = function(){
 		system.log.forEach(function(sl){
 			sl.Veh.forEach(function(v){
-				 v.message.model=getModelfromUser(v.s).model
+				 v.message.model=getModelfromUser(v.s)[0].model
+				 system.veh_maxchargerate =  v.message.model.C_Rate1>=system.veh_maxchargerate?v.message.model.C_Rate1:system.veh_maxchargerate
+				 system.veh_maxcap = v.message.model.MaxCapacity>=system.veh_maxcap?v.message.model.MaxCapacity:system.veh_maxcap
 			});
 		})
+
 
 }
 
@@ -376,6 +379,7 @@ function getSettings(div){
 	out={}
 		$("#simulationInputs input").each(function(d){
 			out[this.id]=this.value
+			//console.log(out[this.id])
 		})
 		return out
 }

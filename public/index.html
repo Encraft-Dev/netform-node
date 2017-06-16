@@ -71,8 +71,9 @@
 						    <li role="presentation" class="active"><a href="#sim_settings" aria-controls="sim_settings" role="tab" data-toggle="tab">Settings</a></li>
 						    <li role="presentation"><a href="#sim_constraints" aria-controls="sim_constraints" role="tab" data-toggle="tab">Constraints</a></li>
 						    <li role="presentation"><a href="#sim_events" aria-controls="sim_events" role="tab" data-toggle="tab">Events</a></li>
-						     <li role="presentation"><a href="#sim_vehicle" aria-controls="sim_vehicle" role="tab" data-toggle="tab">Vehicles</a></li>
+						    <li role="presentation"><a href="#sim_vehicle" aria-controls="sim_vehicle" role="tab" data-toggle="tab">Vehicles</a></li>
 						    <li role="presentation"><a href="#sim_additional" aria-controls="sim_additional" role="tab" data-toggle="tab">Other Tech</a></li>
+						    <li role="presentation"><a href="#sim_scenarios" aria-controls="sim_scenarios" role="tab" data-toggle="tab">Financial Scenarios</a></li>
 						 </ul>
 						 <div class="tab-content container-fluid">
 							<div role="tabpanel" class="tab-pane active" id="sim_settings">
@@ -108,13 +109,13 @@
 								</div>
 								<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
 									<div class="form-group">
-										<input class="form-control" type="number" id="constraintsExportCap" name="export_cap"/>
+										<input class="form-control" type="number" id="constraintsExportCap" name="export_cap" value="10000"/>
 										<label for="export_cap">Export Cap</label>
 									</div>
 								</div>
 								<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
 									<div class="form-group">
-										<input class="form-control" type="number" id="constraintsImportCap" name="import_cap"/>
+										<input class="form-control" type="number" id="constraintsImportCap" name="import_cap" value="10000"/>
 										<label for="import_cap">Import Cap</label>
 									</div>
 								</div>
@@ -136,6 +137,12 @@
 										<input class="form-control" type="number" id="solarCap" name="solar_cap" value="200" />
 										<label for="solar_cap">Solar Peak Capacity kW</label>
 										<input hidden id="solarOut" type="number" value="175800"/>
+								</div>
+							</div><!-- tab panel -->
+							<div role="tabpanel"  class="tab-pane" id="sim_scenarios">	
+								<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 form-group">
+										<p> some things about FFR, import export costs. times etc.</p>
+										<p> eg. ffr switching</p>
 								</div>
 							</div><!-- tab panel -->
 						</div><!-- tab content -->
@@ -250,7 +257,7 @@
 <script type="text/javascript" src="js/date.js"></script>
 <script type="text/javascript" src='js/jquery-3.2.0.min.js'></script>
 <script type="text/javascript" src='bootstrap/js/bootstrap.min.js'></script>
-<<!-- script type="text/javascript" src='js/sim-0.26.js'></script> -->
+<!-- script type="text/javascript" src='js/sim-0.26.js'></script> -->
 <!-- <script type="text/javascript"  src='modules/data.js'></script> -->
 <script type="text/javascript"  src='modules/system.js'></script>
 <!-- <script type="text/javascript"  src='modules/simulation.js'></script> -->
