@@ -312,14 +312,14 @@ function fireSim(){
 			$(".sim_loading").hide()
 			$(".sim_controls").hide()
 
-			console.log("results received")
+			console.log("sim finished")
 			//console.log(d)
 			system.simid=d[0]
 			veh_maxchargerate=d[1]
 			
 			
-			$.get("/results/"+d[0]+"/system/0.json")
-				.done(function(v){
+			$.getJSON("/results/"+d[0]+"/system/0.json",function(v){
+					
 					$(".sim_running").hide()
 					$(".sim_loading").show()
 					$(".sim_controls").hide()
@@ -329,7 +329,8 @@ function fireSim(){
 					console.log("loaded")
 					visualise(system.log[0],0)
 					softloadSystem(d[0],1,1440);
-				})
+			})
+				
 		}) 
 }
 

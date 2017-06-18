@@ -34,18 +34,29 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 //app.use(express.static(path.join(__dirname, 'public')));
-app.use("/", expressStaticGzip(path.join(__dirname,'public')));
+
 //app.use('/', index);
 app.use('/api', api);
 //app.use('/sim', express.static('public'));
-app.use("/results",express.static(path.join(__dirname, 'results'),{
-  extensions:['gz','json.gz'],
-  setHeaders: function(res,path){
-      res.set({'Content-Encoding':'gzip'})
-    }
-}))
+
+app.get ("/results/*",function(req,res,next){
+  req.url=req.url+'.gz';
+  res.set('Content-Encoding',"gzip");
+  res.set("Content-Type","application/json")
+  console.log(res)
+  next()
+})
+ 
+app.use("/results",express.static(path.join(__dirname, 'results')))//,{
+//   extensions:['gz','json.gz'],
+//   setHeaders: function(res,path){
+//       res.set({'Content-Encoding':'gzip'})
+//     }
+// }))
 //app.use('/results',results)
 //serve gzipped simulation results
+
+app.use("/", expressStaticGzip(path.join(__dirname,'public')));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
