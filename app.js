@@ -5,12 +5,13 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 //var compression = require('compression')
-var expressStaticGzip = require("express-static-gzip");
+//var expressStaticGzip = require("express-static-gzip");
 
 
 var index = require('./routes/index');
 var api = require('./routes/api');
-var api = require('./routes/results');
+var results = require('./routes/results');
+var user = require('./routes/users')
 var app = express();
 
 
@@ -37,13 +38,14 @@ app.use(cookieParser());
 
 //app.use('/', index);
 app.use('/api', api);
+app.use('/users', users);
 //app.use('/sim', express.static('public'));
 
 app.get ("/results/*",function(req,res,next){
   req.url=req.url+'.gz';
   res.set('Content-Encoding',"gzip");
   res.set("Content-Type","application/json")
-  console.log(res)
+  //console.log(res)
   next()
 })
  
@@ -56,7 +58,8 @@ app.use("/results",express.static(path.join(__dirname, 'results')))//,{
 //app.use('/results',results)
 //serve gzipped simulation results
 
-app.use("/", expressStaticGzip(path.join(__dirname,'public')));
+
+app.use("/", express.static(path.join(__dirname,'public')));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

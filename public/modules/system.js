@@ -330,6 +330,7 @@ function fireSim(){
 					visualise(system.log[0],0)
 					softloadSystem(d[0],1,1440);
 			})
+			.done(console.log("something"))
 				
 		}) 
 }
