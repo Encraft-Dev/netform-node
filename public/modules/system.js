@@ -318,19 +318,20 @@ function fireSim(){
 			veh_maxchargerate=d[1]
 			
 			
-			$.getJSON("/results/"+d[0]+"/system/0.json",function(v){
-					
+			$.getJSON("/results/"+d[0]+"/settings.json",function(v){})
+			.done(function(v){
+					console.log("Settings Done")
 					$(".sim_running").hide()
 					$(".sim_loading").show()
 					$(".sim_controls").hide()
 					system.vehicleList=d[1][1]
 					system.time=0;
-					system.log[0]=v;
+					//system.log[0]=v;
 					console.log("loaded")
-					visualise(system.log[0],0)
-					softloadSystem(d[0],1,1440);
-			})
-			.done(console.log("something"))
+					//visualise(system.log[0],0)
+					softloadSystem(d[0],0,1440);
+				})
+			.fail(function(jqX,status,err){console.log("error:",err,JSON.stringify(jqX))})
 				
 		}) 
 }
@@ -339,7 +340,7 @@ var softloadSystem = function(id,start, end){
 	var count = 0
 	for (i=start;i<=end;i++){
 		(function(x){
-					$.get("/results/"+id+"/system/"+x+".json")
+					$.getJSON("/results/"+id+"/system/"+x+".json")
 					.done(function(v){
 						count++
 						//console.log(count)
@@ -360,8 +361,8 @@ var updateProgress = function (count,max){
 		// $("#controlpanel").show()
 		// $(".controls").show()
 			$(".sim_running").hide()
-					$(".sim_loading").hide()
-					$(".sim_controls").show()
+			$(".sim_loading").hide()
+			$(".sim_controls").show()
 	}
 }
 

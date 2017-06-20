@@ -11,17 +11,12 @@ var bodyParser = require('body-parser');
 var index = require('./routes/index');
 var api = require('./routes/api');
 var results = require('./routes/results');
-var user = require('./routes/users')
+var users = require('./routes/users')
 var app = express();
 
 
 
-
- 
-
-
-
-// view engine setup
+// view engine setup  //not used
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
@@ -42,9 +37,16 @@ app.use('/users', users);
 //app.use('/sim', express.static('public'));
 
 app.get ("/results/*",function(req,res,next){
-  req.url=req.url+'.gz';
-  res.set('Content-Encoding',"gzip");
-  res.set("Content-Type","application/json")
+  
+//leave main settings file uncompressed because chrome and jquery $getJSON apears to have timing issues with gzip
+//pretty damn hacky if you ask me
+  if(req.url.split("/")[3]!="settings.json"){
+     req.url=req.url+'.gz';
+     res.set('Content-Encoding',"gzip");
+     res.set("Content-Type","application/json")
+  }
+ 
+
   //console.log(res)
   next()
 })
