@@ -1,5 +1,5 @@
-
 var path = require('path');
+
 var express = require('express');
 var router = express.Router();
 //var simulation = require('simjs')
@@ -15,6 +15,10 @@ var router = express.Router();
 
 //var simulation = require('../sim_modules/simulation.js')
 var simulation = require(path.join(__dirname, 'sim_modules','simulation.js'))
+var testData = require(path.join(__dirname, 'test','simulation.js'))
+
+
+console.log(testData)
 
 // function runSimulation(values){//run the sim with input data..
 // 	//if no values then get default test data.
@@ -35,7 +39,7 @@ router.post('/', function(req, res) {
 	
 	//console.log(req.body)
 	//var xsim = simulation.simulate(req.body)
-  	res.send(simulation.simulate(req.body,"sim"));
+  	//res.send(simulation.simulate(req.body,"live"));
 });
 
 module.exports = router;

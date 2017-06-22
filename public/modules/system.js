@@ -8,14 +8,13 @@ function startsim(t,s,seed){console.log("Starting Simulation");
 		}  //using minutes for now
 function stopsim(){console.log("Stopping Simulation")}
 
-//
-//
 // system controls
 function systemControl(con,sta){
 	console.log(con,sta)
 	system.control[con]=sta
 
 }
+
 // output functions (todo move to separate file)
 
 function solarMCSAPI(size,outputid){
@@ -36,34 +35,34 @@ function solarMCSAPI(size,outputid){
 
 
 var system = {
-	control:{
-			discharge:true,
-			slow_charge:true,
-			import_cap:20,
-			export_cap:50,
-			solar_cap:200,
-			solar_output:175800
-		},
-	tempsolar:{},
-	events:[],
-	simid:0,
-	paused:true,
-	simStartDate: new Date(2017,4,1,0,0,0),
-	simtime:getSettings().simLength,
-	simDateTime:0,
-	time:-1,
-	log:[],
-	veh_maxchargerate:0, //default 100
-	plots:{
-			capacityCurrent:{name:"Available Capacity (kWh)",x:[],y:[],type:"scatter"},
-			capacityMax:{name:"Max Capacity (kWh)",x:[],y:[],type:"scatter"},
-			energyFlow:{name:"Import/Export (kW)",x:[],y:[],type:"scatter"},
-			population:{name:"Population",x:[],y:[],type:"scatter"},
-			solar:{name:"Solar generation",x:[],y:[],type:"scatter"}
-		},
-	run:function(){runsystem(system.time)},
-	tick:function(step){
-		step>=0?system.time++:system.time--;
+	control: {
+		discharge: true,
+		slow_charge: true,
+		import_cap: 20,
+		export_cap: 50,
+		solar_cap: 200,
+		solar_output: 175800
+	},
+	tempsolar: {},
+	events: [],
+	simid: 0,
+	paused: true,
+	simStartDate: new Date(2017, 4, 1, 0, 0, 0),
+	simtime: getSettings().simLength,
+	simDateTime: 0,
+	time: -1,
+	log: [],
+	veh_maxchargerate: 0, //default 100
+	plots: {
+		capacityCurrent: { name: "Available Capacity (kWh)", x: [], y: [], type: "scatter" },
+		capacityMax: { name: "Max Capacity (kWh)", x: [], y: [], type: "scatter" },
+		energyFlow: { name: "Import/Export (kW)", x: [], y: [], type: "scatter" },
+		population: { name: "Population", x: [], y: [], type: "scatter" },
+		solar: { name: "Solar generation", x: [], y: [], type: "scatter" }
+	},
+	run: function () { runsystem(system.time) },
+	tick: function (step) {
+		step >= 0 ? system.time++ : system.time--;
 		this.run()
 	}
 }
@@ -347,8 +346,6 @@ var softloadSystem = function(id,start, end){
 						updateProgress(count, end)
 						system.log[x]=v});
 				})(i)
-
-		
 	}
 
 }

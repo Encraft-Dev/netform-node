@@ -20,10 +20,10 @@ var zlib = require('zlib')
 
 
 
+
 var Simjs = require('./sim-0.26.js');
 var Sim=Simjs.Sim;
 Sim.Random =Simjs.Random;
-
 
 
 var cModes = require('../data/charging_modes.json')
@@ -35,16 +35,22 @@ var CarPark = require('../data/profile_parking.json')
 var Cp=CarPark.commuterCP
 
 //var testData = require('../test/testdata.json')
+
+
 var resultsFolder = path.join(appDir,"results")
 if (!fs.existsSync(resultsFolder)){fs.mkdirSync(resultsFolder)}
+
+
 // var veh_maxchargerate = 0
 // for(i=0;i<vArr.length;i++){
 // 	veh_maxchargerate = vArr[i].C_Rate1 > veh_maxchargerate ? vArr[i].C_Rate1 : veh_maxchargerate;
 // }
 
-var logwrite = function(logObj,name){
-	fs.appendFileSync(resultsFolder+name+".json", "," + JSON.stringify(logObj))
-}
+// var logwrite = function(logObj,name){
+// 	fs.appendFileSync(resultsFolder+name+".json", "," + JSON.stringify(logObj))
+// }
+
+
 
 
 
@@ -72,10 +78,22 @@ var writetimelog = function(dirPath,name,data,zip){
 		  //console.log(name)
 		})//writefile
 	}
-		
+}
+
+
+var addPCuser = function(id,vehicle,chargelevel,departuretime,desiredcharge){
+	//add user to user array for simulation
+	// add user to date folder...
+	folderName = Date.today().toString("yyyy_MM_dd")
+
 
 }
 
+var getTimestampfromRealtime = function(realtime){
+	var currenttime = now()
+	
+}
+var getRealtimefromSimtime = function(simtime){}
 // var writesettings = function (dirPath,name,data){
 // 	if (!fs.existsSync(dirPath)){
 // 		    fs.mkdirSync(dirPath);
@@ -87,7 +105,7 @@ var writetimelog = function(dirPath,name,data,zip){
 
 exports.test = function test(){return 'Hello'}
 
-exports.simulate = function(simData){
+exports.simulate = function(simData,type){
 
 	var settings = [] //simulation settings
 	var vehicleslist=[] //list of active vehicles.
@@ -95,12 +113,13 @@ exports.simulate = function(simData){
 	var simID = new Date().getTime() //"biglog";
 	//fs.writeFileSync(resultsFolder + simID+".json","[{}")
 	var sim = new Sim(simID);
+	sim.addEntity
 	var random = new Sim.Random(simData.simSeed);
 	var number_of_vehicles=0
 	var simdir = path.join(resultsFolder,simID.toString())
 	var vehdir = path.join(simdir,"veh")
-	var systemdir = path.join(simdir,"system")
-	
+	var systemdir = path.join(resultsFolder,"data","Users")
+	var userdir = 
 	if (!fs.existsSync(simdir)){fs.mkdirSync(simdir)}
 	if (!fs.existsSync(vehdir)){fs.mkdirSync(vehdir)}
 	if (!fs.existsSync(systemdir)){fs.mkdirSync(systemdir)}
