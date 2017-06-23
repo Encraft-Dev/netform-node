@@ -304,8 +304,8 @@ function fireSim(){
 	$(".sim_loading").hide()
 	$(".sim_controls").hide()
 
-
-	$.post( "/api", data)
+	var ts = new Date().getTime()
+	$.post( "/api?sId="+ts, data)
 		.done(function(d){
 			$(".sim_running").show()
 			$(".sim_loading").hide()

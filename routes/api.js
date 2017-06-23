@@ -14,8 +14,9 @@ var router = express.Router();
 //CP=CP.commuterCP
 
 //var simulation = require('../sim_modules/simulation.js')
-var simulation = require(path.join(__dirname, 'sim_modules','simulation.js'))
-
+var appDir = path.dirname(require.main.filename);
+var simulation = require(path.join(appDir, 'sim_modules','simulation.js'))
+//console.log(path.join(__dirname, 'sim_modules','simulation.js'))
 // function runSimulation(values){//run the sim with input data..
 // 	//if no values then get default test data.
 // 	values = (values==undefined)?values=testData:values
@@ -32,10 +33,11 @@ var simulation = require(path.join(__dirname, 'sim_modules','simulation.js'))
 
 /* GET api */
 router.post('/', function(req, res) {
-	
+	//console.log(req.query.sId)
 	//console.log(req.body)
 	//var xsim = simulation.simulate(req.body)
-  	res.send(simulation.simulate(req.body,"sim"));
+
+  	res.send(simulation.simulate(req.body,req.query.sId));
 });
 
 module.exports = router;

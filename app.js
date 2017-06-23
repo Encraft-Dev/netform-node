@@ -6,7 +6,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 //var compression = require('compression')
 //var expressStaticGzip = require("express-static-gzip");
-
+//global.appRoot = path.resolve(__dirname);
 
 var index = require('./routes/index');
 var api = require('./routes/api');
@@ -14,6 +14,7 @@ var results = require('./routes/results');
 var users = require('./routes/users')
 var live = require('./routes/live')
 var app = express();
+
 
 
 

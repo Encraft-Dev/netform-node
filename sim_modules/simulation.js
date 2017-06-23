@@ -19,7 +19,7 @@ var zlib = require('zlib')
 
 
 
-
+var nFlogs = require (path.join(__dirname,'logs.js'))
 
 var Simjs = require('./sim-0.26.js');
 var Sim=Simjs.Sim;
@@ -54,33 +54,6 @@ if (!fs.existsSync(resultsFolder)){fs.mkdirSync(resultsFolder)}
 
 
 
-var writetimelog = function(dirPath,name,data,zip){
-	if (!fs.existsSync(dirPath)){
-		    fs.mkdirSync(dirPath);
-		}
-	//fs.writeFile(path.format({dir:dirPath,base:timestamp +".json"}),JSON.stringify(data))
-	//myzip = zlib.gzip(JSON.stringify(data))
-	
-	var dataout = JSON.stringify(data)
-
-	if (zip){
-		zlib.gzip(dataout, function (error, result) {
-		   if (error) throw error;
-		     fs.writeFile(path.format({dir:dirPath,base:name +".json.gz"}),result, function(err) {
-			  if (err) throw err;
-			  //console.log(name)
-			})//writefile
-		});//zlib
-	}
-	else {
-		 fs.writeFile(path.format({dir:dirPath,base:name +".json"}),dataout, function(err) {
-		  if (err) throw err;
-		  //console.log(name)
-		})//writefile
-	}
-}
-
-
 var addPCuser = function(id,vehicle,chargelevel,departuretime,desiredcharge){
 	//add user to user array for simulation
 	// add user to date folder...
@@ -105,12 +78,19 @@ var getRealtimefromSimtime = function(simtime){}
 
 exports.test = function test(){return 'Hello'}
 
-exports.simulate = function(simData,type){
+exports.simulate = function(simData,simUID){
 
 	var settings = [] //simulation settings
 	var vehicleslist=[] //list of active vehicles.
-	var vehicleData=[]
-	var simID = new Date().getTime() //"biglog";
+	var vehicleData=[];
+	//var simID = "" //new Date().getTime() //"biglog";
+	
+	// unless you pass a simID i will todays date and overwrite
+	var simID = simUID?simUID: Date.today().toString("yyyy_MM_dd")//"biglog";
+
+
+	
+	
 	//fs.writeFileSync(resultsFolder + simID+".json","[{}")
 	var sim = new Sim(simID);
 	sim.addEntity
@@ -118,11 +98,11 @@ exports.simulate = function(simData,type){
 	var number_of_vehicles=0
 	var simdir = path.join(resultsFolder,simID.toString())
 	var vehdir = path.join(simdir,"veh")
-	var systemdir = path.join(resultsFolder,"data","Users")
-	var userdir = 
+	var systemdir = path.join(simdir,"system")
+	var userdir = path.join(simdir,"PCusers")
 	if (!fs.existsSync(simdir)){fs.mkdirSync(simdir)}
 	if (!fs.existsSync(vehdir)){fs.mkdirSync(vehdir)}
-	if (!fs.existsSync(systemdir)){fs.mkdirSync(systemdir)}
+	if (!fs.existsSync(userdir)){fs.mkdirSync(userdir)}
 
 
 		settings.push(simID)
@@ -231,9 +211,9 @@ var Park = new Sim.Facility("park", Sim.Facility.FCFS,simData.simSlots)//this ma
 				 			genSolar =  Park.solarGeneration.periodOutput("May",period)
 				 			//console.log(Controller.log)
  							// sysLog.push({Veh:this.vehStatus,Cap:Park.caps(),Park:Park.status()})
- 							writetimelog(systemdir,sim.time(),{Veh:this.vehStatus,Cap:Park.caps(),Park:Park.status()},true)
+ 							nFlogs.timelog(systemdir,sim.time(),{Veh:this.vehStatus,Cap:Park.caps(),Park:Park.status()},true)
  			               	this.vehStatus=[];
- 			               	writetimelog(vehdir,sim.time(),vehicleData,true)
+ 			               	nFlogs.timelog(vehdir,sim.time(),vehicleData,true)
  			               	vehicleData=[];
  			               	//request data from vehicle...
  							this.send({c:"status",data:this.vehStatus,control:this.Constraints},0);
@@ -756,8 +736,7 @@ var Park = new Sim.Facility("park", Sim.Facility.FCFS,simData.simSlots)//this ma
 	sim.finalize()
 	
 	
-	writetimelog(simdir,"settings",[settings,vehicleslist],false)
-
+	nFlogs.timelog(simdir,"settings",[settings,vehicleslist],false)
     console.log("Simulation End")
   
 

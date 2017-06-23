@@ -1,0 +1,39 @@
+{
+    "title": "User",
+    "description": "Defines a user for adding to simulation",
+    "type": "object",
+    "properties": {
+        "uid": {
+            "description": "unique id - hash of email",
+            "type": "string"
+        },
+        "arrivaldatetime": {
+            "description": "The arrival time of the user - RFC3339 date string from Date.now()).toISOString(). eg 2017-06-23T10:36:20.685Z ",
+            "type": "string",
+            "format": "date-time"
+        },
+        "departuredatetime": {
+            "description": "The departure time of the user  RFC3339 date string from Date.now()).toISOString(). eg 2017-06-23T10:36:20.685Z",
+            "type": "string",
+            "format": "date-time"
+        },
+        "vehicleId": {
+            "description": "Id of vehicle model from Vehicle database: if nothing passed a random vehiocle will be assigned",
+            "type": "number",
+            "minimum":0
+        },
+         "currentcharge": {
+            "description": "State of charge of vehicle on arrival:percentage - for now will be simulated",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+        },
+         "netformcharge": {
+            "description": "Required state of charge on departure:percentage - if nothing passed then 80% is assumed",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+        }
+    },
+    "required": ["uid","arrivaldatetime","departuredatetime","vehicleId","netformcharge"]
+}
