@@ -8,29 +8,35 @@ var fs = require('graceful-fs')
 require('datejs')
 var write = require (path.join(appDir,"sim_modules",'logs.js'))
 
+///TODO ---- move to own file/////////////////////////////////
 var addUser = function(obj){
   var simid = Date.today().toString("yyyy_MM_dd")
   var userFolder = path.join(appDir,"results",simid)
   var userFile = path.join(userFolder,"users.json")
   if (!fs.existsSync(userFolder)){fs.mkdirSync(userFolder)} // make folder 
-  if (!fs.existsSync(userFile)){fs.writeFileSync(userFile,"[]",function(err){if (err) throw err;})}//writefile} // make usersfile 
+  if (!fs.existsSync(userFile)){fs.writeFileSync(userFile,"[]",function(err){if (err) throw err;})} // make usersfile 
   // check if user already exists  
-  var users =  fs.readFileSync(userFile)
+  var users =  JSON.parse(fs.readFileSync(userFile))
   userExists=users.findIndex(function (el) {return el.uid == obj.uid;})
-  //console.log(userExists)
-  userExists==-1?createUser(userFolder,users,obj):updateUser(obj)
-  //console.log(users,obj)
+  userExists==-1?createUser(userFolder,users,obj):updateUser(userFolder,users,obj,userExists)
   return "user added/updated"
 }
-var createUser = function(userFolder,users,obj){
-    var u=[]
 
+var createUser = function(userFolder,users,obj){
     users.push(obj)
     write.timelog(userFolder,"users",users,false)
+    return true
 }
 
+var updateUser = function(userFolder,users,obj,updateIndex){
+  console.log("update")
+  users[updateIndex]=obj
+  write.timelog(userFolder,"users",users,false)
+  return true
+}
+//////////////////////////////////////////////////////////
 
-var updateUser = function(obj){console.log("update")}
+
 
 /* GET users listing. */
 router.get('/',function(req,res,next){
@@ -45,27 +51,22 @@ router.get('/add', function(req, res, next) {
   res.send(data);
 });
 
-router.post('/add', function(req, res, next) {
+
+router.post('/update', function(req, res, next) {
   var schema = require(path.join(appDir,"data","Users","template.json"))
   var data = req.body
   //check if input is valid against schema
   var ajv = new Ajv({allErrors: true});
   var validate = ajv.compile(schema);
   var valid = validate(data);
-  //var valid = ajv.validate(schema, data);
+ 
   output  = valid ? "Accepted:check back in a while to once the sim has run again" : ajv.errorsText(validate.errors)
-  //add to user list..
+  //add to user list
   valid?addUser(data):false
   res.send(output);
+  
 });
 
-router.get('/update', function(req, res, next) {
-  res.send('update user.. use post with id');
-});
-
-router.post('/update/:id', function(req, res, next) {
-  res.send('update user');
-});
 
 router.get('/:id',function(req,res,next){
   //list all users in current day
