@@ -3,12 +3,6 @@
 
 //ADD CHARGE DISCHARGE EVENTS..
 //START SIMPLE.. 
-//var SIM = require(__dirname+'/sim-0.26-node.js')
-//var _eval = require('eval')
-//var res = _eval(__dirname + '/sim-0.26.js')
-//var res=_eval('module.exports = require("'+__dirname+'/sim-0.26.js")',true)
-//console.clear()//lets start with a clean console.
-//var simjs= require('simjs')
 
 
 require("datejs")
@@ -19,19 +13,19 @@ var zlib = require('zlib')
 
 
 
-var nFlogs = require (path.join(__dirname,'logs.js'))
+var write = require (path.join(appDir,"sim_modules","logs.js"));
 
-var Simjs = require('./sim-0.26.js');
+var Simjs = require(path.join(appDir,"sim_modules","sim-0.26.js"));
 var Sim=Simjs.Sim;
 Sim.Random =Simjs.Random;
 
-
-var cModes = require('../data/charging_modes.json')
-var vArr = require('../data/vehicles.json')
-var uArr = require('../data/user_types.json')
-var profile_solar = require('../data/profile_solar.json')
-var API_MCS24 = require('../data/PV_API.json')
-var CarPark = require('../data/profile_parking.json')
+var dataFolder = path.join(appDir,"data");
+var cModes = require(path.join(dataFolder,"charging_modes"));
+var vArr = require(path.join(dataFolder,"vehicles"));
+var uArr = require(path.join(dataFolder,"user_types"));
+var profile_solar =require(path.join(dataFolder,"profile_solar")); 
+var API_MCS24 =require(path.join(dataFolder,"PV_API")); 
+var CarPark = require(path.join(dataFolder,"profile_parking"));
 var Cp=CarPark.commuterCP
 
 //var testData = require('../test/testdata.json')
@@ -40,33 +34,13 @@ var Cp=CarPark.commuterCP
 var resultsFolder = path.join(appDir,"results")
 if (!fs.existsSync(resultsFolder)){fs.mkdirSync(resultsFolder)}
 
-
-// var veh_maxchargerate = 0
-// for(i=0;i<vArr.length;i++){
-// 	veh_maxchargerate = vArr[i].C_Rate1 > veh_maxchargerate ? vArr[i].C_Rate1 : veh_maxchargerate;
-// }
-
-// var logwrite = function(logObj,name){
-// 	fs.appendFileSync(resultsFolder+name+".json", "," + JSON.stringify(logObj))
-// }
-
-
-
-
-
 var addPCuser = function(id,vehicle,chargelevel,departuretime,desiredcharge){
 	//add user to user array for simulation
 	// add user to date folder...
 	folderName = Date.today().toString("yyyy_MM_dd")
-
-
 }
 
-var getTimestampfromRealtime = function(realtime){
-	var currenttime = now()
-	
-}
-var getRealtimefromSimtime = function(simtime){}
+
 // var writesettings = function (dirPath,name,data){
 // 	if (!fs.existsSync(dirPath)){
 // 		    fs.mkdirSync(dirPath);
@@ -79,7 +53,7 @@ var getRealtimefromSimtime = function(simtime){}
 exports.test = function test(){return 'Hello'}
 
 exports.simulate = function(simData,simUID){
-
+	
 	var settings = [] //simulation settings
 	var vehicleslist=[] //list of active vehicles.
 	var vehicleData=[];
@@ -87,13 +61,10 @@ exports.simulate = function(simData,simUID){
 	
 	// unless you pass a simID i will todays date and overwrite
 	var simID = simUID?simUID: Date.today().toString("yyyy_MM_dd")//"biglog";
+	write.makeUserFiles(simID)
 
-
-	
-	
-	//fs.writeFileSync(resultsFolder + simID+".json","[{}")
 	var sim = new Sim(simID);
-	sim.addEntity
+	//sim.addEntity
 	var random = new Sim.Random(simData.simSeed);
 	var number_of_vehicles=0
 	var simdir = path.join(resultsFolder,simID.toString())
@@ -110,11 +81,14 @@ exports.simulate = function(simData,simUID){
 
 
 
-	var sysLog = []
+var sysLog = []
 	//var oData=simData
 	console.log("========")
 	console.log(simData)
 	console.log("========")
+
+	//load PCuser list
+var PCusers = JSON.parse(fs.readFileSync(path.join(appDir,"results",simID,"users.json")));
 
 var Park = new Sim.Facility("park", Sim.Facility.FCFS,simData.simSlots)//this manages timing and queuing
 	Park.report = function(){console.log(this)};
@@ -211,9 +185,9 @@ var Park = new Sim.Facility("park", Sim.Facility.FCFS,simData.simSlots)//this ma
 				 			genSolar =  Park.solarGeneration.periodOutput("May",period)
 				 			//console.log(Controller.log)
  							// sysLog.push({Veh:this.vehStatus,Cap:Park.caps(),Park:Park.status()})
- 							nFlogs.timelog(systemdir,sim.time(),{Veh:this.vehStatus,Cap:Park.caps(),Park:Park.status()},true)
+ 							write.timelog(systemdir,sim.time(),{Veh:this.vehStatus,Cap:Park.caps(),Park:Park.status()},true)
  			               	this.vehStatus=[];
- 			               	nFlogs.timelog(vehdir,sim.time(),vehicleData,true)
+ 			               	write.timelog(vehdir,sim.time(),vehicleData,true)
  			               	vehicleData=[];
  			               	//request data from vehicle...
  							this.send({c:"status",data:this.vehStatus,control:this.Constraints},0);
@@ -240,8 +214,11 @@ var Park = new Sim.Facility("park", Sim.Facility.FCFS,simData.simSlots)//this ma
  		vehArrival:function(pop,start,stop){//deals with 30 tick period...
  			//frquency for next
  			//console.log(sim.time(),pop,start,stop)
-
+			 
  			if (sim.time()<stop){
+				//check is PCuser vehicles need to be added..
+				
+
  					this.setTimer(random.normal(30/pop,1)).done(function(){//set time to next vehicle...can be more complex
 		        			sim.addEntity(Vehicle);
 		        			this.vehArrival(pop,start,stop);
@@ -249,6 +226,10 @@ var Park = new Sim.Facility("park", Sim.Facility.FCFS,simData.simSlots)//this ma
 			}
  		},
  		start:function(){
+			 	//sort added users
+				//add arrival time in ticks
+				//departure time in ticks
+				
  						if(simData.eventsDischarge=="on"){this.setDischargeEvents()};//set up discharge requests.
  						
  						//console.log("controller started");
@@ -318,6 +299,7 @@ var Park = new Sim.Facility("park", Sim.Facility.FCFS,simData.simSlots)//this ma
  		netformModulation:1,
  		prediction:{},//provides netform control for modulating rate/discharge...
  		state:"",
+		nfAppid:"",
  		NF_vehStatus:[],
  		Constraints:[],
  		//log:[],
@@ -337,7 +319,6 @@ var Park = new Sim.Facility("park", Sim.Facility.FCFS,simData.simSlots)//this ma
  		charge:function(live){//live uses NF modulator, and updates this..  --- not live updates predition object..
  			//if(this.id==2){console.log(live,sim.time(),this.current,this.prediction)}
  			switch(this.statusCode){
-
  				case 1: //on charge point
  						//capture current conditions for prediction run/
  						rate=this.rate
@@ -616,6 +597,7 @@ var Park = new Sim.Facility("park", Sim.Facility.FCFS,simData.simSlots)//this ma
 	    	    //number_of_vehicles++
 	    		//stats_vehicles.record(number_of_vehicles,sim.time());
 		    	//get vehicle type,set user and current state of charge
+				this.model = this.model==""?vArr[(random.random()*(vArr.length-1)).toFixed(0)]:vArr[this.model]
 		    	this.model=vArr[(random.random()*(vArr.length-1)).toFixed(0)];
 		    	this.user=uArr[(random.random()*(uArr.length-1)).toFixed(0)];
 	 			this.current=random.uniform(1, this.model.MaxCapacity);//current battery charge
@@ -678,6 +660,7 @@ var Park = new Sim.Facility("park", Sim.Facility.FCFS,simData.simSlots)//this ma
 	    						   chargeStatus:this.chargeStatus,
 	    						   //model:this.model,
 	    						   user:this.user,
+								   nfAppId:this.nfAppId,
 	    						   arrival:this.arrival,
 	    						   departure:this.departureTime,
 	    						   prediction:this.prediction,
@@ -688,6 +671,7 @@ var Park = new Sim.Facility("park", Sim.Facility.FCFS,simData.simSlots)//this ma
 
 	    				var logObj = {
 	    					"id":this.id,
+							"nfAppId":this.nfAppId,
 	    					"statusCode":this.statusCode,
 	    					"rate":this.rate.toFixed(4),
 	    					"percent":st,
@@ -724,6 +708,23 @@ var Park = new Sim.Facility("park", Sim.Facility.FCFS,simData.simSlots)//this ma
 
    
 	sim.addEntity(Controller)
+	//add additional user vehicles.....
+
+	
+	PCusers.forEach(function(PCu){
+			 console.log(PCu);
+			// var myVeh=sim.addEntity(Vehicle)
+			 //myid = PCu.uid
+			 var xveh = sim.addEntity(Vehicle)
+			// PCVeh[myid]=xveh.id
+			console.log("in",xveh)
+			 xveh.nfAppId = PCu.uid;
+			 xveh.arrival = 1;
+			console.log("out",xveh)
+
+	})
+	
+	
 	sim.addEntity(Vehicle);
 	sim.simulate(simData.simLength);
 	//system.tempsolar=Park.solarGeneration.profile.May
@@ -736,7 +737,7 @@ var Park = new Sim.Facility("park", Sim.Facility.FCFS,simData.simSlots)//this ma
 	sim.finalize()
 	
 	
-	nFlogs.timelog(simdir,"settings",[settings,vehicleslist],false)
+	write.timelog(simdir,"settings",[settings,vehicleslist],false)
     console.log("Simulation End")
   
 

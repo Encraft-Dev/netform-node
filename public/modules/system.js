@@ -328,7 +328,7 @@ function fireSim(){
 					//system.log[0]=v;
 					console.log("loaded")
 					//visualise(system.log[0],0)
-					softloadSystem(d[0],0,1440);
+					softloadSystem(d[0],0,data.simLength);
 				})
 			.fail(function(jqX,status,err){console.log("error:",err,JSON.stringify(jqX))})
 				
