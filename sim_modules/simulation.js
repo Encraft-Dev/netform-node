@@ -53,15 +53,20 @@ var addPCuser = function(id,vehicle,chargelevel,departuretime,desiredcharge){
 exports.test = function test(){return 'Hello'}
 
 exports.simulate = function(simData,simUID){
-	
+
+		
+
+
 	var settings = [] //simulation settings
 	var vehicleslist=[] //list of active vehicles.
 	var vehicleData=[];
 	//var simID = "" //new Date().getTime() //"biglog";
 	
 	// unless you pass a simID i will todays date and overwrite
-	var simID = simUID?simUID: Date.today().toString("yyyy_MM_dd")//"biglog";
+	var simID = simData.simID!=""?simUID: Date.today().toString("yyyy_MM_dd")//"biglog";
 	write.makeUserFiles(simID)
+	// add users if for testing
+
 
 	var sim = new Sim(simID);
 	//sim.addEntity

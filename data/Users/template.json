@@ -19,8 +19,9 @@
         },
         "vehicleId": {
             "description": "Id of vehicle model from Vehicle database: if nothing passed a random vehiocle will be assigned",
-            "type": "number",
-            "minimum":0
+            "type": "integer",
+            "minimum":0,
+            "maximum":21
         },
          "currentcharge": {
             "description": "State of charge of vehicle on arrival:percentage - for now will be simulated",

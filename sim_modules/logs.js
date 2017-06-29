@@ -1,7 +1,7 @@
 var fs = require('graceful-fs')
 var zlib = require('zlib')
 var appDir = path.dirname(require.main.filename);
-require(datejs)
+require("datejs")
 
 exports.timelog = function(dirPath,name,data,zip){
 	if (!fs.existsSync(dirPath)){
