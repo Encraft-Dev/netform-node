@@ -31,8 +31,6 @@ var Cp=CarPark.commuterCP
 //var testData = require('../test/testdata.json')
 
 
-var resultsFolder = path.join(appDir,"results")
-if (!fs.existsSync(resultsFolder)){fs.mkdirSync(resultsFolder)}
 
 var addPCuser = function(id,vehicle,chargelevel,departuretime,desiredcharge){
 	//add user to user array for simulation
@@ -40,21 +38,8 @@ var addPCuser = function(id,vehicle,chargelevel,departuretime,desiredcharge){
 	folderName = Date.today().toString("yyyy_MM_dd")
 }
 
-
-// var writesettings = function (dirPath,name,data){
-// 	if (!fs.existsSync(dirPath)){
-// 		    fs.mkdirSync(dirPath);
-// 		}
-// 	fs.writeFile(path.format({ root: dirPath,  base:name+ "settings.json"}),JSON.stringify(data))
-// }
-
-//zlib.gzip(JSON.stringify(data), (_, buf) -> fs.writeFile(path.format({ root: resultsFolder,  base: "settings.json.gz"}), buf))
-
 exports.test = function test(){return 'Hello'}
-
-exports.simulate = function(simData,simUID){
-
-		
+exports.simulate = function(simData){
 
 
 	var settings = [] //simulation settings
@@ -63,8 +48,12 @@ exports.simulate = function(simData,simUID){
 	//var simID = "" //new Date().getTime() //"biglog";
 	
 	// unless you pass a simID i will todays date and overwrite
-	var simID = simData.simID!=""?simUID: Date.today().toString("yyyy_MM_dd")//"biglog";
-	write.makeUserFiles(simID)
+	console.log("simdata",simData.simID)
+	
+	var simID = (simData.simID=='' || simData.simID =='undefined')? Date.today().toString("yyyy_MM_dd"): simData.simID//"biglog";
+	
+	console.log("SIMID:",simID)
+	var simFolder = write.makeSimFiles(simID)
 	// add users if for testing
 
 
@@ -72,11 +61,9 @@ exports.simulate = function(simData,simUID){
 	//sim.addEntity
 	var random = new Sim.Random(simData.simSeed);
 	var number_of_vehicles=0
-	var simdir = path.join(resultsFolder,simID.toString())
-	var vehdir = path.join(simdir,"veh")
-	var systemdir = path.join(simdir,"system")
-	var userdir = path.join(simdir,"PCusers")
-	if (!fs.existsSync(simdir)){fs.mkdirSync(simdir)}
+	var vehdir = path.join(simFolder,"veh")
+	var systemdir = path.join(simFolder,"system")
+	var userdir = path.join(simFolder,"PCusers")
 	if (!fs.existsSync(vehdir)){fs.mkdirSync(vehdir)}
 	if (!fs.existsSync(userdir)){fs.mkdirSync(userdir)}
 
@@ -742,7 +729,7 @@ var Park = new Sim.Facility("park", Sim.Facility.FCFS,simData.simSlots)//this ma
 	sim.finalize()
 	
 	
-	write.timelog(simdir,"settings",[settings,vehicleslist],false)
+	write.timelog(simFolder,"settings",[settings,vehicleslist],false)
     console.log("Simulation End")
   
 

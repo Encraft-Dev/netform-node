@@ -26,14 +26,21 @@ exports.timelog = function(dirPath,name,data,zip){
 	}
 }
 
+exports.resultsFolder = function(){
+	resultsF = path.join(appDir,"results")
+	if (!fs.existsSync(resultsF)){fs.mkdirSync(resultsF)}
+	return resultsF;
+}
 
-exports.makeUserFiles = function(simid){
+exports.makeSimFiles = function(simid){
   //var simid = Date.today().toString("yyyy_MM_dd")
-  var userFolder = path.join(appDir,"results",simid)
-  var userFile = path.join(userFolder,"users.json")
-  if (!fs.existsSync(userFolder)){fs.mkdirSync(userFolder)} // make folder 
+  var resultsFolder = path.join(appDir,"results")//check results root exists
+  var simFolder = path.join(resultsFolder,simid) // check sim folder exists
+  var userFile = path.join(simFolder,"users.json")//ensure users file exists
+  if (!fs.existsSync(resultsFolder)){fs.mkdirSync(resultsFolder)} // make folder 
+  if (!fs.existsSync(simFolder)){fs.mkdirSync(simFolder)} // make folder 
   if (!fs.existsSync(userFile)){fs.writeFileSync(userFile,"[]")} // make usersfile 
-  return true;
+  return simFolder ;//true;
 }
 
 
