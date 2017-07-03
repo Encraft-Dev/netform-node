@@ -9,13 +9,10 @@ var users = require('./routes/users')
 var app = express();
 
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-// compress all responses // do not use here..
-//app.use(compression())
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-//app.use('/', index);
 app.use('/api', api);//sim api
 app.use('/users', users);//users api
 //deal with sending results back
@@ -32,16 +29,6 @@ app.get("/results/*", function (req, res, next) {
 //set static paths
 app.use("/results",express.static(path.join(__dirname, 'results')))
 app.use("/data",express.static(path.join(__dirname, 'data')))
-//,{
-//   extensions:['gz','json.gz'],
-//   setHeaders: function(res,path){
-//       res.set({'Content-Encoding':'gzip'})
-//     }
-// }))
-//app.use('/results',results)
-//serve gzipped simulation results
-
-
 app.use("/", express.static(path.join(__dirname,'public')));
 
 // catch 404 and forward to error handler
