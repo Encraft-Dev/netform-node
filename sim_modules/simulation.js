@@ -14,7 +14,6 @@ var zlib = require('zlib')
 
 
 var write = require (path.join(appDir,"sim_modules","logs.js"));
-
 var Simjs = require(path.join(appDir,"sim_modules","sim-0.26.js"));
 var Sim=Simjs.Sim;
 Sim.Random =Simjs.Random;
@@ -48,11 +47,11 @@ exports.simulate = function(simData){
 	//var simID = "" //new Date().getTime() //"biglog";
 	
 	// unless you pass a simID i will todays date and overwrite
-	console.log("simdata",simData.simID)
+	//console.log("simdata",simData.simID)
 	
 	var simID = (simData.simID=='' || simData.simID =='undefined')? Date.today().toString("yyyy_MM_dd"): simData.simID//"biglog";
 	
-	console.log("SIMID:",simID)
+	//console.log("SIMID:",simID)
 	var simFolder = write.makeSimFiles(simID)
 	// add users if for testing
 
@@ -75,9 +74,9 @@ exports.simulate = function(simData){
 
 var sysLog = []
 	//var oData=simData
-	console.log("========")
-	console.log(simData)
-	console.log("========")
+	//console.log("========")
+	//console.log(simData)
+	//console.log("========")
 
 	//load PCuser list
 var PCusers = JSON.parse(fs.readFileSync(path.join(appDir,"results",simID,"users.json")));

@@ -8,42 +8,7 @@ var Ajv = require('ajv');
 var fs = require('graceful-fs')
 require('datejs')
 var write = require (path.join(appDir,"sim_modules",'logs.js'))
-
-///TODO ---- move to own file/////////////////////////////////
-var addUser = function(obj){
-  console.log("add user")
-  var simid = Date.today().toString("yyyy_MM_dd")
-  logs.makeUserFiles(simid)
-  var users =  JSON.parse(fs.readFileSync(userFile))
-  userExists=users.findIndex(function (el) {return el.uid == obj.uid;})
-  userExists==-1?createUser(userFolder,users,obj):updateUser(userFolder,users,obj,userExists)
-  return "user added/updated"
-}
-
-var createUser = function(userFolder,users,obj){
-    console.log("create user")
-    users.push(obj)
-    write.timelog(userFolder,"users",users,false)
-    return true
-}
-
-var updateUser = function(userFolder,users,obj,updateIndex){
-  console.log("update")
-  users[updateIndex]=obj
-  write.timelog(userFolder,"users",users,false)
-  return true
-}
-
-// exports.makeUserFiles = function(simid){
-//   //var simid = Date.today().toString("yyyy_MM_dd")
-//   var userFolder = path.join(appDir,"results",simid)
-//   var userFile = path.join(userFolder,"users.json")
-//   if (!fs.existsSync(userFolder)){fs.mkdirSync(userFolder)} // make folder 
-//   if (!fs.existsSync(userFile)){fs.writeFileSync(userFile,"[]")} // make usersfile 
-//   return true;
-// }
-//////////////////////////////////////////////////////////
-
+var users = require (path.join(appDir,"sim_modules",'users.js'))
 
 
 /* GET users listing. */
@@ -51,7 +16,7 @@ router.get('/',function(req,res,next){
   //list all users in current day
   
   var simid = Date.today().toString("yyyy_MM_dd")
-  write.makeUserFiles(simid)
+  write.makeSimFiles(simid)
   
   var data = JSON.parse(fs.readFileSync(path.join(appDir,"results",simid,"users.json")));// require(path.join(appDir,"results",simid,"users.json"))
   res.send(data);
@@ -62,6 +27,18 @@ router.get('/add', function(req, res, next) {
   res.send(data);
 });
 
+router.post('/add',function(req,res,next){
+  var schema = require(path.join(appDir,"data","Users","template.json"))
+  var data = req.body;
+  var ajv = new Ajv({allErrors: true});
+  var validate = ajv.compile(schema);
+  var valid = validate(data);
+
+  output  = valid ? {'Accepted':'check back in a while to once the sim has run again'} : ajv.errorsText(validate.errors)
+  valid?users.addUser(data):false
+  res.send(output);
+
+});
 
 router.post('/update', function(req, res, next) {
   var schema = require(path.join(appDir,"data","Users","template.json"))
@@ -73,7 +50,7 @@ router.post('/update', function(req, res, next) {
  
   output  = valid ? "Accepted:check back in a while to once the sim has run again" : ajv.errorsText(validate.errors)
   //add to user list
-  valid?addUser(data):false
+  valid?users.addUser(data):false
   res.send(output);
   
 });

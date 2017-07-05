@@ -3,6 +3,15 @@ var zlib = require('zlib')
 var appDir = path.dirname(require.main.filename);
 require("datejs")
 
+
+var folders = exports.folders = {
+	'results':"",
+	'sim':"",
+	'user':"",
+	'userFile':""
+};
+
+
 exports.timelog = function(dirPath,name,data,zip){
 	if (!fs.existsSync(dirPath)){
 		    fs.mkdirSync(dirPath);
@@ -26,21 +35,21 @@ exports.timelog = function(dirPath,name,data,zip){
 	}
 }
 
-exports.resultsFolder = function(){
-	resultsF = path.join(appDir,"results")
-	if (!fs.existsSync(resultsF)){fs.mkdirSync(resultsF)}
-	return resultsF;
-}
+// exports.resultsFolder = function(){
+// 	resultsF = path.join(appDir,"results")
+// 	if (!fs.existsSync(resultsF)){fs.mkdirSync(resultsF)}
+// 	return resultsF;
+// }
 
 exports.makeSimFiles = function(simid){
   //var simid = Date.today().toString("yyyy_MM_dd")
-  var resultsFolder = path.join(appDir,"results")//check results root exists
-  var simFolder = path.join(resultsFolder,simid) // check sim folder exists
-  var userFile = path.join(simFolder,"users.json")//ensure users file exists
-  if (!fs.existsSync(resultsFolder)){fs.mkdirSync(resultsFolder)} // make folder 
-  if (!fs.existsSync(simFolder)){fs.mkdirSync(simFolder)} // make folder 
-  if (!fs.existsSync(userFile)){fs.writeFileSync(userFile,"[]")} // make usersfile 
-  return simFolder ;//true;
+  folders.results = path.join(appDir,"results")//check results root exists
+  folders.sim = path.join(folders.results,simid) // check sim folder exists
+  folders.userFile = path.join(folders.sim,"users.json")//ensure users file exists
+  if (!fs.existsSync(folders.results)){fs.mkdirSync(folders.results)} // make folder 
+  if (!fs.existsSync(folders.sim)){fs.mkdirSync(folders.sim)} // make folder 
+  if (!fs.existsSync(folders.userFile)){fs.writeFileSync(folders.userFile,"[]")} // make usersfile 
+  return folders.sim ;//true;
 }
 
 
