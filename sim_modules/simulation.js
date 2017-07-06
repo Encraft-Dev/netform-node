@@ -11,455 +11,437 @@ path = require('path');
 var appDir = path.dirname(require.main.filename);
 var zlib = require('zlib')
 
+var config = require(path.join(appDir, "sim_modules", "config"));
+var write = require(path.join(appDir, "sim_modules", "logs"));
+var users = require(path.join(appDir, "sim_modules", "users"));
+var Simjs = require(path.join(appDir, "sim_modules", "sim-0.26"));
 
 
-var write = require (path.join(appDir,"sim_modules","logs.js"));
-var Simjs = require(path.join(appDir,"sim_modules","sim-0.26.js"));
-var Sim=Simjs.Sim;
-Sim.Random =Simjs.Random;
+var dataFolder = path.join(appDir, "data");
+var cModes = require(path.join(dataFolder, "charging_modes"));
+var vArr = require(path.join(dataFolder, "vehicles"));
+var uArr = require(path.join(dataFolder, "user_types"));
+var profile_solar = require(path.join(dataFolder, "profile_solar"));
+var API_MCS24 = require(path.join(dataFolder, "PV_API"));
+var CarPark = require(path.join(dataFolder, "profile_parking"));
+var Cp = CarPark.commuterCP
+exports.test = function test() { return 'Hello' }
 
-var dataFolder = path.join(appDir,"data");
-var cModes = require(path.join(dataFolder,"charging_modes"));
-var vArr = require(path.join(dataFolder,"vehicles"));
-var uArr = require(path.join(dataFolder,"user_types"));
-var profile_solar =require(path.join(dataFolder,"profile_solar")); 
-var API_MCS24 =require(path.join(dataFolder,"PV_API")); 
-var CarPark = require(path.join(dataFolder,"profile_parking"));
-var Cp=CarPark.commuterCP
-
-//var testData = require('../test/testdata.json')
-
-
-
-var addPCuser = function(id,vehicle,chargelevel,departuretime,desiredcharge){
-	//add user to user array for simulation
-	// add user to date folder...
-	folderName = Date.today().toString("yyyy_MM_dd")
-}
-
-exports.test = function test(){return 'Hello'}
-exports.simulate = function(simData){
+var Sim = Simjs.Sim;
+Sim.Random = Simjs.Random;
+exports.simulate = function (simData) {
 
 
 	var settings = [] //simulation settings
-	var vehicleslist=[] //list of active vehicles.
-	var vehicleData=[];
+	var vehicleslist = [] //list of active vehicles.
+	var vehicleData = [];
 	//var simID = "" //new Date().getTime() //"biglog";
-	
+
 	// unless you pass a simID i will todays date and overwrite
 	//console.log("simdata",simData.simID)
-	
-	var simID = (simData.simID=='' || simData.simID =='undefined')? Date.today().toString("yyyy_MM_dd"): simData.simID//"biglog";
-	
+
+	var simID = (simData.simID == '' || simData.simID == 'undefined') ? Date.today().toString("yyyy_MM_dd") : simData.simID//"biglog";
+
 	//console.log("SIMID:",simID)
 	var simFolder = write.makeSimFiles(simID)
-	// add users if for testing
-
-
 	var sim = new Sim(simID);
 	//sim.addEntity
 	var random = new Sim.Random(simData.simSeed);
-	var number_of_vehicles=0
-	var vehdir = path.join(simFolder,"veh")
-	var systemdir = path.join(simFolder,"system")
-	var userdir = path.join(simFolder,"PCusers")
-	if (!fs.existsSync(vehdir)){fs.mkdirSync(vehdir)}
-	if (!fs.existsSync(userdir)){fs.mkdirSync(userdir)}
+	var number_of_vehicles = 0
 
+	settings.push(simID)
+	settings.push(simData)
+	settings.PCusers = simData.PCUsers// JSON.parse(fs.readFileSync(write.folders.userFile));
 
-		settings.push(simID)
-		settings.push(simData)
-
-
-
-var sysLog = []
+	var sysLog = []
 	//var oData=simData
 	//console.log("========")
 	//console.log(simData)
 	//console.log("========")
 
 	//load PCuser list
-var PCusers = JSON.parse(fs.readFileSync(path.join(appDir,"results",simID,"users.json")));
+	//console.log(settings.PCusers)
 
-var Park = new Sim.Facility("park", Sim.Facility.FCFS,simData.simSlots)//this manages timing and queuing
-	Park.report = function(){console.log(this)};
-	Park.caps = function(){
-	  st = sim.entities
-	  ca = 0;
-	  cu = 0;
-	  if (st.length>1){
-			for (i=1;i<st.length;i++){
-				if(st[i].statusCode == 1){
-					cu+=st[i].current
-					ca+=st[i].model.MaxCapacity
+	var Park = new Sim.Facility("park", Sim.Facility.FCFS, simData.simSlots)//this manages timing and queuing
+	Park.report = function () { console.log(this) };
+	Park.caps = function () {
+		st = sim.entities
+		ca = 0;
+		cu = 0;
+		if (st.length > 1) {
+			for (i = 1; i < st.length; i++) {
+				if (st[i].statusCode == 1) {
+					cu += st[i].current
+					ca += st[i].model.MaxCapacity
 				}
 			}
-	  }
-	return {currentCap:cu,maximumCap:ca};
-};
- 	Park.status = function(){
- 			
- 			f=  this.free //number of aviable slots
- 			q=  this.queue.data.length//population in queue
- 			ps= this.stats.population - q;
- 			pq=q;
- 			t=this.total
- 			pe=t-this.stats.population;
- 			// s=sim.entities
+		}
+		return { currentCap: cu, maximumCap: ca };
+	};
+	Park.status = function () {
 
- 			return {SlotsFree:f,onSlot:ps,Queue:pq,Exited:pe,Total:t,GenSolar:this.solarGeneration.tickOutput("May",sim.time())}
- 	}
- 	Park.total= 0;
- 	Park.inQueue = function(id){
- 			q=1;
- 			t=this.queue.data;
- 			for (i=0;i<t.length;i++){
- 					if(t[i].entity.id===id){q=0}
- 				}
- 			//console.log(id,q,sim.time(),this.queue.data)
- 			return q;
- 	};
- 	Park.solarGeneration = {
- 		profile:{},
- 		init:function(){
- 			//get profile and adjust for system size.
- 			//turn daily into actual..
- 			////get system size from data settings file
+		f = this.free //number of aviable slots
+		q = this.queue.data.length//population in queue
+		ps = this.stats.population - q;
+		pq = q;
+		t = this.total
+		pe = t - this.stats.population;
+		// s=sim.entities
 
-
- 			for(i=0;i<profile_solar.length;i++){
- 				monthly = profile_solar[i].Monthly*simData.solarOut
- 				data=[];
- 				for (j=0;j<24;j++){
- 					data.push(profile_solar[i][j]*monthly)
- 					data.push(profile_solar[i][j]*monthly)//do again for 23 period data
- 				}
-
- 				this.profile[profile_solar[i].Month]={"monthly":monthly,"data":data}
- 			}
- 		},
- 		periodOutput:function(month,period){
- 			//console.log(this.profile[month],this.profile[month].data[10])
- 			return this.profile[month].data[period]/Date.getDaysInMonth(2017, Date.getMonthNumberFromName(month))
- 		},
- 		tickOutput:function(month,tick){
- 			//interpolate solar output to each minute (tick)
- 			period = Math.floor(tick/30)
-  			period =  period > 47 ? 0: period
-  			genSolar =  Park.solarGeneration.periodOutput(month,period)
+		return { SlotsFree: f, onSlot: ps, Queue: pq, Exited: pe, Total: t, GenSolar: this.solarGeneration.tickOutput("May", sim.time()) }
+	}
+	Park.total = 0;
+	Park.inQueue = function (id) {
+		q = 1;
+		t = this.queue.data;
+		for (i = 0; i < t.length; i++) {
+			if (t[i].entity.id === id) { q = 0 }
+		}
+		//console.log(id,q,sim.time(),this.queue.data)
+		return q;
+	};
+	Park.solarGeneration = {
+		profile: {},
+		init: function () {
+			//get profile and adjust for system size.
+			//turn daily into actual..
+			////get system size from data settings file
 
 
- 			return this.profile[month].data[period]/Date.getDaysInMonth(2017, Date.getMonthNumberFromName(month))
- 		}
- 	}
- 	Park.batteryStorage = {}
- 	Park.solarGeneration.init();
- 	//var SlotStore = new Sim.Sto
+			for (i = 0; i < profile_solar.length; i++) {
+				monthly = profile_solar[i].Monthly * simData.solarOut
+				data = [];
+				for (j = 0; j < 24; j++) {
+					data.push(profile_solar[i][j] * monthly)
+					data.push(profile_solar[i][j] * monthly)//do again for 23 period data
+				}
 
-
-
- 	//controller - starts,stops and provided global functions for the sim
- 	var Controller = {
- 		xlog:[],
- 		vehStatus:[],
- 		vehlog:[],
- 		dischargeEvents:[],
- 		Constraints:{},
- 		finalize:function(){},//sysLog = this.xlog;console.log("controller shut down")},
- 		sendTick:function(){
- 							this.setTimer(1).done(function(){this.sendTick()})
- 						},
- 		askStatus:function(){
- 							//console.log(this)
-				 			period = Math.floor(sim.time()/30)
-				 			period =  period > 47 ? 0: period
-				 			genSolar =  Park.solarGeneration.periodOutput("May",period)
-				 			//console.log(Controller.log)
- 							// sysLog.push({Veh:this.vehStatus,Cap:Park.caps(),Park:Park.status()})
- 							write.timelog(systemdir,sim.time(),{Veh:this.vehStatus,Cap:Park.caps(),Park:Park.status()},true)
- 			               	this.vehStatus=[];
- 			               	write.timelog(vehdir,sim.time(),vehicleData,true)
- 			               	vehicleData=[];
- 			               	//request data from vehicle...
- 							this.send({c:"status",data:this.vehStatus,control:this.Constraints},0);
- 							this.setTimer(1).done(function(){
-								this.askStatus()
-							})
- 						},
- 		askCommand:function(){this.send({c:"charge",data:this.vehStatus},0)},
- 		periodTick:function(){//set 30min related items
- 								period = Math.floor(sim.time()/30)
- 								period =  period > 47 ? 0: period
-		        				nextPeriod = period+1 > 47 ? 0: period+1
-		       					previousPeriod = period-1 > 0 ? period-1:47
-		        				periodPop = Cp[period]*simData.simSlots
-		        				previousPeriodPop = sim.time()<30 ? 0: Cp[previousPeriod]*simData.simSlots
-		        				addPop = periodPop - previousPeriodPop
-		        				addPop =  addPop<=0?0:addPop
-		        				this.vehArrival(addPop,sim.time(),sim.time()+30)
- 								//console.log(period,periodPop,previousPeriodPop,addPop)
-			 					this.setTimer(30).done(function(){//do it again
-			 								this.periodTick();
-			 					})
- 		},
- 		vehArrival:function(pop,start,stop){//deals with 30 tick period...
- 			//frquency for next
- 			//console.log(sim.time(),pop,start,stop)
-			 
- 			if (sim.time()<stop){
-				//check is PCuser vehicles need to be added..
-				
-
- 					this.setTimer(random.normal(30/pop,1)).done(function(){//set time to next vehicle...can be more complex
-		        			sim.addEntity(Vehicle);
-		        			this.vehArrival(pop,start,stop);
-		        	});
+				this.profile[profile_solar[i].Month] = { "monthly": monthly, "data": data }
 			}
- 		},
- 		start:function(){
-			 	//sort added users
-				//add arrival time in ticks
-				//departure time in ticks
-				
- 						if(simData.eventsDischarge=="on"){this.setDischargeEvents()};//set up discharge requests.
- 						
- 						//console.log("controller started");
- 							this.Constraints = {exportCap:simData.constraintsExportCap,importCap:simData.constraintsImportCap}
- 							this.askStatus();//set data logging going
- 				
- 							this.discharge();//set discharge going
- 							this.periodTick();//set half houly update going
-
- 							//this.askCommand();
- 							//fire random events fro discharging and charging...... including how long for...
- 							//this.sendTick();
- 							//add solar unit
- 							//add 
- 						},
- 		setDischargeEvents:function(){
- 			this.dischargeEvents.push({type:"Discharge",start:50,stop:80,capacity:20})
- 			this.dischargeEvents.push({type:"Discharge",start:90,stop:200,capacity:100})
- 			this.dischargeEvents.push({type:"Discharge",start:480,stop:550,capacity:100})
- 		},
- 		discharge:function(){
- 			//function needs to have array of discharge events
- 			//loop through events and discharge as required...
- 			disTrigger=false;
- 			disCap=0;
- 			 for(i=0;i<this.dischargeEvents.length;i++){
- 				 	 	d=this.dischargeEvents[i]
- 				 	
-	 			 	if (sim.time()>d.start && sim.time()<d.stop){
-		 			 	disTrigger=true;
-		 			 	disCap=disCap<d.capacity?disCap:d.capacity;
-	 			 	}
- 			 }
- 			if (disTrigger){
- 				this.send({c:"discharge",data:this.vehStatus,capacity:disCap},0)
- 			}
- 			else {this.send({c:"hold",data:this.vehStatus},0)}
- 			this.setTimer(1).done(function(){this.discharge()})
- 			//if export cap then ask for each avialable then  share between 
-
- 		},
- 		netformNegotiation:function(){
- 			//ask for predicted 
- 		},
- 		onMessage:function(sender,message){
- 			s = sender.id;
- 			this.vehStatus.push({s,message})
- 			//on
- 			//console.log(sender.id,message);
- 			//document.getElementById("log").innerHTML += "<pre>"+message.entityId+"</pre>";
- 		}
- 	}
-
- 	//vehicle object
- 	var Slot= {
- 		type:"Standard",
- 		modes:[3,7,22]
- 	}
+		},
+		periodOutput: function (month, period) {
+			//console.log(this.profile[month],this.profile[month].data[10])
+			return this.profile[month].data[period] / Date.getDaysInMonth(2017, Date.getMonthNumberFromName(month))
+		},
+		tickOutput: function (month, tick) {
+			//interpolate solar output to each minute (tick)
+			period = Math.floor(tick / 30)
+			period = period > 47 ? 0 : period
+			genSolar = Park.solarGeneration.periodOutput(month, period)
 
 
- 	var Vehicle = {
- 		statustext:"Awaiting charge point",
- 		statusCode:0,// 0 - in queue, 1-on charge point , -1 - exited
- 		chargeStatus:0, // 0 = not charging  // 1 = mode 1 charging   2= mode 2 charging // -1 mode 1 discharging  // -2 mode 2 discharging
- 		chargeStart:0,// time from start charging (for ramp up time)
- 		netformStatus:0,//0=not affect, number = modulation
- 		netformModulation:1,
- 		prediction:{},//provides netform control for modulating rate/discharge...
- 		state:"",
-		nfAppid:"",
- 		NF_vehStatus:[],
- 		Constraints:[],
- 		//log:[],
- 		model:"",
- 		user:"",
- 		current:0,
- 		rate:0,//negative for discharge/positive for charge
- 		//netformFactor:0
- 		netFF:0,//set using netformfactor function
- 		netFFPredicted:0,
- 		arrival:0,
- 		onSlotTime:0,
- 		departure:0,
- 		departureTime:0,
- 		facilitySlot:0,
- 		command:0, //default is charge //will need to object at some point to enable fast,slow chage and discharge/ currently is  
- 		charge:function(live){//live uses NF modulator, and updates this..  --- not live updates predition object..
- 			//if(this.id==2){console.log(live,sim.time(),this.current,this.prediction)}
- 			switch(this.statusCode){
- 				case 1: //on charge point
- 						//capture current conditions for prediction run/
- 						rate=this.rate
- 						current=this.current
- 						chargeStatus=this.chargeStatus
- 						chargeStart=this.chargeStart
- 						this.netformFactor();
- 						//run negotiation to set modulator....
- 						//this.netformModulation = this.negotiation()
- 						//add ramp up time (use rd???)
- 						chargeStatus=this.command //default to request						
- 						// if netform factor requires then charge me.
- 						if (this.netFF>1){chargeStatus=1}//fire netform....
-					
- 						if((current/this.model.MaxCapacity)>this.model.C_RDC && chargeStatus>0){chargeStatus=2}//slow drop towards top.
- 						if(chargeStatus==0 && simData.allowSlowCharge){chargeStatus=2}
- 							//console.log(simData)
- 						//do negotiation here...
- 						//
- 						neg=live?this.negotiation(chargeStatus,rate):{"status":chargeStatus,"rate":rate}
+			return this.profile[month].data[period] / Date.getDaysInMonth(2017, Date.getMonthNumberFromName(month))
+		}
+	}
+	Park.batteryStorage = {}
+	Park.solarGeneration.init();
+	//var SlotStore = new Sim.Sto
 
- 						chargeStatus=live?neg.status:chargeStatus;
- 						netformModulation=live?neg.rate:1;
 
- 						//this.id==2&&live?console.log(sim.time(),this.netFF,this.netFFPredicted,netformModulation):false
- 						//(this.id==6&&sim.time()>500&&sim.time()<550&&live)?console.log(sim.time(),chargeStatus,neg.rate,rate):false;
- 						if (this.model.MinCharge <= current && current <= this.model.MaxCapacity){// if able to charge/discharge.
- 						//	this.chargeStatus = this.command;//accept request // following  if statements  qualify
- 							//rd=1//rate direction + charging - discharging and ramp time
- 							switch (chargeStatus){
- 								case 2:
- 									rate=netformModulation*this.model.C_Rate2;
- 									chargeStart++;
- 									chargeStart=chargeStart<0?1:chargeStart;
- 									if(chargeStart<this.model.C_RUT){
- 										rate=rate*chargeStart/this.model.C_RUT
- 									//	if(this.id==2){console.log(rate)}
- 									}
- 								break;
- 								case 1: //charge
- 									rate=netformModulation*this.model.C_Rate1;
- 									chargeStart++;
- 									chargeStart=chargeStart<0?1:chargeStart;
- 									if(chargeStart<this.model.C_RUT){
- 										rate=rate*chargeStart/this.model.C_RUT
- 									}
- 								break;
- 								case -1: //discharge at default
- 									rate=(netformModulation*-1*this.model.D_Rate);
- 									chargeStart--;
- 									chargeStart=chargeStart>0?-1:chargeStart;
 
- 										if(chargeStart>-this.model.C_RUT){
- 										rate=rate*-1*chargeStart/this.model.C_RUT
- 									}
- 								break;
- 								case 0: //hold
- 									rate=0;
- 									chargeStart=0
- 								break;
- 								default:
- 							}
- 						};
+	//controller - starts,stops and provided global functions for the sim
+	var Controller = {
+		xlog: [],
+		vehStatus: [],
+		vehlog: [],
+		dischargeEvents: [],
+		Constraints: {},
+		finalize: function () { },//sysLog = this.xlog;console.log("controller shut down")},
+		sendTick: function () {
+			this.setTimer(1).done(function () { this.sendTick() })
+		},
+		askStatus: function () {
+			//console.log(this)
+			period = Math.floor(sim.time() / 30)
+			period = period > 47 ? 0 : period
+			genSolar = Park.solarGeneration.periodOutput("May", period)
+			//console.log(Controller.log)
+			// sysLog.push({Veh:this.vehStatus,Cap:Park.caps(),Park:Park.status()})
+			write.timelog(write.folders.sys, sim.time(), { Veh: this.vehStatus, Cap: Park.caps(), Park: Park.status() }, true)
+			this.vehStatus = [];
+			write.timelog(write.folders.veh, sim.time(), vehicleData, true)
+			vehicleData = [];
+			//request data from vehicle...
+			this.send({ c: "status", data: this.vehStatus, control: this.Constraints }, 0);
+			this.setTimer(1).done(function () {
+				this.askStatus()
+			})
+		},
+		askCommand: function () { this.send({ c: "charge", data: this.vehStatus }, 0) },
+		periodTick: function () {//set 30min related items
+			period = Math.floor(sim.time() / 30)
+			period = period > 47 ? 0 : period
+			nextPeriod = period + 1 > 47 ? 0 : period + 1
+			previousPeriod = period - 1 > 0 ? period - 1 : 47
+			periodPop = Cp[period] * simData.simSlots
+			previousPeriodPop = sim.time() < 30 ? 0 : Cp[previousPeriod] * simData.simSlots
+			addPop = periodPop - previousPeriodPop
+			addPop = addPop <= 0 ? 0 : addPop
+			this.vehArrival(addPop, sim.time(), sim.time() + 30)
+			//console.log(period,periodPop,previousPeriodPop,addPop)
+			this.setTimer(30).done(function () {//do it again
+				this.periodTick();
+			})
+		},
+		vehArrival: function (pop, start, stop) {//deals with 30 tick period...
+			//frquency for next
+			//console.log(sim.time(),pop,start,stop)
 
- 						//l=live?this.negotiation():false
- 						//modulation_rate=live?this.netformModulation:1; //set the factor is live run, use 1 if prediction run.
- 						//rate=modulation_rate*rate
- 						//chargeStatus=modulation_status
- 						//if(this.id==2){console.log(sim.time(),live,this.current,rate,modulation_rate,chargeStatus,this.netformFactor())}
+			if (sim.time() < stop) {
+				//check is PCuser vehicles need to be added..
 
- 						current +=  rate/60;
-						
- 						if(current > this.model.MaxCapacity && rate>0){
- 							current = this.model.MaxCapacity;
- 							rate=0;//add default to do nothing...
- 							chargeStatus=0;//default
- 							}
 
- 						if(current < this.model.MinCharge && rate<0){
- 							current = this.model.MinCharge;
- 							rate=0;//add default to do nothing...
- 							chargeStatus=0;//default
- 							}
+				this.setTimer(random.normal(30 / pop, 1)).done(function () {//set time to next vehicle...can be more complex
+					sim.addEntity(Vehicle);
+					this.vehArrival(pop, start, stop);
+				});
+			}
+		},
+		start: function () {
+			//sort added users
+			//add arrival time in ticks
+			//departure time in ticks
 
- 						//if not prediction
- 						if(live){
- 							this.rate=rate
- 							this.current=current
- 							this.chargeStatus=chargeStatus
- 							this.chargeStart=chargeStart
+			if (simData.eventsDischarge == "on") { this.setDischargeEvents() };//set up discharge requests.
 
- 							return true;
- 						}
- 						else
- 						{
- 							this.prediction = {
- 								rate:rate,
- 								current:current,
- 								chargeStatus:chargeStatus,
- 								chargeStart:chargeStart,
- 								netform:this.netFFPredicted
- 							}
- 							this.charge(true);
- 							return false;
- 						}
+			//console.log("controller started");
+			this.Constraints = { exportCap: simData.constraintsExportCap, importCap: simData.constraintsImportCap }
+			this.askStatus();//set data logging going
 
- 						//console.log(sim.time(),this.id,this.NF_vehStatus)
- 						// //*******************************
- 						// neg=this.negotiation()
- 						// this.rate=neg.rate;
- 						// this.chargeStatus=neg.chargeStatus
- 						// //this is the good stuff
- 						// //*********************************
- 						// //
- 				break;
- 				default:
- 				}
- 			},
- 		negotiation:function(cStatus,cRate){
- 			v=this.NF_vehStatus
- 			//if(this.id==4){console.log(v)}
- 			//oRate=this.rate;
- 			//oCS=this.chargeStatus;
- 			this.netformStatus=cStatus;//pass through from calc by default
-			this.netformModulation=1;
-			aRate=0;  //message.
-			nfRate=0;
-			rate=0;
-			nfList=[]
-			list=[];
-			tList=[];
-			nfMod=1;//modulate rate.... nf
+			this.discharge();//set discharge going
+			this.periodTick();//set half houly update going
+
+			//this.askCommand();
+			//fire random events fro discharging and charging...... including how long for...
+			//this.sendTick();
+			//add solar unit
+			//add 
+		},
+		setDischargeEvents: function () {
+			this.dischargeEvents.push({ type: "Discharge", start: 50, stop: 80, capacity: 20 })
+			this.dischargeEvents.push({ type: "Discharge", start: 90, stop: 200, capacity: 100 })
+			this.dischargeEvents.push({ type: "Discharge", start: 480, stop: 550, capacity: 100 })
+		},
+		discharge: function () {
+			//function needs to have array of discharge events
+			//loop through events and discharge as required...
+			disTrigger = false;
+			disCap = 0;
+			for (i = 0; i < this.dischargeEvents.length; i++) {
+				d = this.dischargeEvents[i]
+
+				if (sim.time() > d.start && sim.time() < d.stop) {
+					disTrigger = true;
+					disCap = disCap < d.capacity ? disCap : d.capacity;
+				}
+			}
+			if (disTrigger) {
+				this.send({ c: "discharge", data: this.vehStatus, capacity: disCap }, 0)
+			}
+			else { this.send({ c: "hold", data: this.vehStatus }, 0) }
+			this.setTimer(1).done(function () { this.discharge() })
+			//if export cap then ask for each avialable then  share between 
+
+		},
+		netformNegotiation: function () {
+			//ask for predicted 
+		},
+		onMessage: function (sender, message) {
+			s = sender.id;
+			this.vehStatus.push({ s, message })
+			//on
+			//console.log(sender.id,message);
+			//document.getElementById("log").innerHTML += "<pre>"+message.entityId+"</pre>";
+		}
+	}
+
+	//vehicle object
+	var Slot = {
+		type: "Standard",
+		modes: [3, 7, 22]
+	}
+
+
+	var Vehicle = {
+		statustext: "Awaiting charge point",
+		statusCode: 0,// 0 - in queue, 1-on charge point , -1 - exited
+		chargeStatus: 0, // 0 = not charging  // 1 = mode 1 charging   2= mode 2 charging // -1 mode 1 discharging  // -2 mode 2 discharging
+		chargeStart: 0,// time from start charging (for ramp up time)
+		netformStatus: 0,//0=not affect, number = modulation
+		netformModulation: 1,
+		prediction: {},//provides netform control for modulating rate/discharge...
+		state: "",
+		nfAppid: "",
+		NF_vehStatus: [],
+		Constraints: [],
+		//log:[],
+		model: "",
+		user: "",
+		current: 0,
+		rate: 0,//negative for discharge/positive for charge
+		//netformFactor:0
+		netFF: 0,//set using netformfactor function
+		netFFPredicted: 0,
+		arrival: 0,
+		onSlotTime: 0,
+		departure: 0,
+		departureTime: 0,
+		facilitySlot: 0,
+		command: 0, //default is charge //will need to object at some point to enable fast,slow chage and discharge/ currently is  
+		charge: function (live) {//live uses NF modulator, and updates this..  --- not live updates predition object..
+			//if(this.id==2){console.log(live,sim.time(),this.current,this.prediction)}
+			switch (this.statusCode) {
+				case 1: //on charge point
+					//capture current conditions for prediction run/
+					rate = this.rate
+					current = this.current
+					chargeStatus = this.chargeStatus
+					chargeStart = this.chargeStart
+					this.netformFactor();
+					//run negotiation to set modulator....
+					//this.netformModulation = this.negotiation()
+					//add ramp up time (use rd???)
+					chargeStatus = this.command //default to request						
+					// if netform factor requires then charge me.
+					if (this.netFF > 1) { chargeStatus = 1 }//fire netform....
+
+					if ((current / this.model.MaxCapacity) > this.model.C_RDC && chargeStatus > 0) { chargeStatus = 2 }//slow drop towards top.
+					if (chargeStatus == 0 && simData.allowSlowCharge) { chargeStatus = 2 }
+					//console.log(simData)
+					//do negotiation here...
+					//
+					neg = live ? this.negotiation(chargeStatus, rate) : { "status": chargeStatus, "rate": rate }
+
+					chargeStatus = live ? neg.status : chargeStatus;
+					netformModulation = live ? neg.rate : 1;
+
+					//this.id==2&&live?console.log(sim.time(),this.netFF,this.netFFPredicted,netformModulation):false
+					//(this.id==6&&sim.time()>500&&sim.time()<550&&live)?console.log(sim.time(),chargeStatus,neg.rate,rate):false;
+					if (this.model.MinCharge <= current && current <= this.model.MaxCapacity) {// if able to charge/discharge.
+						//	this.chargeStatus = this.command;//accept request // following  if statements  qualify
+						//rd=1//rate direction + charging - discharging and ramp time
+						switch (chargeStatus) {
+							case 2:
+								rate = netformModulation * this.model.C_Rate2;
+								chargeStart++;
+								chargeStart = chargeStart < 0 ? 1 : chargeStart;
+								if (chargeStart < this.model.C_RUT) {
+									rate = rate * chargeStart / this.model.C_RUT
+									//	if(this.id==2){console.log(rate)}
+								}
+								break;
+							case 1: //charge
+								rate = netformModulation * this.model.C_Rate1;
+								chargeStart++;
+								chargeStart = chargeStart < 0 ? 1 : chargeStart;
+								if (chargeStart < this.model.C_RUT) {
+									rate = rate * chargeStart / this.model.C_RUT
+								}
+								break;
+							case -1: //discharge at default
+								rate = (netformModulation * -1 * this.model.D_Rate);
+								chargeStart--;
+								chargeStart = chargeStart > 0 ? -1 : chargeStart;
+
+								if (chargeStart > -this.model.C_RUT) {
+									rate = rate * -1 * chargeStart / this.model.C_RUT
+								}
+								break;
+							case 0: //hold
+								rate = 0;
+								chargeStart = 0
+								break;
+							default:
+						}
+					};
+
+					//l=live?this.negotiation():false
+					//modulation_rate=live?this.netformModulation:1; //set the factor is live run, use 1 if prediction run.
+					//rate=modulation_rate*rate
+					//chargeStatus=modulation_status
+					//if(this.id==2){console.log(sim.time(),live,this.current,rate,modulation_rate,chargeStatus,this.netformFactor())}
+
+					current += rate / 60;
+
+					if (current > this.model.MaxCapacity && rate > 0) {
+						current = this.model.MaxCapacity;
+						rate = 0;//add default to do nothing...
+						chargeStatus = 0;//default
+					}
+
+					if (current < this.model.MinCharge && rate < 0) {
+						current = this.model.MinCharge;
+						rate = 0;//add default to do nothing...
+						chargeStatus = 0;//default
+					}
+
+					//if not prediction
+					if (live) {
+						this.rate = rate
+						this.current = current
+						this.chargeStatus = chargeStatus
+						this.chargeStart = chargeStart
+
+						return true;
+					}
+					else {
+						this.prediction = {
+							rate: rate,
+							current: current,
+							chargeStatus: chargeStatus,
+							chargeStart: chargeStart,
+							netform: this.netFFPredicted
+						}
+						this.charge(true);
+						return false;
+					}
+
+					//console.log(sim.time(),this.id,this.NF_vehStatus)
+					// //*******************************
+					// neg=this.negotiation()
+					// this.rate=neg.rate;
+					// this.chargeStatus=neg.chargeStatus
+					// //this is the good stuff
+					// //*********************************
+					// //
+					break;
+				default:
+			}
+		},
+		negotiation: function (cStatus, cRate) {
+			v = this.NF_vehStatus
+			//if(this.id==4){console.log(v)}
+			//oRate=this.rate;
+			//oCS=this.chargeStatus;
+			this.netformStatus = cStatus;//pass through from calc by default
+			this.netformModulation = 1;
+			aRate = 0;  //message.
+			nfRate = 0;
+			rate = 0;
+			nfList = []
+			list = [];
+			tList = [];
+			nfMod = 1;//modulate rate.... nf
 
 			//Mod=1;//modulate rate other
 			//if(this.id==4){sim.time(),console.log(v)}
 			//set up data streams
-			for(i=0;i<v.length;i++){
-				if(v[i].message.statusCode!=1){continue;}
+			for (i = 0; i < v.length; i++) {
+				if (v[i].message.statusCode != 1) { continue; }
 
 				//v[i].s==6?console.log(v[i]):false
-					x=v[i].message.prediction;
-					//rd=(x.chargeStatus>=0?1:-1)
-					tList.push(v[i])
-					aRate += (1*x.rate);//get max rate..
-					if(x.netform>1){//add netform >1 to arr
-						nfList.push(x);
-						nfRate+=(1*x.rate)}
-					else{
-						list.push(x);
-						rate+=(1*x.rate)};
+				x = v[i].message.prediction;
+				//rd=(x.chargeStatus>=0?1:-1)
+				tList.push(v[i])
+				aRate += (1 * x.rate);//get max rate..
+				if (x.netform > 1) {//add netform >1 to arr
+					nfList.push(x);
+					nfRate += (1 * x.rate)
+				}
+				else {
+					list.push(x);
+					rate += (1 * x.rate)
+				};
 
 			}
 			//(this.id==6&&sim.time()>475&&sim.time()<490)?console.log(sim.time(),cStatus,this.statusCode):false
@@ -479,52 +461,52 @@ var Park = new Sim.Facility("park", Sim.Facility.FCFS,simData.simSlots)//this ma
 			//1.discharge of xxx for x mins
 			//2.charge of xxx for x mins
 
-			period = Math.floor(sim.time()/30)
- 			period =  period > 47 ? 0: period
- 			genSolar =  Park.solarGeneration.periodOutput("May",period)
+			period = Math.floor(sim.time() / 30)
+			period = period > 47 ? 0 : period
+			genSolar = Park.solarGeneration.periodOutput("May", period)
 
-			importcap=this.Constraints.importCap;
-			exportcap=-this.Constraints.exportCap;
+			importcap = this.Constraints.importCap;
+			exportcap = -this.Constraints.exportCap;
 			//Capacity scenarios
 
 			//scenario 1: all is fine
-			NFmodRate=1
-			nonNFModRate=1
-			NFStatus=this.netformStatus
-			nonNFStatus=this.netformStatus
+			NFmodRate = 1
+			nonNFModRate = 1
+			NFStatus = this.netformStatus
+			nonNFStatus = this.netformStatus
 
 			//genSolar=0
 			//adjust capacity limits for solar generation
-			importcap=importcap+genSolar
-			exportcap=exportcap-genSolar
+			importcap = importcap + genSolar
+			exportcap = exportcap - genSolar
 
-			if(this.Constraints && aRate>=importcap){
+			if (this.Constraints && aRate >= importcap) {
 				//scenario 2: NF is good, other modulate,,
-				nonNFModRate = (importcap-nfRate)/rate;  // first modulate non nf leaving nf
-				NFmodRate=1;
+				nonNFModRate = (importcap - nfRate) / rate;  // first modulate non nf leaving nf
+				NFmodRate = 1;
 				//scenario 3: NF is over > stop other, modulate NF
-				if (nfRate>importcap){
-						nonNFModRate=0;
-						nonNFStatus=0;
-						NFmodRate=(importcap)/nfRate
-						//console.log(sim.time(),NFmodRate)
-					}
+				if (nfRate > importcap) {
+					nonNFModRate = 0;
+					nonNFStatus = 0;
+					NFmodRate = (importcap) / nfRate
+					//console.log(sim.time(),NFmodRate)
+				}
 			}
 
-			if(this.Constraints && aRate<=exportcap ){
+			if (this.Constraints && aRate <= exportcap) {
 				//scenario 4: discharge cap	
-				nonNFModRate = (exportcap)/aRate;  // first modulate non nf leaving nf
+				nonNFModRate = (exportcap) / aRate;  // first modulate non nf leaving nf
 			}
 
 			//what am i , what should i do...
-			this.netformModulation=this.netFF>1?NFmodRate:nonNFModRate;
+			this.netformModulation = this.netFF > 1 ? NFmodRate : nonNFModRate;
 
-		//	this.netformModulation=nfMod
-			this.netformStatus=NFStatus
+			//	this.netformModulation=nfMod
+			this.netformStatus = NFStatus
 			//this.netformStatus=this.chargeStatus
 
-		//this.id==2?
-		return{rate:this.netformModulation,status:this.netformStatus}
+			//this.id==2?
+			return { rate: this.netformModulation, status: this.netformStatus }
 			//if(this.id==4){console.log(nfList,nfRate,list,rate,aRate)}
 			//this is the key to the whole thing.
 			//we need to check everyone is happy with what they are going to do......
@@ -535,211 +517,212 @@ var Park = new Sim.Facility("park", Sim.Facility.FCFS,simData.simSlots)//this ma
 			//3. if no import headroom then get excess from netforms
 			//4. discharge all at modulated rate for cover excess.
 
-	    },
-		netformFactor:function(){
-				 time_to_depart = this.onSlotTime+this.user.duration-sim.time(); //this.arrival+this.user.duration-sim.time();//user.timeend-system.time;
-
-				 //include top RDC current drop
-				 charge_throttle_threshold = this.model.MaxCapacity*this.model.C_RDC
-				  remain_charge_high = charge_throttle_threshold-this.current
-
-				  remain_time_high = remain_charge_high > 0 ?
-				  						remain_charge_high / (this.model.C_Rate1/60):
-				  						0;
-
-				  remain_charge_low = this.current >=charge_throttle_threshold ?
-				  	   					this.model.MaxCapacity-this.current:
-				  						this.model.MaxCapacity-charge_throttle_threshold;
-
-				  remain_time_low = remain_charge_low/(this.model.C_Rate2/60)
-			     time_to_full = remain_time_low + remain_time_high
-
-			     //nff= (time_to_full/time_to_depart).toFixed(3)
-				 this.netFF = (time_to_full/time_to_depart).toFixed(3)//nff  //time_to_end //nF //(1/nF).toFixed(2)
-				 this.netFFPredicted=((time_to_full)/(time_to_depart-1)).toFixed(3)
-				 return this.netFF//true;
-			},
-		selfCharge:function(){//if not given any commands then charge if netform requires.
-					//this should override any message commands..
-					//this.netformFactor();
-					//if(this.netFF>=1){
-					//		this.command=1;
-					//	}
-					//	else {this.command=2}
-					//this.command=2;
-					this.checkQueue();
-					//this.command=2;
-				
-					this.charge(false)
-				//	this.charge(false);//do prediction...
-					this.setTimer(1).done(function(){this.selfCharge()});//loop control
-					
 		},
-		leavefacility:function(){
-			
-        		this.departure = sim.time();//this.arrival + this.user.duration;
-        		this.facilitySlot = 0;
-        		this.statusCode = -1;
-        		this.statusText="Exited";
-        		this.chargeStatus=0;
-        		this.rate=0;
-        		},
-	    start: function () {
-	    	    //number_of_vehicles++
-	    		//stats_vehicles.record(number_of_vehicles,sim.time());
-		    	//get vehicle type,set user and current state of charge
-				this.model = this.model==""?vArr[(random.random()*(vArr.length-1)).toFixed(0)]:vArr[this.model]
-		    	this.model=vArr[(random.random()*(vArr.length-1)).toFixed(0)];
-		    	this.user=uArr[(random.random()*(uArr.length-1)).toFixed(0)];
-	 			this.current=random.uniform(1, this.model.MaxCapacity);//current battery charge
+		netformFactor: function () {
+			time_to_depart = this.onSlotTime + this.user.duration - sim.time(); //this.arrival+this.user.duration-sim.time();//user.timeend-system.time;
 
-		        var useDuration = this.user.duration//TODO - add normal around this number
-		     	//arrive
-		        this.arrival=sim.time();
-		        Park.total++;
+			//include top RDC current drop
+			charge_throttle_threshold = this.model.MaxCapacity * this.model.C_RDC
+			remain_charge_high = charge_throttle_threshold - this.current
 
-		        vehicleslist.push({
-		        				"id":this.id,
-		        				"arrTime":this.arrival,
-		        				"model":this.model,
-		        				"user":this.user,
-		        				"cCharge":this.current
-		        			})
+			remain_time_high = remain_charge_high > 0 ?
+				remain_charge_high / (this.model.C_Rate1 / 60) :
+				0;
 
-		        this.useFacility(Park, useDuration)//facility manages time and departure
-		        	.done(this.leavefacility)
-		        	//.waitUntil(10,this.leavefacility())
-		        	.setData(this.id);
-		        //set next 
-		        this.checkQueue();
-		        this.selfCharge();
-		       
+			remain_charge_low = this.current >= charge_throttle_threshold ?
+				this.model.MaxCapacity - this.current :
+				this.model.MaxCapacity - charge_throttle_threshold;
 
-	    		},
-	    checkQueue:function(){//while in queue check and set inque = false once entered facility
-	    		//console.log(sim.time(),this.id,Park.inQueue(this.id))
-	    		switch(this.statusCode){
-	    			case -1:
-	    				this.statusText="Gone baby gone"
-	    				this.statusCode=-1;
-	    			break;
-	    			case 0:
-		    			this.status="Awaiting charge point!"
-		    			this.statusCode=0;
-		    			this.statusCode=Park.inQueue(this.id);
-		    			 if(this.statusCode==1){this.onSlotTime=sim.time();}
-	    			break;
-	    			case 1:
-	    				this.statusText="on point";
-	    			break;
+			remain_time_low = remain_charge_low / (this.model.C_Rate2 / 60)
+			time_to_full = remain_time_low + remain_time_high
 
-	    		}
-	    },
-	    onMessage:function(s,m){
-	    		this.checkQueue()
-	    		if(Park.inQueue(this.id)){this.status="Awaiting charge point"}
-	    		switch (m.c){
-	    			case "status":
-	    				this.NF_vehStatus = m.data;
-	    				this.Constraints = m.control;
+			//nff= (time_to_full/time_to_depart).toFixed(3)
+			this.netFF = (time_to_full / time_to_depart).toFixed(3)//nff  //time_to_end //nF //(1/nF).toFixed(2)
+			this.netFFPredicted = ((time_to_full) / (time_to_depart - 1)).toFixed(3)
+			return this.netFF//true;
+		},
+		selfCharge: function () {//if not given any commands then charge if netform requires.
+			//this should override any message commands..
+			//this.netformFactor();
+			//if(this.netFF>=1){
+			//		this.command=1;
+			//	}
+			//	else {this.command=2}
+			//this.command=2;
+			this.checkQueue();
+			//this.command=2;
 
-	    				st = (100*this.current/this.model.MaxCapacity).toFixed(0)
-	    				this.send({statusCode:this.statusCode,
-	    						   rate:this.rate.toFixed(4),
-	    						   percent:st,
-	    						   netform:	this.netFF,//this.netformFactor(),//this.netFF,
-	    						   chargeStatus:this.chargeStatus,
-	    						   //model:this.model,
-	    						   user:this.user,
-								   nfAppId:this.nfAppId,
-	    						   arrival:this.arrival,
-	    						   departure:this.departureTime,
-	    						   prediction:this.prediction,
-	    						   netMod:this.netformModulation
-	    							},
-	    						   0,
-	    						   s);
+			this.charge(false)
+			//	this.charge(false);//do prediction...
+			this.setTimer(1).done(function () { this.selfCharge() });//loop control
 
-	    				var logObj = {
-	    					"id":this.id,
-							"nfAppId":this.nfAppId,
-	    					"statusCode":this.statusCode,
-	    					"rate":this.rate.toFixed(4),
-	    					"percent":st,
-	    					//"netform":	this.netFF,//this.netformFactor(),//this.netFF,
-	    					"chargeStatus":this.chargeStatus,
-	    						   //model:this.model,
-	    					//user:this.user,
-	    					"arrival":this.arrival,
-	    					"departure":this.departureTime
-	    				}
+		},
+		leavefacility: function () {
+
+			this.departure = sim.time();//this.arrival + this.user.duration;
+			this.facilitySlot = 0;
+			this.statusCode = -1;
+			this.statusText = "Exited";
+			this.chargeStatus = 0;
+			this.rate = 0;
+		},
+		start: function () {
+			//number_of_vehicles++
+			//stats_vehicles.record(number_of_vehicles,sim.time());
+			//get vehicle type,set user and current state of charge
+			this.model = this.model == "" ? vArr[(random.random() * (vArr.length - 1)).toFixed(0)] : vArr[this.model]
+			this.model = vArr[(random.random() * (vArr.length - 1)).toFixed(0)];
+			this.user = uArr[(random.random() * (uArr.length - 1)).toFixed(0)];
+			this.current = random.uniform(1, this.model.MaxCapacity);//current battery charge
+
+			var useDuration = this.user.duration//TODO - add normal around this number
+			//arrive
+			this.arrival = sim.time();
+			Park.total++;
+
+			vehicleslist.push({
+				"id": this.id,
+				"arrTime": this.arrival,
+				"model": this.model,
+				"user": this.user,
+				"cCharge": this.current
+			})
+
+			this.useFacility(Park, useDuration)//facility manages time and departure
+				.done(this.leavefacility)
+				//.waitUntil(10,this.leavefacility())
+				.setData(this.id);
+			//set next 
+			this.checkQueue();
+			this.selfCharge();
 
 
-	    				this.statusCode==1?vehicleData.push(logObj):false
-	    			break;
-	    			case "charge":
-	    			//when import is required...
-	    				//this.command=1;this.charge();
-	    				//add in automatic charge at slow rate to 60% lowest expected??.. before high rate if NFF
-	    			break;
-	    			case "discharge":
-	    				this.command=-1;//this.charge();
+		},
+		checkQueue: function () {//while in queue check and set inque = false once entered facility
+			//console.log(sim.time(),this.id,Park.inQueue(this.id))
+			switch (this.statusCode) {
+				case -1:
+					this.statusText = "Gone baby gone"
+					this.statusCode = -1;
+					break;
+				case 0:
+					this.status = "Awaiting charge point!"
+					this.statusCode = 0;
+					this.statusCode = Park.inQueue(this.id);
+					if (this.statusCode == 1) { this.onSlotTime = sim.time(); }
+					break;
+				case 1:
+					this.statusText = "on point";
+					break;
 
-	    			break;
-	    				case "hold":
-	    				this.command=0;
-	    			break;
-	    			default:
-	    		}
-	    	},
+			}
+		},
+		onMessage: function (s, m) {
+			this.checkQueue()
+			if (Park.inQueue(this.id)) { this.status = "Awaiting charge point" }
+			switch (m.c) {
+				case "status":
+					this.NF_vehStatus = m.data;
+					this.Constraints = m.control;
 
-	    finalize:function(){},
+					st = (100 * this.current / this.model.MaxCapacity).toFixed(0)
+					this.send({
+						statusCode: this.statusCode,
+						rate: this.rate.toFixed(4),
+						percent: st,
+						netform: this.netFF,//this.netformFactor(),//this.netFF,
+						chargeStatus: this.chargeStatus,
+						//model:this.model,
+						user: this.user,
+						nfAppId: this.nfAppId,
+						arrival: this.arrival,
+						departure: this.departureTime,
+						prediction: this.prediction,
+						netMod: this.netformModulation
+					},
+						0,
+						s);
+
+					var logObj = {
+						"id": this.id,
+						"nfAppId": this.nfAppId,
+						"statusCode": this.statusCode,
+						"rate": this.rate.toFixed(4),
+						"percent": st,
+						//"netform":	this.netFF,//this.netformFactor(),//this.netFF,
+						"chargeStatus": this.chargeStatus,
+						//model:this.model,
+						//user:this.user,
+						"arrival": this.arrival,
+						"departure": this.departureTime
+					}
+
+
+					this.statusCode == 1 ? vehicleData.push(logObj) : false
+					break;
+				case "charge":
+					//when import is required...
+					//this.command=1;this.charge();
+					//add in automatic charge at slow rate to 60% lowest expected??.. before high rate if NFF
+					break;
+				case "discharge":
+					this.command = -1;//this.charge();
+
+					break;
+				case "hold":
+					this.command = 0;
+					break;
+				default:
+			}
+		},
+
+		finalize: function () { },
 	}//end??? sim function
 
 
-   
+
 	sim.addEntity(Controller)
 	//add additional user vehicles.....
 
-	
-	PCusers.forEach(function(PCu){
-			 console.log(PCu);
-			// var myVeh=sim.addEntity(Vehicle)
-			 //myid = PCu.uid
-			 var xveh = sim.addEntity(Vehicle)
-			// PCVeh[myid]=xveh.id
-			console.log("in",xveh)
-			 xveh.nfAppId = PCu.uid;
-			 xveh.arrival = 1;
-			console.log("out",xveh)
+
+	settings.PCusers.forEach(function (PCu) {
+		console.log(PCu);
+		// var myVeh=sim.addEntity(Vehicle)
+		//myid = PCu.uid
+		var xveh = sim.addEntity(Vehicle)
+		// PCVeh[myid]=xveh.id
+		console.log("in", xveh)
+		xveh.nfAppId = PCu.uid;
+		xveh.arrival = users.;
+		console.log("out", xveh)
 
 	})
-	
-	
+
+
 	sim.addEntity(Vehicle);
 	sim.simulate(simData.simLength);
 	//system.tempsolar=Park.solarGeneration.profile.May
 	//console.log(Park.solarGeneration.periodOutput("May",10))
 
-	
+
 	//console.log(sim)
 	//system.simtime=SIMTIME
 	//system.events=Controller.dischargeEvents
 	sim.finalize()
-	
-	
-	write.timelog(simFolder,"settings",[settings,vehicleslist],false)
-    console.log("Simulation End")
-  
 
-// 	var fs = require('fs');
-// 	fs.writeFileSync("../public/results/test", "Hey there!", function(err) {
-//     if(err) {
-//         return console.log(err);
-//     }
 
-//     console.log("The file was saved!");
-// }); 
+	write.timelog(simFolder, "settings", [settings, vehicleslist], false)
+	console.log("Simulation End")
+
+
+	// 	var fs = require('fs');
+	// 	fs.writeFileSync("../public/results/test", "Hey there!", function(err) {
+	//     if(err) {
+	//         return console.log(err);
+	//     }
+
+	//     console.log("The file was saved!");
+	// }); 
 
 	//console.log(Controller.log)
 	// $("#controlpanel").show()
@@ -747,19 +730,19 @@ var Park = new Sim.Facility("park", Sim.Facility.FCFS,simData.simSlots)//this ma
 	//stats_vehicles.finalize(sim.time())
 	//visualise(log);
 	//console.log(stats_vehicles.getHistogram())      // start simulation
-   // Park.report();  
-  // while(!fs.existsSync(path.format({dir:simdir,base:"settings.json.gz"}))){
-  // 	console.log("waiting for file to be written")
-  // }
-   return [simID,[settings,vehicleslist]] //Controller.log
+	// Park.report();  
+	// while(!fs.existsSync(path.format({dir:simdir,base:"settings.json.gz"}))){
+	// 	console.log("waiting for file to be written")
+	// }
+	return [simID, [settings, vehicleslist]] //Controller.log
 
 }//end function
 
 
-function setupModels(simData){
+function setupModels(simData) {
 
 
-console.log("___________settting models up")
+	console.log("___________settting models up")
 
 
 }

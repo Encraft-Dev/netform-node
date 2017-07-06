@@ -1,12 +1,14 @@
 
 var path = require('path');
 var express = require('express');
+var js = require('fs-graceful');
 var router = express.Router();
 var appDir = path.dirname(require.main.filename);
 require('datejs')
-var simulation = require(path.join(appDir, 'sim_modules','simulation.js'))
+var simulation = require(path.join(appDir, 'sim_modules','simulation'))
 var testData = require(path.join(appDir, 'test','testdata.json'))
-var users = require (path.join(appDir,"sim_modules",'users.js'))
+var users = require (path.join(appDir,"sim_modules",'users'))
+var write = require(path.join(appDir, "sim_modules", "logs"));
 //var write = require (path.join(appDir,"sim_modules",'logs.js'))
 
 
@@ -18,23 +20,26 @@ var userTestData = function(u){
 		el.arrivaldatetime = new Date(now.getFullYear(),now.getMonth(),now.getDate(),rndInt(07,11),rndInt(0,59),rndInt(0,59))
 		el.departuredatetime =new Date(now.getFullYear(),now.getMonth(),now.getDate(),rndInt(13,19),rndInt(0,59),rndInt(0,59))
 		el.model = users.getModelfromId(el.vehicleId)
-		users.addUser(el)
+		users.addUser(el,"test")
 	}, this);
 	return u;
 	//write out user to files for test
 }
 
-function rndInt(min,max)
-{
-    return Math.floor(Math.random()*(max-min+1)+min);
+var userData = function(u){
+	//load userfile
+	var UData = fs.readFileSync(write.folders.userFile)
+	
 }
+
+function rndInt(min,max){return Math.floor(Math.random()*(max-min+1)+min);}
 
 
 /* GET api */
 router.post('/', function(req, res) {
 	
 	var test = (Object.keys(req.body).length === 0);true;false;
-	var config = test?userTestData(testData):req.body;
+	var config = test?userTestData(testData,"test"):userData(req.body);
 	
 	//config = test?userTestData(config.testusers):config
 	//console.log(config)  

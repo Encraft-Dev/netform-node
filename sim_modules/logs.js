@@ -1,6 +1,7 @@
 var fs = require('graceful-fs')
 var zlib = require('zlib')
-var appDir = path.dirname(require.main.filename);
+var config = require("./config")
+var appDir = config.appRoot//path.dirname(require.main.filename);
 require("datejs")
 
 
@@ -8,7 +9,9 @@ var folders = exports.folders = {
 	'results':"",
 	'sim':"",
 	'user':"",
-	'userFile':""
+	'userFile':"",
+	'veh':"",
+	'sys':""
 };
 
 
@@ -36,13 +39,28 @@ exports.timelog = function(dirPath,name,data,zip){
 // }
 
 exports.makeSimFiles = function(simid){
-  //var simid = Date.today().toString("yyyy_MM_dd")
-  folders.results = path.join(appDir,"results")//check results root exists
-  folders.sim = path.join(folders.results,simid) // check sim folder exists
-  folders.userFile = path.join(folders.sim,"users.json")//ensure users file exists
-  if (!fs.existsSync(folders.results)){fs.mkdirSync(folders.results)} // make folder 
-  if (!fs.existsSync(folders.sim)){fs.mkdirSync(folders.sim)} // make folder 
-  if (!fs.existsSync(folders.userFile)){fs.writeFileSync(folders.userFile,"[]")} // make usersfile 
+	//var simid = Date.today().toString("yyyy_MM_dd")
+	folders.results = path.join(appDir,"results")//check results root exists
+	folders.sim = path.join(folders.results,simid) // check sim folder exists
+	folders.userFile = path.join(folders.sim,"users.json")//ensure users file exists
+	if (!fs.existsSync(folders.results)){fs.mkdirSync(folders.results)} // make folder 
+	if (!fs.existsSync(folders.sim)){fs.mkdirSync(folders.sim)} // make folder 
+	if (!fs.existsSync(folders.userFile)){fs.writeFileSync(folders.userFile,"[]")} // make usersfile 
+
+  	folders.veh = path.join(folders.sim,"veh")
+	folders.sys = path.join(folders.sim,"system")
+	//var userdir = path.join(simFolder,"PCusers")
+	if (!fs.existsSync(folders.veh)){fs.mkdirSync(folders.veh)}
+	if (!fs.existsSync(folders.sys)){fs.mkdirSync(folders.sys)}
+	//if (!fs.existsSync(userdir)){fs.mkdirSync(userdir)}
+
+
+  //make test folders for test
+//   folder.test = path.join(folders.results,"test")
+//   folders.testUserFile = path.join(folders.test,"users.json")//ensure users file exists 
+//   if (!fs.existsSync(folders.test)){fs.mkdirSync(folders.test)} // make folder 
+//   if (!fs.existsSync(folders.testUserFile)){fs.writeFileSync(folders.testUserFile,"[]")} // make usersfile 
+
   return folders.sim ;//true;
 }
 
