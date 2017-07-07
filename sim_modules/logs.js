@@ -72,7 +72,7 @@ exports.getSimTimefromISOtime = function(ISOtime){
 
 	diff = now - midnight
 	minDiff = diff/(1000*60) //difference in minutes
-	simtime=Math.ciel(minDiff)
+	simtime=Math.ceil(minDiff)
 	return simtime
 }
 

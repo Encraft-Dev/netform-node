@@ -30,7 +30,7 @@ exports.test = function test() { return 'Hello' }
 var Sim = Simjs.Sim;
 Sim.Random = Simjs.Random;
 exports.simulate = function (simData) {
-
+	//console.log("full config file",simData)
 
 	var settings = [] //simulation settings
 	var vehicleslist = [] //list of active vehicles.
@@ -51,7 +51,7 @@ exports.simulate = function (simData) {
 
 	settings.push(simID)
 	settings.push(simData)
-	settings.PCusers = simData.PCUsers// JSON.parse(fs.readFileSync(write.folders.userFile));
+	settings.PCusers = simData.PCusers// JSON.parse(fs.readFileSync(write.folders.userFile));
 
 	var sysLog = []
 	//var oData=simData
@@ -148,7 +148,26 @@ exports.simulate = function (simData) {
 		Constraints: {},
 		finalize: function () { },//sysLog = this.xlog;console.log("controller shut down")},
 		sendTick: function () {
-			this.setTimer(1).done(function () { this.sendTick() })
+			this.setTimer(1).done(function () { this.addPC();this.sendTick(); })
+		},
+		addPC: function(){
+			var pclist = pcUserArray[sim.time()]?pcUserArray[sim.time()]:[]
+			//console.log("adding",sim.time(),pclist)
+			pclist.array.forEach(function(pcu) {
+					sim.addEntity(Vehicle);
+// var xveh = sim.addEntity(Vehicle)
+// 		// PCVeh[myid]=xveh.id
+		
+// 		xveh.nfAppId = PCu.uid;
+
+			});
+			
+
+
+		
+		
+
+
 		},
 		askStatus: function () {
 			//console.log(this)
@@ -178,19 +197,13 @@ exports.simulate = function (simData) {
 			addPop = periodPop - previousPeriodPop
 			addPop = addPop <= 0 ? 0 : addPop
 			this.vehArrival(addPop, sim.time(), sim.time() + 30)
-			//console.log(period,periodPop,previousPeriodPop,addPop)
 			this.setTimer(30).done(function () {//do it again
 				this.periodTick();
 			})
 		},
 		vehArrival: function (pop, start, stop) {//deals with 30 tick period...
-			//frquency for next
-			//console.log(sim.time(),pop,start,stop)
-
-			if (sim.time() < stop) {
-				//check is PCuser vehicles need to be added..
-
-
+		 
+			if (sim.time() < stop) {//if sim should be running 
 				this.setTimer(random.normal(30 / pop, 1)).done(function () {//set time to next vehicle...can be more complex
 					sim.addEntity(Vehicle);
 					this.vehArrival(pop, start, stop);
@@ -210,7 +223,20 @@ exports.simulate = function (simData) {
 
 			this.discharge();//set discharge going
 			this.periodTick();//set half houly update going
-
+			this.sendTick();//set minute events
+			//set timer for each new PCusers
+			//console.log(settings.PCusers)
+			pcUserArray = []
+			for (var pci = 0; pci < settings.PCusers.length; pci++) {
+				var pc = settings.PCusers[pci];
+				pc.addedToSim=false;
+				if(pcUserArray[write.getSimTimefromISOtime(pc.arrivaldatetime)]==null){
+					pcUserArray[write.getSimTimefromISOtime(pc.arrivaldatetime)]=[]
+				}
+				pcUserArray[write.getSimTimefromISOtime(pc.arrivaldatetime)].push(pc) 
+			}
+			
+			
 			//this.askCommand();
 			//fire random events fro discharging and charging...... including how long for...
 			//this.sendTick();
@@ -288,6 +314,46 @@ exports.simulate = function (simData) {
 		departureTime: 0,
 		facilitySlot: 0,
 		command: 0, //default is charge //will need to object at some point to enable fast,slow chage and discharge/ currently is  
+		start: function () {
+			//stats_vehicles.record(number_of_vehicles,sim.time());
+			//get vehicle type,set user and current state of charge
+			//this.model = this.model == "" ? vArr[(random.random() * (vArr.length - 1)).toFixed(0)] : vArr[this.model]
+			
+			//for simtime see if any PC
+			//if is then filter by added? choose first PC
+			//once added change the added? factor to true,
+			
+			if (pcUserArray[sim.time()]){
+				pcFresh =pcUserArray[sim.time()].filter(function(x){return x.addedToSim == false})
+
+
+			}
+
+			this.model = vArr[(random.random() * (vArr.length - 1)).toFixed(0)];
+			this.user = uArr[(random.random() * (uArr.length - 1)).toFixed(0)];
+			this.current = random.uniform(1, this.model.MaxCapacity);//current battery charge
+			
+			var useDuration = this.user.duration//TODO - add normal around this number
+			
+			this.arrival = sim.time();
+			Park.total++;
+
+			vehicleslist.push({
+				"id": this.id,
+				"arrTime": this.arrival,
+				"model": this.model,
+				"user": this.user,
+				"cCharge": this.current
+			})
+
+			this.useFacility(Park, useDuration)//facility manages time and departure
+				.done(this.leavefacility)
+				//.waitUntil(10,this.leavefacility())
+				.setData(this.id);
+			//set next 
+			this.checkQueue();
+			this.selfCharge();
+		},
 		charge: function (live) {//live uses NF modulator, and updates this..  --- not live updates predition object..
 			//if(this.id==2){console.log(live,sim.time(),this.current,this.prediction)}
 			switch (this.statusCode) {
@@ -566,38 +632,7 @@ exports.simulate = function (simData) {
 			this.chargeStatus = 0;
 			this.rate = 0;
 		},
-		start: function () {
-			//number_of_vehicles++
-			//stats_vehicles.record(number_of_vehicles,sim.time());
-			//get vehicle type,set user and current state of charge
-			this.model = this.model == "" ? vArr[(random.random() * (vArr.length - 1)).toFixed(0)] : vArr[this.model]
-			this.model = vArr[(random.random() * (vArr.length - 1)).toFixed(0)];
-			this.user = uArr[(random.random() * (uArr.length - 1)).toFixed(0)];
-			this.current = random.uniform(1, this.model.MaxCapacity);//current battery charge
-
-			var useDuration = this.user.duration//TODO - add normal around this number
-			//arrive
-			this.arrival = sim.time();
-			Park.total++;
-
-			vehicleslist.push({
-				"id": this.id,
-				"arrTime": this.arrival,
-				"model": this.model,
-				"user": this.user,
-				"cCharge": this.current
-			})
-
-			this.useFacility(Park, useDuration)//facility manages time and departure
-				.done(this.leavefacility)
-				//.waitUntil(10,this.leavefacility())
-				.setData(this.id);
-			//set next 
-			this.checkQueue();
-			this.selfCharge();
-
-
-		},
+		
 		checkQueue: function () {//while in queue check and set inque = false once entered facility
 			//console.log(sim.time(),this.id,Park.inQueue(this.id))
 			switch (this.statusCode) {
@@ -682,58 +717,12 @@ exports.simulate = function (simData) {
 
 
 	sim.addEntity(Controller)
-	//add additional user vehicles.....
-
-
-	settings.PCusers.forEach(function (PCu) {
-		console.log(PCu);
-		// var myVeh=sim.addEntity(Vehicle)
-		//myid = PCu.uid
-		var xveh = sim.addEntity(Vehicle)
-		// PCVeh[myid]=xveh.id
-		console.log("in", xveh)
-		xveh.nfAppId = PCu.uid;
-		xveh.arrival = users.;
-		console.log("out", xveh)
-
-	})
-
-
-	sim.addEntity(Vehicle);
 	sim.simulate(simData.simLength);
-	//system.tempsolar=Park.solarGeneration.profile.May
-	//console.log(Park.solarGeneration.periodOutput("May",10))
-
-
-	//console.log(sim)
-	//system.simtime=SIMTIME
-	//system.events=Controller.dischargeEvents
 	sim.finalize()
 
 
 	write.timelog(simFolder, "settings", [settings, vehicleslist], false)
 	console.log("Simulation End")
-
-
-	// 	var fs = require('fs');
-	// 	fs.writeFileSync("../public/results/test", "Hey there!", function(err) {
-	//     if(err) {
-	//         return console.log(err);
-	//     }
-
-	//     console.log("The file was saved!");
-	// }); 
-
-	//console.log(Controller.log)
-	// $("#controlpanel").show()
-	// $(".controls").show()
-	//stats_vehicles.finalize(sim.time())
-	//visualise(log);
-	//console.log(stats_vehicles.getHistogram())      // start simulation
-	// Park.report();  
-	// while(!fs.existsSync(path.format({dir:simdir,base:"settings.json.gz"}))){
-	// 	console.log("waiting for file to be written")
-	// }
 	return [simID, [settings, vehicleslist]] //Controller.log
 
 }//end function
