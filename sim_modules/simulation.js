@@ -31,7 +31,7 @@ var Sim = Simjs.Sim;
 Sim.Random = Simjs.Random;
 exports.simulate = function (simData) {
 	//console.log("full config file",simData)
-
+	console.log(simData)
 	var settings = [] //simulation settings
 	var vehicleslist = [] //list of active vehicles.
 	var vehicleData = [];
@@ -52,7 +52,7 @@ exports.simulate = function (simData) {
 	settings.push(simID)
 	settings.push(simData)
 	settings.PCusers = simData.PCusers// JSON.parse(fs.readFileSync(write.folders.userFile));
-
+	settings.PCusersSim=[];
 	var sysLog = []
 	//var oData=simData
 	//console.log("========")
@@ -146,26 +146,17 @@ exports.simulate = function (simData) {
 		vehlog: [],
 		dischargeEvents: [],
 		Constraints: {},
+		PCusersSim:[],
 		finalize: function () { },//sysLog = this.xlog;console.log("controller shut down")},
 		sendTick: function () {
-			this.setTimer(1).done(function () { this.addPC();this.sendTick(); })
+			this.setTimer(1).done(function () { this.addPC(); this.sendTick(); })
 		},
-		addPC: function(){
-			var pclist = pcUserArray[sim.time()]?pcUserArray[sim.time()]:[]
+		addPC: function () {
+		//	var pclist = pcUserArray[sim.time()] ? pcUserArray[sim.time()] : []
 			//console.log("adding",sim.time(),pclist)
-			pclist.array.forEach(function(pcu) {
-					sim.addEntity(Vehicle);
-// var xveh = sim.addEntity(Vehicle)
-// 		// PCVeh[myid]=xveh.id
-		
-// 		xveh.nfAppId = PCu.uid;
-
-			});
-			
-
-
-		
-		
+			// pclist.array.forEach(function (pcu) {
+			// 	sim.addEntity(Vehicle);
+			// });
 
 
 		},
@@ -202,7 +193,7 @@ exports.simulate = function (simData) {
 			})
 		},
 		vehArrival: function (pop, start, stop) {//deals with 30 tick period...
-		 
+
 			if (sim.time() < stop) {//if sim should be running 
 				this.setTimer(random.normal(30 / pop, 1)).done(function () {//set time to next vehicle...can be more complex
 					sim.addEntity(Vehicle);
@@ -226,17 +217,20 @@ exports.simulate = function (simData) {
 			this.sendTick();//set minute events
 			//set timer for each new PCusers
 			//console.log(settings.PCusers)
-			pcUserArray = []
+			// pcUserArray = []
 			for (var pci = 0; pci < settings.PCusers.length; pci++) {
-				var pc = settings.PCusers[pci];
-				pc.addedToSim=false;
-				if(pcUserArray[write.getSimTimefromISOtime(pc.arrivaldatetime)]==null){
-					pcUserArray[write.getSimTimefromISOtime(pc.arrivaldatetime)]=[]
-				}
-				pcUserArray[write.getSimTimefromISOtime(pc.arrivaldatetime)].push(pc) 
+			//	var pc = write.getSimTimefromISOtime(settings.PCusers[pci].arrivaldatetime)//get basic sim time stamp
+			//	pc.addedToSim = false;
+	
+			// settings.pcUserArray[pc] =	((settings.pcUserArray[pc] == null)? [] : settings.pcUserArray[pc]) ; //set pcuserarray 
+
+			// 	// if (settings.pcUserArray[pc] == null) {
+			// 	// 	settings.pcUserArray[pc] = []
+			// 	// }
+			// 	settings.pcUserArray[pc].push(settings.PCusers[pci])
 			}
-			
-			
+
+
 			//this.askCommand();
 			//fire random events fro discharging and charging...... including how long for...
 			//this.sendTick();
@@ -318,23 +312,26 @@ exports.simulate = function (simData) {
 			//stats_vehicles.record(number_of_vehicles,sim.time());
 			//get vehicle type,set user and current state of charge
 			//this.model = this.model == "" ? vArr[(random.random() * (vArr.length - 1)).toFixed(0)] : vArr[this.model]
-			
+
 			//for simtime see if any PC
 			//if is then filter by added? choose first PC
 			//once added change the added? factor to true,
-			
-			if (pcUserArray[sim.time()]){
-				pcFresh =pcUserArray[sim.time()].filter(function(x){return x.addedToSim == false})
+			// var pcFresh=[]
+			// if (pcUserArray[sim.time()]) {
+			// 	pcFresh = pcUserArray[sim.time()].filter(function (x) { return x.addedToSim == false })
+			// }
 
-
-			}
+			// console.log(pcFresh)
+			// pcfresh.forEach(function(pcV) {
+			// 	console.log(pcV)	
+			// });
 
 			this.model = vArr[(random.random() * (vArr.length - 1)).toFixed(0)];
 			this.user = uArr[(random.random() * (uArr.length - 1)).toFixed(0)];
 			this.current = random.uniform(1, this.model.MaxCapacity);//current battery charge
-			
+
 			var useDuration = this.user.duration//TODO - add normal around this number
-			
+
 			this.arrival = sim.time();
 			Park.total++;
 
@@ -632,7 +629,7 @@ exports.simulate = function (simData) {
 			this.chargeStatus = 0;
 			this.rate = 0;
 		},
-		
+
 		checkQueue: function () {//while in queue check and set inque = false once entered facility
 			//console.log(sim.time(),this.id,Park.inQueue(this.id))
 			switch (this.statusCode) {
