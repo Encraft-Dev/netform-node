@@ -218,7 +218,24 @@ exports.simulate = function (simData) {
 			//set timer for each new PCusers
 			//console.log(settings.PCusers)
 			// pcUserArray = []
-			for (var pci = 0; pci < settings.PCusers.length; pci++) {
+			// for (var pci = 0; pci < settings.PCusers.length; pci++) {
+			// 	//set each of the vehciles at this time running.....
+			// 	//console.log("veh",settings.PCusers[pci])
+			// 	this.setTimer(settings.PCusers.simArrival).done(
+			// 	function(){
+			// 		console.log("hello",sim.time())
+			// 	}	
+			// 	)
+			// }
+			settings.PCusers.forEach(function(element) {
+				this.setTimer(element.simArrival).done(function(){
+					console.log("loop", sim.time(),element);
+					sim.addEntity(Vehicle);
+				});
+			}, this);
+				//within vehicle check if a new one exists!!!!!
+				//loop until there are none left
+			//	sim.addEntity("vehicle")
 			//	var pc = write.getSimTimefromISOtime(settings.PCusers[pci].arrivaldatetime)//get basic sim time stamp
 			//	pc.addedToSim = false;
 	
@@ -228,8 +245,7 @@ exports.simulate = function (simData) {
 			// 	// 	settings.pcUserArray[pc] = []
 			// 	// }
 			// 	settings.pcUserArray[pc].push(settings.PCusers[pci])
-			}
-
+			
 
 			//this.askCommand();
 			//fire random events fro discharging and charging...... including how long for...
@@ -291,7 +307,7 @@ exports.simulate = function (simData) {
 		netformModulation: 1,
 		prediction: {},//provides netform control for modulating rate/discharge...
 		state: "",
-		nfAppid: "",
+		nfAppId: "",
 		NF_vehStatus: [],
 		Constraints: [],
 		//log:[],
@@ -326,13 +342,29 @@ exports.simulate = function (simData) {
 			// 	console.log(pcV)	
 			// });
 
-			this.model = vArr[(random.random() * (vArr.length - 1)).toFixed(0)];
-			this.user = uArr[(random.random() * (uArr.length - 1)).toFixed(0)];
+			//using the sim,time  find if this is a user vehicle
+			var isPCarray = settings.PCusers.filter(function (el) { return el.simArrival == sim.time() })
+
+			//console.log("vehadd", sim.time(), isPCarray)
+
+			if (isPCarray.length == 1) {
+				this.model = isPCarray[0].model
+				this.user = isPCarray[0].user
+				this.nfAppId = isPCarray[0].uid
+			}
+			else {
+				this.model = vArr[(random.random() * (vArr.length - 1)).toFixed(0)];
+				this.user = uArr[(random.random() * (uArr.length - 1)).toFixed(0)];
+			}
+
+			//console.log("vehadd", sim.time(), this)
 			this.current = random.uniform(1, this.model.MaxCapacity);//current battery charge
-
 			var useDuration = this.user.duration//TODO - add normal around this number
-
+		
 			this.arrival = sim.time();
+			this.departure = sim.time() + useDuration
+
+
 			Park.total++;
 
 			vehicleslist.push({
@@ -668,7 +700,7 @@ exports.simulate = function (simData) {
 						user: this.user,
 						nfAppId: this.nfAppId,
 						arrival: this.arrival,
-						departure: this.departureTime,
+						departure: this.departure,
 						prediction: this.prediction,
 						netMod: this.netformModulation
 					},
@@ -686,7 +718,7 @@ exports.simulate = function (simData) {
 						//model:this.model,
 						//user:this.user,
 						"arrival": this.arrival,
-						"departure": this.departureTime
+						"departure": this.departure
 					}
 
 

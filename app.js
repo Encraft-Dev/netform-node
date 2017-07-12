@@ -8,6 +8,7 @@ var config = require("./sim_modules/config")
 
 var api = require('./routes/api');
 var users = require('./routes/user')
+var testusers = require('./routes/testuser')
 var app = express();
 
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
@@ -17,6 +18,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use('/api', api);//sim api
 app.use('/user', users);//users api
+app.use('/testuser', testusers);
 //deal with sending results back
 app.get("/results/*", function (req, res, next) {
   //leave main settings file uncompressed because chrome and jquery $getJSON apears to have timing issues with gzip

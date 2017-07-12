@@ -33,12 +33,21 @@ function processUserData(obj){
 	//model already exists..
     ////todo not ure what htis does!!!!!!!
 	
-	for(i=0;i<obj.PCusers.length;i++){
-		obj.PCusers[i].addedToSim=false
-		obj.PCusers[i].simArrival=write.getSimTimefromISOtime(obj.PCusers[i].arrivaldatetime)
-		obj.PCusers[i].simDuration=write.getSimTimefromISOtime(obj.PCusers[i].departuredatetime) - obj.PCusers[i].simArrival
+	for (i = 0; i < obj.PCusers.length; i++) {
+		obj.PCusers[i].addedToSim = false
+		obj.PCusers[i].simArrival = write.getSimTimefromISOtime(obj.PCusers[i].arrivaldatetime)
+		obj.PCusers[i].simDuration = write.getSimTimefromISOtime(obj.PCusers[i].departuredatetime) - obj.PCusers[i].simArrival
 		obj.PCusers[i].model = users.getModelfromId(obj.PCusers[i].vehicleId)
+		obj.PCusers[i].user = {
+			"type": "PC",
+			"duration": write.getSimTimefromISOtime(obj.PCusers[i].departuredatetime) - obj.PCusers[i].simArrival,
+			"cap_pref": obj.PCusers[i].netformcharge,// 0.8,
+			"cap_min": 0.2
+		}
+
 	}
+
+
 
 	console.log(obj)
 	return obj

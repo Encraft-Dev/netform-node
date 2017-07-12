@@ -4,7 +4,7 @@ var path = require('path');
 var appDir = path.dirname(require.main.filename);
 require('datejs')
 var write = require(path.join(appDir, "sim_modules", 'logs'))
-var write = require(path.join(appDir, "sim_modules", 'logs'))
+//var write = require(path.join(appDir, "sim_modules", 'logs'))
 var models = require(path.join(appDir, "data", 'vehicles.json'))
 
 exports.addUser = function (obj, sim) {
