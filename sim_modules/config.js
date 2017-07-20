@@ -1,9 +1,11 @@
 var path = require('path');
 
-exports.appRoot = path.dirname(require.main.filename);
+var appRoot = exports.appRoot = path.dirname(require.main.filename);
+exports.dataRoot = process.env.OPENSHIFT_DATA_DIR || appRoot;
+
 exports.test = {
     "simName": "test",
-    "data": path.join(path.dirname(require.main.filename), "test")
+    "data": path.join(appRoot, "test")
 }
 exports.simData = {// used to run auto sims for user testing
     "simID": "",

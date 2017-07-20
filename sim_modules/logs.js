@@ -2,10 +2,12 @@ var fs = require('graceful-fs')
 var zlib = require('zlib')
 var config = require("./config")
 var appDir = config.appRoot//path.dirname(require.main.filename);
+var dataRoot = config.dataRoot
+var data_folder = process.env.OPENSHIFT_DATA_DIR || appDir;
+
 require("datejs")
 
-
-var folders = exports.folders = {
+var folders = exports.folders = {//requires makesimFiles() to be called at least once udring the simulation/user/data process
 	'results':"",
 	'sim':"",
 	'user':"",
@@ -40,7 +42,7 @@ exports.timelog = function(dirPath,name,data,zip){
 
 exports.makeSimFiles = function(simid){
 	//var simid = Date.today().toString("yyyy_MM_dd")
-	folders.results = path.join(appDir,"results")//check results root exists
+	folders.results = path.join(dataRoot,"results")//check results root exists
 	folders.sim = path.join(folders.results,simid) // check sim folder exists
 	folders.userFile = path.join(folders.sim,"users.json")//ensure users file exists
 	if (!fs.existsSync(folders.results)){fs.mkdirSync(folders.results)} // make folder 

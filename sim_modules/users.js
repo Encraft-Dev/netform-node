@@ -1,11 +1,12 @@
-var fs = require('graceful-fs')
+var fs = require('graceful-fs');
 var path = require('path');
+var conf = require("./config");
+var appDir = conf.appRoot; //path.dirname(require.main.filename);
+var dataRoot = conf.dataRoot;
+require('datejs');
 
-var appDir = path.dirname(require.main.filename);
-require('datejs')
-var write = require(path.join(appDir, "sim_modules", 'logs'))
-//var write = require(path.join(appDir, "sim_modules", 'logs'))
-var models = require(path.join(appDir, "data", 'vehicles.json'))
+var write = require(path.join(appDir, "sim_modules", 'logs'));
+var models = require(path.join(appDir, "data", 'vehicles.json'));
 
 exports.addUser = function (obj, sim) {
   var simid = sim ? sim : Date.today().toString("yyyy_MM_dd")

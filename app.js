@@ -4,14 +4,16 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var bodyParser = require('body-parser');
 
-var config = require("./sim_modules/config")
+var conf = require("./sim_modules/config");
+var appRoot = conf.appRoot;
+var dataRoot = conf.dataRoot;
 
-var api = require('./routes/api');
-var users = require('./routes/user')
-var testusers = require('./routes/testuser')
+var api = require(path.join(appRoot,'routes','api'));
+var users = require(path.join(appRoot,'routes','user')); 
+var testusers = require(path.join(appRoot,'routes','testuser')); 
 var app = express();
 
-app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+app.use(favicon(path.join(appRoot, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -31,9 +33,10 @@ app.get("/results/*", function (req, res, next) {
   next()
 })
 //set static paths
-app.use("/results",express.static(path.join(__dirname, 'results')))
-app.use("/data",express.static(path.join(__dirname, 'data')))
-app.use("/", express.static(path.join(__dirname,'public')));
+app.use("/results",express.static(path.join(dataRoot, 'results')))
+app.use("/data",express.static(path.join(appRoot, 'data')))
+app.use("/sim",express.static(path.join(appRoot, 'public','sim')))
+app.use("/", express.static(path.join(appRoot,'public','app')));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

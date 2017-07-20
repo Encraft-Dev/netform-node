@@ -3,7 +3,8 @@ var path = require('path');
 var express = require('express');
 var js = require('graceful-fs');
 var router = express.Router();
-var appDir = path.dirname(require.main.filename);
+var conf = require("../sim_modules/config");
+var appDir = conf.appRoot //config.path.dirname(require.main.filename);
 require('datejs')
 var simulation = require(path.join(appDir, 'sim_modules','simulation'))
 var testData = require(path.join(appDir, 'test','testdata.json'))
@@ -54,6 +55,10 @@ function processUserData(obj){
 }
 
 /* GET api */
+
+router.get('/',function(req,res){
+	res.send("no route, use post")
+});
 router.post('/', function(req, res) {
 	//if nothing posted then test - attached test users to config body
 	//if postdata then find correct user list.

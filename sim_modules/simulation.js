@@ -5,11 +5,12 @@
 //START SIMPLE.. 
 
 
-require("datejs")
-fs = require('graceful-fs')
+require("datejs");
+fs = require('graceful-fs');
 path = require('path');
-var appDir = path.dirname(require.main.filename);
-var zlib = require('zlib')
+var conf = require("./config");
+var zlib = require('zlib');
+var appDir = conf.appRoot;//path.dirname(require.main.filename);
 
 var config = require(path.join(appDir, "sim_modules", "config"));
 var write = require(path.join(appDir, "sim_modules", "logs"));
