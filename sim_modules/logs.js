@@ -79,8 +79,10 @@ exports.getSimTimefromISOtime = function(ISOtime){
 }
 
 exports.getRealtimefromSimtime = function(simtime){
+	console.log(simtime)
 	now = new Date()
 	midnight = new Date(now.getFullYear(),now.getMonth(),now.getDate(),0,0,0)
 	time = midnight.addMinutes(simtime)
+	
 	return time
 }

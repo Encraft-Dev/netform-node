@@ -11,8 +11,9 @@ var dataRoot = conf.dataRoot;
 var api = require(path.join(appRoot,'routes','api'));
 var users = require(path.join(appRoot,'routes','user')); 
 var testusers = require(path.join(appRoot,'routes','testuser')); 
-var app = express();
+var helpers = require(path.join(appRoot,'routes','helpers'));
 
+var app = express();
 app.use(favicon(path.join(appRoot, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
@@ -21,6 +22,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use('/api', api);//sim api
 app.use('/user', users);//users api
 app.use('/testuser', testusers);
+app.use('/helper',helpers);
 //deal with sending results back
 app.get("/results/*", function (req, res, next) {
   //leave main settings file uncompressed because chrome and jquery $getJSON apears to have timing issues with gzip
