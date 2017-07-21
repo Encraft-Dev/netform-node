@@ -17,7 +17,8 @@
     "jade": "~1.11.0",
     "morgan": "~1.8.1",
     "serve-favicon": "~2.4.2",
-    "simjs": "^2.0.3"
+    "simjs": "^2.0.3",
+    "request": "^2.81.0"
   },
   "main": "application"
 }
