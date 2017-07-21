@@ -38,3 +38,7 @@ var updateUser = function (userFolder, users, obj, updateIndex) {
   write.timelog(userFolder, "users", users, false)
   return true
 }
+
+var runSimulation = function(){
+  
+}

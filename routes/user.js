@@ -31,8 +31,7 @@ router.post('/add',function(req,res,next){
   var schema = require(path.join(appDir,"data","Users","template.json"))
   var data = req.body;
   var ajv = new Ajv({allErrors: true});
-  var validate = ajv.compile(schema);
-  var valid = validate(data);
+  var valid = ajv.validate(schema, data);
 
   output  = valid ? {'Accepted':'check back in a while to once the sim has run again'} : ajv.errorsText(validate.errors)
   valid?users.addUser(data):false
@@ -69,7 +68,8 @@ router.get('/:id/:time',function(req,res,next){
 router.get('/:id',function(req,res,next){
   //list all users in current day
   var simid = Date.today().toString("yyyy_MM_dd")
-  var data = JSON.parse(fs.readFileSync(path.join(write.folder.sim,"users.json")));
+    write.makeSimFiles(simid)
+  var data = JSON.parse(fs.readFileSync(write.folders.userFile));
   var userid = req.params.id
   console.log(userid)
   // check for user existing
