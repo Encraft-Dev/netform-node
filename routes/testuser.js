@@ -1,7 +1,7 @@
 var express = require('express');
-var path = require('path');
 var router = express.Router();
 
+var path = require('path');
 var zlib = require('zlib')
 var Ajv = require('ajv');
 var fs = require('graceful-fs')
@@ -11,18 +11,15 @@ require('datejs')
 var conf = require("../sim_modules/config");
 var appDir = conf.appRoot;
 
-
 var write = require (path.join(appDir,"sim_modules",'logs.js'))
 var users = require (path.join(appDir,"sim_modules",'users.js'))
-
 
 /* GET users listing. */
 router.get('/',function(req,res,next){
   //list all users in current day
   var simid = "test";//Date.today().toString("yyyy_MM_dd")
   write.makeSimFiles(simid);
-
-  var data = JSON.parse(fs.readFileSync(write.folders.sim,"users.json"));// require(path.join(appDir,"results",simid,"users.json"))
+  var data = JSON.parse(fs.readFileSync(path.join(write.folders.sim,"users.json")));// require(path.join(appDir,"results",simid,"users.json"))
   res.send(data);
 });
 //return template format

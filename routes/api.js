@@ -73,7 +73,7 @@ router.post('/', function(req, res) {
 	var UData = JSON.parse(fs.readFileSync(write.folders.userFile));
 	//process UDATA
 	config.PCusers = UData;
-	config = processUserData(config);///currently soes notthign!!!!
+	config = processUserData(config);//
 	res.send(simulation.simulate(config));//res.send(simulation.simulate(req.body,req.query.sId));
 });
 
