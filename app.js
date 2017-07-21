@@ -38,6 +38,7 @@ app.get("/results/*", function (req, res, next) {
 app.use("/results",express.static(path.join(dataRoot, 'results')));
 app.use("/data",express.static(path.join(appRoot, 'data')));
 app.use("/sim",express.static(path.join(appRoot, 'public','sim')));
+app.use("/app",express.static(path.join(appRoot, 'public','app')));
 app.use("/docs",express.static(path.join(appRoot, 'public','docs')));
 app.use("/", express.static(path.join(appRoot,'public','app')));
 
