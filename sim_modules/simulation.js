@@ -32,7 +32,7 @@ var Sim = Simjs.Sim;
 Sim.Random = Simjs.Random;
 exports.simulate = function (simData) {
 	//console.log("full config file",simData)
-	console.log(simData)
+	//console.log(simData)
 	var settings = [] //simulation settings
 	var vehicleslist = [] //list of active vehicles.
 	var vehicleData = [];
@@ -63,7 +63,7 @@ exports.simulate = function (simData) {
 	//load PCuser list
 	//console.log(settings.PCusers)
 
-	var Park = new Sim.Facility("park", Sim.Facility.FCFS, simData.simSlots)//this manages timing and queuing
+	var Park = new Sim.Facility("park", Sim.Facility.FCFS, simData.simSlots+ settings.PCusers.length)//this manages timing and queuing
 	Park.report = function () { console.log(this) };
 	Park.caps = function () {
 		st = sim.entities
@@ -230,7 +230,7 @@ exports.simulate = function (simData) {
 			// }
 			settings.PCusers.forEach(function(element) {
 				this.setTimer(element.simArrival).done(function(){
-					console.log("loop", sim.time(),element);
+					//console.log("loop", sim.time(),element);
 					sim.addEntity(Vehicle);
 				});
 			}, this);

@@ -10,7 +10,7 @@ exports.test = {
 exports.simData = {// used to run auto sims for user testing
     "simID": "",
     "simLength": "1440",
-    "simSlots": "30",
+    "simSlots": "250",
     "simSeed": "1234",
     "allowConstraints": "on",
     "constraintsExportCap": "500000",

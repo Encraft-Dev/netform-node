@@ -1,0 +1,411 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "Netform App",
+    "version": "1.0.0",
+    "title": "Netform"
+  },
+  "host": "netform.encraft.co.uk",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "Users",
+      "description": "Everything about your Users"
+    },
+    {
+      "name": "helpers",
+      "description": "Useful functions"
+    }
+  ],
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "paths": {
+    "/helper/isotosim/{isotime}": {
+      "get": {
+        "tags": [
+          "helpers"
+        ],
+        "summary": "convert ISO time to simtime",
+        "description": "converts a JS Date().toISOString() to sim time",
+        "operationId": "isoToSimtime",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "isotime",
+            "in": "path",
+            "description": "ISO time",
+            "required": true,
+            "type": "string",
+            "format": "date-time"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Simtime",
+            "schema": {
+              "$ref": "#/definitions/singleInteger"
+            }
+          }
+        }
+      }
+    },
+    "/helper/simtoiso/{simtime}": {
+      "get": {
+        "tags": [
+          "helpers"
+        ],
+        "summary": "convert sim time to ISO time",
+        "description": "converts a sim time to ISO time",
+        "operationId": "simToIsotime",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "simtime",
+            "in": "path",
+            "description": "Sim time",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Isotime",
+            "schema": {
+              "$ref": "#/definitions/singleDate"
+            }
+          }
+        }
+      }
+    },
+    "/user": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "List Users",
+        "description": "List all users.",
+        "operationId": "listUser",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "default": {
+            "description": "successful operation"
+          }
+        }
+      }
+    },
+    "/user/add": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Returns User Schema",
+        "description": "Allow validation of the data before entering into the simulation",
+        "operationId": "userSchema",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "default": {
+            "description": "successful operation"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Adds or updates user to system",
+        "description": "Add/update user to system after validating with schema",
+        "operationId": "addUser",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "dates should be ISO. eg new Date().toISOString() ",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/User"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Accepted':'check back in a while to once the sim has run again'"
+          }
+        }
+      }
+    },
+    "/user/{id}": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get user by user id",
+        "description": "",
+        "operationId": "getUserById",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "returns ",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/UserRtn"
+            }
+          },
+          "400": {
+            "description": "Invalid username supplied"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/user/{id}/{simtime}": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get user sim data for specific sim time",
+        "description": "",
+        "operationId": "getUserByIDandTime",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "User ID",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "simtime",
+            "in": "path",
+            "description": "Sim time required",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/UserSim"
+            }
+          },
+          "400": {
+            "description": "Invalid username supplied"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "singleDate": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "date-time"
+      }
+    },
+    "singleInteger": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 1339
+      }
+    },
+    "User": {
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string"
+        },
+        "arrivaldatetime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "departuredatetime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "vehicleId": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 21
+        },
+        "currentcharge": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "netformcharge": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    },
+    "UserSim": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "nfAppId": {
+          "type": "string"
+        },
+        "statusCode": {
+          "type": "integer",
+          "enum": [
+            -1,
+            0,
+            1
+          ]
+        },
+        "rate": {
+          "type": "number"
+        },
+        "percent": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "chargeStatus": {
+          "type": "integer"
+        },
+        "arrival": {
+          "type": "number",
+          "format": "float"
+        },
+        "departure": {
+          "type": "number",
+          "format": "float"
+        }
+      }
+    },
+    "UserRtn": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "arrivaldatetime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "departuredatetime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "vehicleId": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 21
+        },
+        "currentcharge": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "netformcharge": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "model": {
+          "type": "object",
+          "properties": {
+            "Make": {
+              "type": "string"
+            },
+            "Model": {
+              "type": "string"
+            },
+            "Name": {
+              "type": "string"
+            },
+            "Seats": {
+              "type": "integer"
+            },
+            "Range": {
+              "type": "integer"
+            },
+            "MaxCapacity": {
+              "type": "integer"
+            },
+            "MinCharge": {
+              "type": "integer"
+            },
+            "C_Rate1": {
+              "type": "number"
+            },
+            "C_Rate2": {
+              "type": "number"
+            },
+            "D_Rate": {
+              "type": "number"
+            },
+            "C_RUT": {
+              "type": "integer"
+            },
+            "C_RDC": {
+              "type": "number"
+            },
+            "C_T1": {
+              "type": "integer"
+            },
+            "C_T2": {
+              "type": "integer"
+            },
+            "C_T3": {
+              "type": "integer"
+            },
+            "C_T4": {
+              "type": "integer"
+            },
+            "C_CS": {
+              "type": "integer"
+            },
+            "C_TS": {
+              "type": "integer"
+            },
+            "id": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    }
+  }
+}
