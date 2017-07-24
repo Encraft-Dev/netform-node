@@ -16,14 +16,6 @@ var helpers = require(path.join(appRoot,'routes','helpers'));
 var app    = express(),
     http 	 = require('http').Server(app),
     io 		 = require('socket.io')(http);
-    //handle app communications - like routes but commands instead of urls
-    io.on('connection', function(socket){
-      // socket.on('login', function(updObj){
-      // 	createUser(updObj, function(car){
-      // 		io.to(socket.id).emit('userSetup', car);
-      // 	});
-      // });
-    });
     
 app.use(favicon(path.join(appRoot, 'public', 'favicon.ico')));
 app.use(logger('dev'));
@@ -56,12 +48,22 @@ app.use("/app",express.static(path.join(appRoot, 'public','app')));
 app.use("/docs",express.static(path.join(appRoot, 'public','docs')));
 app.use("/app", express.static(path.join(appRoot,'public','app')));
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  var err = new Error('Route Not Found');
-  err.status = 404;
-  next(err);
+
+//handle app communications - like routes but commands instead of urls
+io.on('connection', function(socket){
+  // socket.on('login', function(updObj){
+  // 	createUser(updObj, function(car){
+  // 		io.to(socket.id).emit('userSetup', car);
+  // 	});
+  // });
 });
+
+// catch 404 and forward to error handler
+// app.use(function(req, res, next) {
+//   var err = new Error('Route Not Found');
+//   err.status = 404;
+//   next(err);
+// });
 
 // error handler
 app.use(function(err, req, res, next) {
