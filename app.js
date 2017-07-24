@@ -13,7 +13,10 @@ var users = require(path.join(appRoot,'routes','user'));
 var testusers = require(path.join(appRoot,'routes','testuser')); 
 var helpers = require(path.join(appRoot,'routes','helpers'));
 
-var app = express();
+var app    = express(),
+    http 	 = require('http').Server(app),
+    io 		 = require('socket.io')(http);
+    
 app.use(favicon(path.join(appRoot, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
@@ -23,9 +26,6 @@ app.use('/api', api);//sim api
 app.use('/user', users);//users api
 app.use('/testuser', testusers);
 app.use('/helper',helpers);
-
-var http 		 = require('http').Server(app),
-    io 			 = require('socket.io')(http);
 
 //deal with sending results back
 app.get("/results/*", function (req, res, next) {
