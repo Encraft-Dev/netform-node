@@ -16,7 +16,6 @@ var helpers = require(path.join(appRoot,'routes','helpers'));
 var app    = express(),
     http 	 = require('http').Server(app),
     io 		 = require('socket.io')(http);
-console.log(io);
     //handle app communications - like routes but commands instead of urls
     io.on('connection', function(socket){
       // socket.on('login', function(updObj){
@@ -55,7 +54,7 @@ app.use("/data",express.static(path.join(appRoot, 'data')));
 app.use("/sim",express.static(path.join(appRoot, 'public','sim')));
 app.use("/app",express.static(path.join(appRoot, 'public','app')));
 app.use("/docs",express.static(path.join(appRoot, 'public','docs')));
-app.use("/", express.static(path.join(appRoot,'public','app')));
+app.use("/app", express.static(path.join(appRoot,'public','app')));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
