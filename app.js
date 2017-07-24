@@ -16,7 +16,7 @@ var helpers = require(path.join(appRoot,'routes','helpers'));
 var app    = express(),
     http 	 = require('http').Server(app),
     io 		 = require('socket.io')(http);
-
+console.log(io);
     //handle app communications - like routes but commands instead of urls
     io.on('connection', function(socket){
       // socket.on('login', function(updObj){
