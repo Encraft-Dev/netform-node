@@ -1,1 +1,271 @@
-put app code here
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>NETFORM</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <div class="container-fluid" style="padding:0; margin:0;">
+    <!-- // 
+    // ╔══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+    // ║                                                                                                                      ║
+    // ║                                                       SPLASH SCREEN                                                  ║
+    // ║                                                                                                                      ║
+    // ╠══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
+    // ║                                                                                                                      ║
+    // ║                                                                                                                      ║
+    -->
+    <section id="splashScreen">
+    	<span class="glyphicon glyphicon-th-large" aria-hidden="true"></span>
+    	<h1 class="heading">NET-FORM</h1>
+    </section>
+
+
+
+
+   <!-- // 
+    // ╔══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+    // ║                                                                                                                      ║
+    // ║                                                       LOGIN                                                          ║
+    // ║                                                                                                                      ║
+    // ╠══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
+    // ║                                                                                                                      ║
+    // ║                                                                                                                      ║
+    -->
+
+        <section id="login">
+          <div class="form-group">
+          	<div class="glyph-container">
+          		<span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+          	</div>
+          <h1 class="heading">Sign in</h1>
+            <input type="email" class="form-control" id="email1" placeholder="Email">
+            <input type="text" class="form-control" id="phone1" placeholder="Mobile Number">
+          </div>
+          <button class="btn btn-lg" id="loginBtn">GO</button>
+        </section>
+
+    <!--
+    // ║                                                                                                                      ║
+    // ║                                                                                                                      ║
+    // ╠══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
+    // ║                                                END OF SECTION                                                        ║
+    // ╚══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+    // 
+     // 
+      // ╔══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+      // ║                                                                                                                      ║
+      // ║                                                 CAR DETAILS                                                          ║
+      // ║                                                                                                                      ║
+      // ╠══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
+      // ║                                                                                                                      ║
+      // ║                                                                                                                      ║
+      -->
+          <section id="car" style="display: none;">
+            <div class="form-group">
+            	<div class="glyph-container">
+            		<span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+            	</div>
+              <h1 class="heading">Find your car</h1>
+              <select name="carMake" id="carMake" class="form-control">
+                <option>Make...</option>
+              </select>
+              <select name="carModel" id="carModel" class="form-control" disabled="disabled">
+                <option>Model...</option>
+              </select>
+            </div>
+            <button class="btn btn-lg" id="saveCar" disabled="disabled">SAVE</button>
+          </section>
+      <!--
+      // ║                                                                                                                      ║
+      // ║                                                                                                                      ║
+      // ╠══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
+      // ║                                                END OF SECTION                                                        ║
+      // ╚══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+      //   
+      // 
+      // ╔══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+      // ║                                                                                                                      ║
+      // ║                                            YOUR SECTION NAME                                                    ║
+      // ║                                                                                                                      ║
+      // ╠══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
+      // ║                                                                                                                      ║
+      // ║                                                                                                                      ║
+      -->
+          <section id="input" style="display: none;">
+            <div class="row" id='inputs'>
+              <div class="col-xs-12 col-sm-4">
+              <div class="glyph-container">
+            		<span class="glyphicon glyphicon-calendar" aria-hidden="true"></span>
+            	</div>
+              	<h1 class="heading">Your journey</h1>
+                <div class="form-group">
+                  <label for="">RETURN</label>
+                  <input type="datetime-local" class="form-control" id="returnTime">
+                </div>
+              </div>
+       
+               <div class="col-xs-12 col-sm-4">
+                <div class="form-group">
+                  <label for="">CHARGE</label>
+                  <label class="radio-inline">
+                    <input type="radio" name="chargeType" id="chargeType1" value="perc" checked>%
+                  </label>
+                  <label class="radio-inline">
+                    <input type="radio" name="chargeType" id="chargeType2" value="miles">miles
+                  </label>
+                  <select name="chargePerc" id="chargePerc" class="chargePerc">
+                    <option value="5">5%</option>
+                    <option value="10">10%</option>
+                    <option value="15">15%</option>
+                    <option value="20">20%</option>
+                    <option value="25">25%</option>
+                    <option value="30">30%</option>
+                    <option value="35">35%</option>
+                    <option value="40">40%</option>
+                    <option value="45">45%</option>
+                    <option value="50">50%</option>
+                    <option value="55">55%</option>
+                    <option value="60">60%</option>
+                    <option value="65">65%</option>
+                    <option value="70">70%</option>
+                    <option value="75">75%</option>
+                    <option value="80">80%</option>
+                    <option value="85">85%</option>
+                    <option value="90">90%</option>
+                    <option value="95">95%</option>
+                    <option value="100">100%</option>
+                  </select>
+                  <input type="number" name="chargeMiles" id="chargeMiles" class="form-control" style="display: none;">
+                </div>
+              </div>
+    
+               <div class="col-xs-12 col-sm-4">
+                <label for="">COST</label>
+                <select name="cost" id="costSel" class="cost">
+                  <option value="3">< £3</option>
+                  <option value="5">< £5</option>
+                  <option value="7">< £7</option>
+                  <option value="10">< £10</option>
+                  <option value="15">< £15</option>
+                  <option value="20">< £20</option>
+                  <option value="25">< £25</option>
+                  <option value="30">< £30</option>
+                  <option value="50">< £50</option>
+                </select>
+              </div>
+              <div class="col-xs-12">
+              	<button class="btn btn-lg" id="saveInputs">SAVE</button>
+              </div>
+
+            </div>
+            <div id="results">
+	            <div id="journeyDetails">
+	            	<div class="glyph-container">
+            			<span class="glyphicon glyphicon-stats" aria-hidden="true"></span>
+            		</div>
+		            <div id="resultContent">
+		            	
+		            	<div class="col-xs-10">
+		            		<span class="result-column">RETURN:</span>
+		            		<span class="resultSpan" id='resDate'>03/06/2017 13:50<!--change me--></span>
+		            	</div>
+		            	<div class="col-xs-2">
+		            		<button class="btn btn-default" id='editInputs'><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></button>
+		            	</div>
+
+			            <div class="col-xs-12">
+			            	<span class="result-column">CHARGE:</span>
+			            	<span class="resultSpan" id='resCharge'>75%<!--change me--></span>
+			            </div>
+			            <div class="col-xs-12">
+				            <span class="result-column">COST:</span>
+				            <span class="resultSpan" id='resCost'>£15<!--change me--></span>
+			            </div>
+			        </div>
+		        <hr>
+	            <div class="row" id="graph"></div>
+	            <hr>
+	            <div id="changeCar">
+	            	<div class="row">
+	            		<div class="col-xs-10">
+		            		<span class="result-column">CAR:</span>
+		            		<span class="resultSpan" id='thisCar'>Tesla Model S<!--change me--></span>
+		            	</div>
+		            	<div class="col-xs-2">
+		            		<button class="btn btn-default" id='editCar'><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></button>
+		            	</div>
+	            	</div>
+	            </div>
+	        </div>
+            
+          </section>
+      <!-- 
+      // ║                                                                                                                      ║
+      // ║                                                                                                                      ║
+      // ╠══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
+      // ║                                                END OF SECTION                                                        ║
+      // ╚══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+      // -->
+      
+    </div>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <!-- Bootstrap JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.2/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+    <script type="text/javascript" src="cookie.js"></script>
+
+
+    <script>
+      var socket = io();
+      var offline = false;
+      socket.io.on('connect_error', function(err) {
+        offline = true;
+      });
+      var thisCookie = Cookies.get('thisCar');
+      var thisCar =  (thisCookie ? JSON.parse(thisCookie) : {running:false});
+    </script>
+    <script type="text/javascript" src="login.js"></script>
+    <script type="text/javascript" src="saveCar.js"></script>
+    <script type="text/javascript" src="inputs.js"></script>
+    <script>
+      $(document).ready(function(){
+        if(thisCar.email){
+          $('#email1').val(thisCar.email)
+        }
+
+        if(thisCar.phone){
+          $('#phone1').val(thisCar.phone)
+        }
+
+        if(thisCar.carDetails){
+          $('#carMake').val(thisCar.carDetails.make);
+          $('#carModel').val(thisCar.carDetails.model);
+        }
+
+        $('#returnTime').val(moment().add(2, 'hours').format('YYYY-MM-DDTHH:mm'))
+
+        //---------------------------------------------------------| SPLASH SCREEN
+
+        $( "body" ).css({
+          backgroundColor: "#383838",
+        }, 1000 );
+        $("#splashScreen").fadeOut(3000,function(){
+          $("#login").fadeIn(2000);
+          $( "body" ).animate({
+            backgroundColor: "#66cccc",
+          }, 300 );
+        });
+
+      });
+    </script>
+  </body>
+</html>

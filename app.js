@@ -23,6 +23,10 @@ app.use('/api', api);//sim api
 app.use('/user', users);//users api
 app.use('/testuser', testusers);
 app.use('/helper',helpers);
+
+var http 		 = require('http').Server(app),
+    io 			 = require('socket.io')(http);
+
 //deal with sending results back
 app.get("/results/*", function (req, res, next) {
   //leave main settings file uncompressed because chrome and jquery $getJSON apears to have timing issues with gzip
@@ -34,6 +38,16 @@ app.get("/results/*", function (req, res, next) {
   }
   next()
 })
+
+//handle app communications - like routes but commands instead of urls
+io.on('connection', function(socket){
+  // socket.on('login', function(updObj){
+	// 	createUser(updObj, function(car){
+	// 		io.to(socket.id).emit('userSetup', car);
+	// 	});
+	// });
+});
+
 //set static paths
 app.use("/results",express.static(path.join(dataRoot, 'results')));
 app.use("/data",express.static(path.join(appRoot, 'data')));
