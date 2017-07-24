@@ -16,6 +16,15 @@ var helpers = require(path.join(appRoot,'routes','helpers'));
 var app    = express(),
     http 	 = require('http').Server(app),
     io 		 = require('socket.io')(http);
+
+    //handle app communications - like routes but commands instead of urls
+    io.on('connection', function(socket){
+      // socket.on('login', function(updObj){
+      // 	createUser(updObj, function(car){
+      // 		io.to(socket.id).emit('userSetup', car);
+      // 	});
+      // });
+    });
     
 app.use(favicon(path.join(appRoot, 'public', 'favicon.ico')));
 app.use(logger('dev'));
@@ -39,14 +48,6 @@ app.get("/results/*", function (req, res, next) {
   next()
 })
 
-//handle app communications - like routes but commands instead of urls
-io.on('connection', function(socket){
-  // socket.on('login', function(updObj){
-	// 	createUser(updObj, function(car){
-	// 		io.to(socket.id).emit('userSetup', car);
-	// 	});
-	// });
-});
 
 //set static paths
 app.use("/results",express.static(path.join(dataRoot, 'results')));
