@@ -37,5 +37,7 @@ var login = function(){
     thisCar.id = results;
     Cookies.set('thisCar', JSON.stringify(thisCar));
     (!thisCar.carDetails ? transition('login', 'car', '478e8e') : transition('login','input', '336666'));
-  })
+  }).catch(e => {
+    console.log(e);
+  });
 }

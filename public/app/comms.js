@@ -5,11 +5,11 @@ var emit = function(where, what, how){
             url: 'http://netform.encraft.co.uk/'+where,
             data: what,
             success: function(data){
-                return resolve(data);
+                resolve(data);
             },
-            error: function(err){
-                reject(err);
-            },
+            // error: function(err){
+            //     reject(err);
+            // },
             dataType: 'json'
         });
     });
@@ -17,6 +17,6 @@ var emit = function(where, what, how){
 
 var emptyProm = function(data){
     return new Promise(function(resolve, reject) {
-        return resolve(data);
+        resolve(data);
     })
 }

@@ -58,7 +58,7 @@ router.post('/update', function(req, res, next) {
 router.post('/generateId', function(req, res){
   res.setHeader('Access-Control-Allow-Origin','*');
   res.setHeader('Content-Type', 'application/json');
-  res.send(passHash.generate(req.body.email));
+  res.send({guid:passHash.generate(req.body.email)});
 });
 
 router.get('/:id/:time',function(req,res,next){
