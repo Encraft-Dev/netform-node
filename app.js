@@ -41,8 +41,9 @@ app.get("/results/*", function (req, res, next) {
 
 
 //set static paths
-app.use(function(req, res) {
+app.use(function(req, res, nect) {
   res.header("Access-Control-Allow-Origin", "*");
+  next();
 });
 app.use("/results",express.static(path.join(dataRoot, 'results')));
 app.use("/data",express.static(path.join(appRoot, 'data')));
