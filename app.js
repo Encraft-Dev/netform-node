@@ -50,13 +50,13 @@ app.use("/", express.static(path.join(appRoot,'public','app')));
 
 
 //handle app communications - like routes but commands instead of urls
-io.on('connection', function(socket){
-  // socket.on('login', function(updObj){
-  // 	createUser(updObj, function(car){
-  // 		io.to(socket.id).emit('userSetup', car);
-  // 	});
-  // });
-});
+// io.on('connection', function(socket){
+//   // socket.on('login', function(updObj){
+//   // 	createUser(updObj, function(car){
+//   // 		io.to(socket.id).emit('userSetup', car);
+//   // 	});
+//   // });
+// });
 
 // catch 404 and forward to error handler
 // app.use(function(req, res, next) {
