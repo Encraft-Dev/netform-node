@@ -32,8 +32,6 @@ carOptions.forEach(function(c, i){
   $('#carMake').append('<option value="'+c+'">'+c+'</option>');
 });
 
-
-
 $('document').ready(function(){
   $('#saveCar').click(function(){
     thisCar.carDetails = {
@@ -43,7 +41,7 @@ $('document').ready(function(){
     if(offline == true){
       saveCar(thisCar)
     }else{
-      socket.emit('setCar', thisCar);
+      emit('setCar', thisCar);
     }
   });
 
@@ -60,9 +58,9 @@ $('document').ready(function(){
 });
 
 // --------------------------------------------------------┤ LISTEN FOR SUCCESSFUL SAVE
-socket.on('carSaved', function(car){
-    saveCar(car);
-});      
+// on('carSaved', function(car){
+//     saveCar(car);
+// });      
 
 var saveCar = function(car){
     thisCar = car;

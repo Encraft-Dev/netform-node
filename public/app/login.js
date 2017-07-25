@@ -7,13 +7,13 @@ $('document').ready(function(){
       if(offline == true){
         setCar(thisCar);
       }else{
-        socket.emit('login', thisCar);
+        emit('login', thisCar);
       }
 	}else{
     if(offline == true){
         setCar(thisCar);
       }else{
-		    socket.emit('updateUser', thisCar);
+		    emit('updateUser', thisCar);
       }
 	}
     
@@ -21,9 +21,9 @@ $('document').ready(function(){
 });
 
 // --------------------------------------------------------┤ LISTEN FOR SUCCESSFUL LOGIN
-socket.on('userSetup', function(car){
-  setCar(car)
-});
+// socket.on('userSetup', function(car){
+//   setCar(car)
+// });
 
 var setCar = function(car){
   thisCar = car;
