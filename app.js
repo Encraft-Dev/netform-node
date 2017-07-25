@@ -43,7 +43,6 @@ app.get("/results/*", function (req, res, next) {
 //set static paths
 app.use(function(req, res) {
   res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "X-Requested-With");
 });
 app.use("/results",express.static(path.join(dataRoot, 'results')));
 app.use("/data",express.static(path.join(appRoot, 'data')));
