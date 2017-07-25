@@ -42,6 +42,7 @@ router.post('/add',function(req,res,next){
 });
 
 router.post('/add/test',function(req,res,next){
+  res.header("Access-Control-Allow-Origin", "*");
   var schema = require(path.join(appDir,"data","Users","template.json"))
   var data = req.body;
   var ajv = new Ajv({allErrors: true});
