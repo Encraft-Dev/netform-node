@@ -45,8 +45,8 @@ router.post('/add/test',function(req,res,next){
   res.header("Access-Control-Allow-Origin", "*");
   var schema = require(path.join(appDir,"data","Users","template.json"))
   var data = req.body;
-  data.arrivaldatetime = timef.getSimTimefromISOtime(data.HTMLarrivaldatetime).toString();;
-  data.departuredatetime = timef.getSimTimefromISOtime(data.HTMLdeparturedatetime).toString();;
+  data.arrivaldatetime = '"'+timef.getSimTimefromISOtime(data.HTMLarrivaldatetime)+'"';
+  data.departuredatetime = '"'+timef.getSimTimefromISOtime(data.HTMLdeparturedatetime)+'"';
   data.vehicleId *= 1;
   data.netformcharge *= 1;
   var ajv = new Ajv({allErrors: true});
