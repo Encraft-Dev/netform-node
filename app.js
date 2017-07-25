@@ -14,8 +14,8 @@ var testusers = require(path.join(appRoot,'routes','testuser'));
 var helpers = require(path.join(appRoot,'routes','helpers'));
 
 var app    = express(),
-    http 	 = require('http').Server(app),
-    io 		 = require('socket.io')(http);
+    // http 	 = require('http').Server(app),
+    io 		 = require('socket.io')(server);
     
 app.use(favicon(path.join(appRoot, 'public', 'favicon.ico')));
 app.use(logger('dev'));
@@ -46,7 +46,7 @@ app.use("/data",express.static(path.join(appRoot, 'data')));
 app.use("/sim",express.static(path.join(appRoot, 'public','sim')));
 app.use("/app",express.static(path.join(appRoot, 'public','app')));
 app.use("/docs",express.static(path.join(appRoot, 'public','docs')));
-app.use("/app", express.static(path.join(appRoot,'public','app')));
+app.use("/", express.static(path.join(appRoot,'public','app')));
 
 
 //handle app communications - like routes but commands instead of urls
