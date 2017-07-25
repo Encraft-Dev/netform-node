@@ -41,7 +41,7 @@ app.get("/results/*", function (req, res, next) {
 
 
 //set static paths
-app.use(function(req, res, nect) {
+app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   next();
 });
