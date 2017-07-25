@@ -47,7 +47,7 @@ router.post('/add/test',function(req,res,next){
   var data = req.body;
   var ajv = new Ajv({allErrors: true});
   var valid = ajv.validate(schema, data);
-  output  = valid ? {'Accepted':'check back in a while to once the sim has run again'} : ajv.errorsText(validate.errors)
+  output  = valid ? {'Accepted':'check back in a while to once the sim has run again'} : ajv.errors
   // valid?users.addUser(data):false
   res.send(output);
 
