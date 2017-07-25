@@ -3,6 +3,7 @@ var path = require('path');
 var router = express.Router();
 var zlib = require('zlib')
 var Ajv = require('ajv');
+var passHash = require('password-hash');
 
 var fs = require('graceful-fs')
 require('datejs')
@@ -52,6 +53,10 @@ router.post('/update', function(req, res, next) {
   valid?users.addUser(data):false
   res.send(output);
 
+});
+
+router.post('/generateId', function(req, res){
+  res.send(passHash.generate(req.body.email));
 });
 
 router.get('/:id/:time',function(req,res,next){

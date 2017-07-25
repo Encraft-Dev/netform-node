@@ -3,19 +3,19 @@ $('document').ready(function(){
     e.preventDefault();
     thisCar.email = $('#email1').val();
     thisCar.phone = $('#phone1').val();
-    if(!thisCar.id){
-      if(offline == true){
-        setCar(thisCar);
-      }else{
-        emit('login', thisCar);
-      }
-	}else{
-    if(offline == true){
-        setCar(thisCar);
-      }else{
-		    emit('updateUser', thisCar);
-      }
-	}
+  //   if(!thisCar.id){
+  //     if(offline == true){
+  //       setCar(thisCar);
+  //     }else{
+  //       emit('login', thisCar);
+  //     }
+	// }else{
+  //   if(offline == true){
+  //       setCar(thisCar);
+  //     }else{
+	// 	    emit('updateUser', thisCar);
+  //     }
+	// }
     
   });
 });
@@ -24,21 +24,19 @@ $('document').ready(function(){
 // socket.on('userSetup', function(car){
 //   setCar(car)
 // });
-
-var setCar = function(car){
+var proms = [];
+var login = function(car){
   thisCar = car;
-  Cookies.set('thisCar', JSON.stringify(thisCar));
-  $("#login").slideUp("slow", function(){
-    if(!thisCar.carDetails){
-        $("#car").slideDown("slow")
-        $( "body" ).animate({
-          backgroundColor: "#478e8e",
-        }, 1000 );
-    }else{
-        $("#input").slideDown("slow")
-        $( "body" ).animate({
-          backgroundColor: "#336666",
-        }, 1000 );
-    }
-  }); 
+  if(!thisCar.id){
+    proms.push(emit('user/generateId', thisCar.email));
+  }else{
+    proms.push(emptyProm(thisCar.id));
+  }
+
+  var items = Promise.all(proms);
+	items.then(function(results){
+    thisCar.id = results;
+    Cookies.set('thisCar', JSON.stringify(thisCar));
+    (!thisCar.carDetails ? transition('login', 'car', '478e8e') : transition('login','input', '336666'));
+  })
 }

@@ -19,7 +19,7 @@
     "serve-favicon": "~2.4.2",
     "simjs": "^2.0.3",
     "request": "^2.81.0",
-    "socket.io": "^2.0.2"
+    "password-hash": "^1.2.2"
   },
   "main": "application"
 }

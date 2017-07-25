@@ -5,7 +5,7 @@ var emit = function(where, what, how){
             url: 'http://netform.encraft.co.uk/'+where,
             data: what,
             success: function(data){
-                resolve(data);
+                return resolve(data);
             },
             error: function(err){
                 reject(err);
@@ -13,4 +13,10 @@ var emit = function(where, what, how){
             dataType: 'json'
         });
     });
+}
+
+var emptyProm = function(data){
+    return new Promise(function(resolve, reject) {
+        return resolve(data);
+    })
 }
