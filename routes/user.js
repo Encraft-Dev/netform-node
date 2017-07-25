@@ -46,7 +46,7 @@ router.post('/add/test',function(req,res,next){
   var schema = require(path.join(appDir,"data","Users","template.json"))
   var data = req.body;
   data.arrivaldatetime = new Date(data.HTMLarrivaldatetime);
-  data.departuredatetime = new Date(data.HTMLdeparturedatetime);
+  data.departuredatetime = data.HTMLdeparturedatetime;
   // data.arrivaldatetime = timef.getSimTimefromISOtime(data.HTMLarrivaldatetime);
   // data.departuredatetime = timef.getSimTimefromISOtime(data.HTMLdeparturedatetime);
   console.log(data.arrivaldatetime, data.departuredatetime)
