@@ -3,7 +3,7 @@ $('document').ready(function(){
 	$('#saveInputs').click(function(){
 		if(!thisCar.current){
 			thisCar.current = {
-				arrDate : new Date()
+				arrDate : new Date().toISOString()
 			};
 
 		}
