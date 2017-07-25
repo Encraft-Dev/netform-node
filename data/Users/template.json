@@ -10,12 +10,12 @@
         "arrivaldatetime": {
             "description": "The arrival time of the user - RFC3339 date string from Date.now()).toISOString(). eg 2017-06-23T10:36:20.685Z ",
             "type": "string",
-            "format": "date-time"
+            // "format": "date-time"
         },
         "departuredatetime": {
             "description": "The departure time of the user  RFC3339 date string from Date.now()).toISOString(). eg 2017-06-23T10:36:20.685Z",
             "type": "string",
-            "format": "date-time"
+            // "format": "date-time"
         },
         "vehicleId": {
             "description": "Id of vehicle model from Vehicle database: if nothing passed a random vehiocle will be assigned",

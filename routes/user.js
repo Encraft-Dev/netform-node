@@ -45,7 +45,7 @@ router.post('/add/test',function(req,res,next){
   res.header("Access-Control-Allow-Origin", "*");
   var schema = require(path.join(appDir,"data","Users","template.json"))
   var data = req.body;
-  data.arrivaldatetime = new Date(data.HTMLarrivaldatetime);
+  data.arrivaldatetime = data.HTMLarrivaldatetime;
   data.departuredatetime = data.HTMLdeparturedatetime;
   // data.arrivaldatetime = timef.getSimTimefromISOtime(data.HTMLarrivaldatetime);
   // data.departuredatetime = timef.getSimTimefromISOtime(data.HTMLdeparturedatetime);
