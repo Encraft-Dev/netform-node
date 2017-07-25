@@ -5,7 +5,7 @@ var emit = function(where, what, how){
             url: 'http://netform.encraft.co.uk/'+where,
             data: what,
             success: function(data){
-                resolve(data);
+                return resolve(data);
             },
             // error: function(err){
             //     reject(err);

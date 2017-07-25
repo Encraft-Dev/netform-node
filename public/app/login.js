@@ -27,14 +27,18 @@ $('document').ready(function(){
 var proms = [];
 var login = function(){
   if(!thisCar.id){
-    proms.push(emit('user/generateId', {email: thisCar.email}));
+    proms.push(
+      emit('user/generateId', {email: thisCar.email})
+      .then(function(results){
+        thisCar.id = results.guid;
+      })
+  );
   }else{
     proms.push(emptyProm(thisCar.id));
   }
 
   var items = Promise.all(proms);
 	items.then(function(results){
-    thisCar.id = results;
     Cookies.set('thisCar', JSON.stringify(thisCar));
     (!thisCar.carDetails ? transition('login', 'car', '478e8e') : transition('login','input', '336666'));
   }).catch(e => {

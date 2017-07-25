@@ -41,6 +41,10 @@ app.get("/results/*", function (req, res, next) {
 
 
 //set static paths
+app.use(function(req, res) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "X-Requested-With");
+});
 app.use("/results",express.static(path.join(dataRoot, 'results')));
 app.use("/data",express.static(path.join(appRoot, 'data')));
 app.use("/sim",express.static(path.join(appRoot, 'public','sim')));
@@ -59,11 +63,11 @@ app.use("/", express.static(path.join(appRoot,'public','app')));
 // });
 
 // catch 404 and forward to error handler
-// app.use(function(req, res, next) {
-//   var err = new Error('Route Not Found');
-//   err.status = 404;
-//   next(err);
-// });
+app.use(function(req, res, next) {
+  var err = new Error('Route Not Found');
+  err.status = 404;
+  next(err);
+});
 
 // error handler
 app.use(function(err, req, res, next) {
