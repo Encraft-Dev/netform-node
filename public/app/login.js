@@ -3,19 +3,6 @@ $('document').ready(function(){
     e.preventDefault();
     thisCar.email = $('#email1').val();
     thisCar.phone = $('#phone1').val();
-  //   if(!thisCar.id){
-  //     if(offline == true){
-  //       setCar(thisCar);
-  //     }else{
-  //       emit('login', thisCar);
-  //     }
-	// }else{
-  //   if(offline == true){
-  //       setCar(thisCar);
-  //     }else{
-	// 	    emit('updateUser', thisCar);
-  //     }
-	// }
     login();
   });
 });

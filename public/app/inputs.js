@@ -1,27 +1,30 @@
 $('document').ready(function(){
 	// updateDetails();
 	$('#saveInputs').click(function(){
-		updateDetails();
-		$('#inputs').hide('slide',{direction:'up'});
-		$( "body" ).animate({
-	      backgroundColor: "#333",
-	    }, 1000 );
+		if(!thisCar.current){
+			thisCar.current = {
+				arrDate : new Date()
+			};
+
+		}
+		if(thisCar.current.depDate != $('#returnTime').val() || thisCar.current.chargePerc != $('#chargePerc').val()){
+			thisCar.current.depDate = $('#returnTime').val();
+			thisCar.current.chargePerc = $('#chargePerc').val();
+			updateDetails(function(){
+				transition('results', 'inputs', '333');
+			});
+		}else{
+			transition('results', 'inputs', '333');
+		}
+
 	});
 
 	$('#editInputs').click(function(){
-		$('#inputs').show('slide',{direction:'up'});
-		$( "body" ).animate({
-	      backgroundColor: "#336666",
-	    }, 1000 );
+		transition('results', 'inputs', '336666');
 	});
 
 	$('#editCar').click(function(){
-		$("#input").slideUp("slow", function(){
-	      $("#car").slideDown("slow")
-	    })
-	    $( "body" ).animate({
-	      backgroundColor: "#478e8e",
-	    }, 1000 );
+		transition('input', 'car', '478e8e');
 	})
 });
 
@@ -69,10 +72,22 @@ function updateChart(){
 	});  
 }
 
-function updateDetails(){
-	$('#resDate').html($('#returnTime').val());
-	$('#resCharge').html($('#chargePerc').val()+'%');
-	$('#resCost').html('< £'+$('#costSel').val());
-	$('#thisCar').html(thisCar.carDetails.make +' ' +thisCar.carDetails.model);
-	updateChart();
+function updateDetails(callback){
+	if(!offline){
+
+	}
+	emit('user/add/test',{
+		uid: thisCar.id,
+		HTMLarrivaldatetime: thisCar.current.arrDate,
+		HTMLdeparturedatetime: thisCar.current.depDate,
+		vehicleId: thisCar.carDetails.id,
+		netformcharge: thisCar.current.chargePerc
+	}).then(function(res){
+		callback();
+	})
+	// $('#resDate').html($('#returnTime').val());
+	// $('#resCharge').html($('#chargePerc').val()+'%');
+	// $('#resCost').html('< £'+$('#costSel').val());
+	// $('#thisCar').html(thisCar.carDetails.make +' ' +thisCar.carDetails.model);
+	// updateChart();
 }

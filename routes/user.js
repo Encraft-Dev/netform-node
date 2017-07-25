@@ -11,6 +11,7 @@ var conf = require("../sim_modules/config");
 var appDir = conf.appRoot;
 var write = require (path.join(appDir,"sim_modules",'logs.js'))
 var users = require (path.join(appDir,"sim_modules",'users.js'))
+var timef = require(path.join(appDir,"sim_modules",'logs.js'))
 
 /* GET users listing. */
 router.get('/',function(req,res,next){
@@ -43,6 +44,8 @@ router.post('/add',function(req,res,next){
 router.post('/update', function(req, res, next) {
   var schema = require(path.join(appDir,"data","Users","template.json"))
   var data = req.body
+  data.arrivaldatetime = timef.getSimTimefromISOtime(data.HTMLarrivaldatetime);
+  data.departuredatetime = timef.getSimTimefromISOtime(data.HTMLdeparturedatetime);
   //check if input is valid against schema
   var ajv = new Ajv({allErrors: true});
   var validate = ajv.compile(schema);
