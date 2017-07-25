@@ -13,9 +13,9 @@ var users = require(path.join(appRoot,'routes','user'));
 var testusers = require(path.join(appRoot,'routes','testuser')); 
 var helpers = require(path.join(appRoot,'routes','helpers'));
 
-var app    = express(),
+var app    = express();
     // http 	 = require('http').Server(app),
-    io 		 = require('socket.io')(server);
+    // io 		 = require('socket.io')(server);
     
 app.use(favicon(path.join(appRoot, 'public', 'favicon.ico')));
 app.use(logger('dev'));
