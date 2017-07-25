@@ -16,7 +16,7 @@ $('document').ready(function(){
 	// 	    emit('updateUser', thisCar);
   //     }
 	// }
-    
+    login();
   });
 });
 
@@ -25,10 +25,9 @@ $('document').ready(function(){
 //   setCar(car)
 // });
 var proms = [];
-var login = function(car){
-  thisCar = car;
+var login = function(){
   if(!thisCar.id){
-    proms.push(emit('user/generateId', thisCar.email));
+    proms.push(emit('user/generateId', {email: thisCar.email}));
   }else{
     proms.push(emptyProm(thisCar.id));
   }
