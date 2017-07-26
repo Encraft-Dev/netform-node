@@ -4,6 +4,10 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var bodyParser = require('body-parser');
 
+// --------------------------------------------------------┤ GLOBAL SYSTEM STATUS WHICH CAN BE USED WHEREVER IT IS NEEDED TO GUAGE WHAT THE SYSTEM IS DOING
+global.sysStatus = 'READY';
+// --------------------------------------------------------┤ OPTIONS: DateTime LAST CREATED, 'SIM RUNNING' OR 'READY' ON SERVER START
+
 var conf = require("./sim_modules/config");
 var appRoot = conf.appRoot;
 var dataRoot = conf.dataRoot;

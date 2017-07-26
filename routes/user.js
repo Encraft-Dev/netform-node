@@ -60,6 +60,10 @@ router.post('/add/test',function(req,res,next){
 
 });
 
+router.get('/systemStatus', function(req,res){
+  res.send(global.sysStatus);
+});
+
 router.post('/update', function(req, res, next) {
   var schema = require(path.join(appDir,"data","Users","template.json"))
   var data = req.body
