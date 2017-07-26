@@ -37,4 +37,9 @@ router.post('/', function(req, res) {
 	res.send(simulation.simulate(config));//res.send(simulation.simulate(req.body,req.query.sId));
 });
 
+router.get('/systemStatus', function(req,res){
+  res.header("Access-Control-Allow-Origin", "*");  
+  res.send(global.sysStatus);
+});
+
 module.exports = router;

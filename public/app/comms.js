@@ -22,7 +22,7 @@ var emptyProm = function(data){
 }
 
 var getUpdates = function(){
-    emit('user/systemStatus', {}, 'GET')
+    emit('api/systemStatus', {}, 'GET')
     .then(function(res){
         console.log(res);
     })
