@@ -60,7 +60,8 @@ router.post('/add/test',function(req,res,next){
 
 });
 
-router.get('/systemStatus', function(req,res){
+router.get('/systemStatus', function(req,res,next){
+  res.header("Access-Control-Allow-Origin", "*");  
   res.send(global.sysStatus);
 });
 

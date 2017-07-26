@@ -20,3 +20,15 @@ var emptyProm = function(data){
         resolve(data);
     })
 }
+
+var getUpdates = function(){
+    emit('user/systemStatus', {}, 'GET')
+    .then(function(res){
+        console.log(res);
+    })
+}
+
+$(document).ready(function(){
+    getUpdates();
+    setInterval(getUpdates, 10000);
+})
