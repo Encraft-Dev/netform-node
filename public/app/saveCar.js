@@ -55,6 +55,9 @@ var filterModels = function(tMake){
 }
 
 var saveCar = function(car){
+  if(!thisCar.carDetails){
+    thisCar.carDetails = {};
+  }
   if(thisCar.carDetails.id != $('#carModel').val()){
     thisCar.carDetails = {
           make: $('#carMake').val(),
@@ -62,9 +65,13 @@ var saveCar = function(car){
           id: $('#carModel').val()
     };
     Cookies.set('thisCar', JSON.stringify(thisCar));
-    updateDetails(function(){
-      transition('car', 'input', '336666');    
-    });
+    if(!offline){
+      updateDetails(function(){
+        transition('car', 'input', '336666');    
+      });
+	  }else{
+      transition('car', 'input', '336666');
+    }
   }else{
     transition('car', 'input', '336666');        
   }

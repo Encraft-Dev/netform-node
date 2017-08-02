@@ -21,14 +21,32 @@ var emptyProm = function(data){
     })
 }
 
-var getUpdates = function(){
-    emit('api/systemStatus', {}, 'GET')
+
+var currData = null;
+
+var getUpdate = function(newDate){
+    currData = 'PAUSED';
+    emit('')
     .then(function(res){
-        console.log(res);
+        updateChart();
+        currData = newDate;
     })
 }
 
+var checkUpdate = function(){
+    if(currData != 'PAUSED'){        
+        emit('api/systemStatus', {}, 'GET')
+        .then(function(res){
+            if(res != 'READY' && res != 'SIM RUNNING'){
+                if(moment(currData).isBefore(res)){
+                    getUpdate(res);
+                }
+            }
+        })
+    }
+}
+
 $(document).ready(function(){
-    getUpdates();
-    setInterval(getUpdates, 10000);
+    // getUpdate();
+    // setInterval(checkUpdate, 10000);
 })
