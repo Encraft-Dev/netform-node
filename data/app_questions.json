@@ -1,0 +1,155 @@
+{
+    "1":
+    {
+        "type": "SignUp",
+        "qText": "Age",
+        "answer_format": "integer",
+        "answer_key": "<20,20-30,30-50,50+",
+        "followUp": "",
+        "followUpText": ""
+    },
+    "2":
+    {
+        "type": "SignUp",
+        "qText": "Gender",
+        "answer_format": "Bool",
+        "answer_key": "0-F,1-M",
+        "followUp": "",
+        "followUpText": ""
+    },
+    "3":
+    {
+        "type": "SignUp",
+        "qText": "Do you currently own a plug-in electric vehicle?",
+        "answer_format": "Bool",
+        "answer_key": "0-N,1-Y",
+        "followUp": "",
+        "followUpText": ""
+    },
+    "4":
+    {
+        "type": "SignUp",
+        "qText": "Current car (if not fully electric EV)?",
+        "answer_format": "text",
+        "answer_key": "",
+        "followUp": "",
+        "followUpText": ""
+    },
+    "5":
+    {
+        "type": "During",
+        "qText": "Had you heard of V2G before this trial?",
+        "answer_format": "Bool",
+        "answer_key": "0-N,1-Y",
+        "followUp": "URL",
+        "followUpText": "Please click link for more information – takes to a more info page"
+    },
+    "6":
+    {
+        "type": "During",
+        "qText": "What is your average daily mileage? ",
+        "answer_format": "integer",
+        "answer_key": "0-10,10-20,20-30,30-50,50+",
+        "followUp": "",
+        "followUpText": ""
+    },
+    "7":
+    {
+        "type": "During",
+        "qText": "Do you think you would mind if the range on the car was (Q6) in the morning if you got free parking at your car park at work/ train station? ",
+        "answer_format": "bool",
+        "answer_key": "",
+        "followUp": "",
+        "followUpText": ""
+    },
+    "8":
+    {
+        "type": "During",
+        "qText": "Based on your current mileage, you could save money by switching to an EV, is this something you could be interested in? ",
+        "answer_format": "bool",
+        "answer_key": "0-N,1-Y",
+        "followUp": "URL",
+        "followUpText": " (Yes – take to new page with more info on EVs)."
+    },
+    "9":
+    {
+        "type": "During",
+        "qText": "Would you say the driving you’ve been doing since this trial is fairly typical of your weekly driving behaviour?  ",
+        "answer_format": "bool",
+        "answer_key": "0-N,1-Y",
+        "followUp": "Comment",
+        "followUpText": ""
+    },
+    "10":
+    {
+        "type": "followUp",
+        "qText": "Why not?  In what way is this different?",
+        "answer_format": "text",
+        "answer_key": "",
+        "followUp": "",
+        "followUpText": ""
+    },
+    "11":
+    {
+        "type": "During",
+        "qText": "Are you the only driver of your vehicle? ",
+        "answer_format": "bool",
+        "answer_key": "0-N,1-Y",
+        "followUp": "List",
+        "followUpText": "Who else uses it (tick all that apply)- list? family member, friend, work colleague"
+    },
+    "12":
+    {
+        "type": "During",
+        "qText": "What age is your vehicle? (Options).  ",
+        "answer_format": "integer ",
+        "answer_key": "(0-5,5-10,10-15,15+)",
+        "followUp": "",
+        "followUpText": ""
+    },
+    "13":
+    {
+        "type": "During",
+        "qText": "To reduce the electricity bills in your home, you could have a V2Home unit installed that uses stored energy to discharge during the evening and at night time.  Do you think that sounds like something you would be interested in? ",
+        "answer_format": "bool",
+        "answer_key": "0-N,1-Y",
+        "followUp": "Y-14,N-15",
+        "followUpText": ""
+    },
+    "14":
+    {
+        "type": "followUp",
+        "qText": "Do you own your own home",
+        "answer_format": "Bool",
+        "answer_key": "0-N,1-Y",
+        "followUp": "",
+        "followUpText": ""
+    },
+    "15":
+    {
+        "type": "followup",
+        "qText": "Why not?",
+        "answer_format": "text",
+        "answer_key": "",
+        "followUp": "",
+        "followUpText": ""
+    },
+    "16":
+    {
+        "type": "During",
+        "qText": "Do you have solar panels on your roof at home?",
+        "answer_format": "bool",
+        "answer_key": "0-N,1-Y",
+        "followUp": "",
+        "followUpText": ""
+    },
+    "17":
+    {
+        "type": "During",
+        "qText": "Who is your electricity supplier?",
+        "answer_format": "text",
+        "answer_key": "",
+        "followUp": "",
+        "followUpText": ""
+    }
+}
