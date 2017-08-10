@@ -113,7 +113,7 @@
         "qText": "To reduce the electricity bills in your home, you could have a V2Home unit installed that uses stored energy to discharge during the evening and at night time.  Do you think that sounds like something you would be interested in? ",
         "answer_format": "bool",
         "answer_key": "0-N,1-Y",
-        "followUp": "Y-14,N-15",
+        "followUp": "1-14,0-15",
         "followUpText": ""
     },
     "14":

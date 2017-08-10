@@ -21,10 +21,10 @@ emit('data/vehicles.json', {}, 'GET').then(function(results){
     $('#carMake').append('<option value="'+c+'">'+c+'</option>');
   });
 
-  if(thisCar.carDetails){
-    $('#carMake').val(thisCar.carDetails.make)
-    filterModels(thisCar.carDetails.make)
-    $('#carModel').val(thisCar.carDetails.id)
+  if(thisCar.car){
+    $('#carMake').val(thisCar.car.make)
+    filterModels(thisCar.car.make)
+    $('#carModel').val(thisCar.car.id)
   }
 
 })
@@ -55,11 +55,11 @@ var filterModels = function(tMake){
 }
 
 var saveCar = function(car){
-  if(!thisCar.carDetails){
-    thisCar.carDetails = {};
-  }
-  if(thisCar.carDetails.id != $('#carModel').val()){
-    thisCar.carDetails = {
+  // if(!thisCar.car){
+  //   thisCar.car = {};
+  // }
+  if(thisCar.car.id != $('#carModel').val()){
+    thisCar.car = {
           make: $('#carMake').val(),
           model: $('#carModel option:selected').html(),
           id: $('#carModel').val()

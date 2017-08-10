@@ -268,7 +268,7 @@
         }, 1000 );
         $("#splashScreen").fadeOut(3000,function(){
           if(thisCar.email && thisCar.phone){
-            (!thisCar.carDetails ? transition('login', 'car', '478e8e') : transition('login','input', '336666'));
+            (!thisCar.car ? transition('login', 'car', '478e8e') : transition('login','input', '336666'));
           }else{
             $("#login").fadeIn(2000);
             $( "body" ).animate({

@@ -3,12 +3,13 @@ var path = require('path');
 var router = express.Router();
 var zlib = require('zlib')
 var Ajv = require('ajv');
-var passHash = require('password-hash');
 
 var fs = require('graceful-fs')
 require('datejs')
-var conf = require("../sim_modules/config");
-var appDir = conf.appRoot;
+var   conf        = require("../sim_modules/config"),
+      appDir      = conf.appRoot,
+      userDataDir = conf.dataRoot+'/userData/';
+
 var write = require (path.join(appDir,"sim_modules",'logs.js'))
 var users = require (path.join(appDir,"sim_modules",'users.js'))
 var timef = require(path.join(appDir,"sim_modules",'logs.js'))
@@ -41,21 +42,15 @@ router.post('/add',function(req,res,next){
 
 });
 
-router.post('/add/test',function(req,res,next){
+router.post('/updateActivity',function(req,res,next){
   res.header("Access-Control-Allow-Origin", "*");
-  var schema = require(path.join(appDir,"data","Users","template.json"))
-  var data = req.body;
-  // data.arrivaldatetime = data.HTMLarrivaldatetime;
-  // data.departuredatetime = data.HTMLdeparturedatetime;
-  data.arrivaldatetime = timef.getSimTimefromISOtime(data.HTMLarrivaldatetime);
-  data.departuredatetime = timef.getSimTimefromISOtime(data.HTMLdeparturedatetime);
-  console.log(data.arrivaldatetime, data.departuredatetime)
-  data.vehicleId *= 1;
-  data.netformcharge *= 1;
-  var ajv = new Ajv({allErrors: true});
-  var valid = ajv.validate(schema, data);
-  output  = valid ? {'Accepted':'check back in a while to once the sim has run again'} : ajv.errors
-  // valid?users.addUser(data):false
+  if (fs.existsSync(userDataDir+tID+'.json')){
+     tFile = fs.readFileSync(userDataDir+tID+'.json');
+     tFile.activity.push(req.body).current;
+     fs.writeFileSync(userDataDir+tID+'.json', JSON.stringify(tFile));
+  }else{
+    res.send({error:'NOt a user'});
+  }
   res.send(output);
 
 });
@@ -80,7 +75,22 @@ router.post('/update', function(req, res, next) {
 router.post('/generateId', function(req, res){
   res.setHeader('Access-Control-Allow-Origin','*');
   res.setHeader('Content-Type', 'application/json');
-  res.send({guid:passHash.generate(req.body.email)});
+  var tID = encodeURIComponent(req.body.email);
+  var tFile;
+  if (!fs.existsSync(userDataDir)){fs.mkdirSync(userDataDir)} // make folder 
+  if (!fs.existsSync(userDataDir+tID+'.json')){
+    tFile = {id: tID, email : req.body.email, phone : req.body.phone, car : {}, activity : [], survey:[]}
+    fs.writeFileSync(userDataDir+tID+'.json', JSON.stringify(tFile))
+   res.send(tFile);
+  }else{
+    tFile = fs.readFileSync(userDataDir+tID+'.json');
+    if(tFile.email != req.body.email || tFile.phone != req.body.phone){
+      tFile.email = req.body.email;
+      tFile.phone = req.body.phone;
+      fs.writeFileSync(userDataDir+tID+'.json', JSON.stringify(tFile));
+    }
+    res.send(tFile)
+  }
 });
 
 router.get('/:id/:time',function(req,res,next){

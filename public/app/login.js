@@ -15,9 +15,14 @@ var proms = [];
 var login = function(){
   if(!thisCar.id){
     proms.push(
-      emit('user/generateId', {email: thisCar.email})
+      emit('user/generateId', {email: thisCar.email, phone: thisCar.phone})
       .then(function(results){
-        thisCar.id = results.guid;
+        thisCar = results;
+        if(thisCar.car.make){
+          $('#carMake').val(thisCar.car.make)
+          filterModels(thisCar.car.make)
+          $('#carModel').val(thisCar.car.id)
+        }
       })
   );
   }else{
@@ -31,4 +36,8 @@ var login = function(){
   }).catch(e => {
     console.log(e);
   });
+}
+
+var clearData = function(){
+  Cookies.remove('thisCar');
 }

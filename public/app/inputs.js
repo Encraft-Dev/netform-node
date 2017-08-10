@@ -74,17 +74,13 @@ function updateChart(){
 
 function updateDetails(callback){
 	if(!offline){
-
+	// --------------------------------------------------------┤ THE USER HAS UPDATED AN ALREADY RUNNING JOURNEY
+	}else{
+		// --------------------------------------------------------┤ THIS IS A NEW JOURNEY
+		emit('user/updateActivity',thisCar).then(function(res){
+			callback();
+		})
 	}
-	emit('user/add/test',{
-		uid: thisCar.id,
-		HTMLarrivaldatetime: thisCar.current.arrDate,
-		HTMLdeparturedatetime: thisCar.current.depDate,
-		vehicleId: thisCar.carDetails.id,
-		netformcharge: thisCar.current.chargePerc
-	}).then(function(res){
-		callback();
-	})
 	// $('#resDate').html($('#returnTime').val());
 	// $('#resCharge').html($('#chargePerc').val()+'%');
 	// $('#resCost').html('< £'+$('#costSel').val());
