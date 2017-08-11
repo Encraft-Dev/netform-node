@@ -31,6 +31,7 @@ exports.test = function test() { return 'Hello' }
 var Sim = Simjs.Sim;
 Sim.Random = Simjs.Random;
 exports.simulate = function (simData) {
+	write.setSimStatus(1)
 	//console.log("full config file",simData)
 	//console.log(simData)
 	var settings = [] //simulation settings
@@ -753,6 +754,7 @@ exports.simulate = function (simData) {
 
 	write.timelog(simFolder, "settings", [settings, vehicleslist], false)
 	console.log("Simulation End")
+	write.setSimStatus(0)
 	return [simID, [settings, vehicleslist]] //Controller.log
 
 }//end function

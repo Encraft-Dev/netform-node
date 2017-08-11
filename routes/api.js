@@ -37,9 +37,20 @@ router.post('/', function(req, res) {
 	res.send(simulation.simulate(config));//res.send(simulation.simulate(req.body,req.query.sId));
 });
 
+router.get('/userlist', function(req,res){
+	res.header("Access-Control-Allow-Origin", "*");  
+	var out  = users.getUsersfromUserdata()
+	console.log(out)
+	res.send(out)
+
+	//	res.send(js.readFileSync(path.join(conf.appRoot,"data","sim_status.json")));
+  });
+
 router.get('/systemStatus', function(req,res){
   res.header("Access-Control-Allow-Origin", "*");  
-  res.send(global.sysStatus);
+  console.log(conf.dataRoot)
+  write.setSimStatus();
+  res.send(js.readFileSync(path.join(conf.appRoot,"data","sim_status.json")));
 });
 
 module.exports = router;

@@ -22,6 +22,27 @@
     "https"
   ],
   "paths": {
+    "/api/systemstatus": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": "provides system status",
+        "description": "Provdes last run date and current simulation status",
+        "operationId": "status",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "default": {
+            "description": "Status",
+            "schema": {
+              "$ref": "#/definitions/systemStatus"
+            }
+          }
+        }
+      }
+    },
     "/helper/isotosim/{isotime}": {
       "get": {
         "tags": [
@@ -47,7 +68,7 @@
           "default": {
             "description": "Simtime",
             "schema": {
-              "$ref": "#/definitions/singleInteger"
+              "$ref": "#/definitions/systemstatus"
             }
           }
         }
@@ -230,6 +251,21 @@
     }
   },
   "definitions": {
+    "systemStatus": {
+      "type": "object",
+      "properties": {
+        "lastrun": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "integer"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
     "singleDate": {
       "type": "array",
       "items": {

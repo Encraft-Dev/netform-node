@@ -8,7 +8,8 @@ $('document').ready(function(){
 
 		}
 		if(thisCar.current.depDate != $('#returnTime').val() || thisCar.current.chargePerc != $('#chargePerc').val()){
-			thisCar.current.depDate = $('#returnTime').val();
+			thisCar.current.depDate = (new Date($('#returnTime').val())).toISOString()
+			console.log(thisCar)
 			thisCar.current.chargePerc = $('#chargePerc').val();
 			updateDetails(function(){
 				transition('results', 'inputs', '333');
@@ -77,6 +78,7 @@ function updateDetails(callback){
 	// --------------------------------------------------------┤ THE USER HAS UPDATED AN ALREADY RUNNING JOURNEY
 	}else{
 		// --------------------------------------------------------┤ THIS IS A NEW JOURNEY
+		console.log("mine",thisCar)
 		emit('user/updateActivity',thisCar).then(function(res){
 			callback();
 		})

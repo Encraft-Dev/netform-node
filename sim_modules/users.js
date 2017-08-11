@@ -1,13 +1,55 @@
-var fs = require('graceful-fs');
-var path = require('path');
-var conf = require("./config");
-var appDir = conf.appRoot; //path.dirname(require.main.filename);
-var dataRoot = conf.dataRoot;
-require('datejs');
+const     fs = require('graceful-fs');
+        path = require('path');
+        conf = require("./config");
+      appDir = conf.appRoot; //path.dirname(require.main.filename);
+    dataRoot = conf.dataRoot;          
+    write    = require(path.join(appDir, "sim_modules", 'logs'));
+    models   = require(path.join(appDir, "data", 'vehicles.json'));
+ apifunction = require(path.join(appDir, 'sim_modules','api_functions'));
+               require('datejs');
 
-var write = require(path.join(appDir, "sim_modules", 'logs'));
-var models = require(path.join(appDir, "data", 'vehicles.json'));
-var apifunction = require(path.join(appDir, 'sim_modules','api_functions'));
+
+
+exports.getUsersfromUserdata = function(){
+  //loop through the available users and a to user array
+  var filelist = fs.readdirSync(path.join(dataRoot,"userData"))
+  var out = []
+  filelist.forEach(function(f) {
+    var fu = JSON.parse(fs.readFileSync(path.join(dataRoot,"userData",f), "utf8"))
+    //for each get last activity and add to array
+    if(fu.activity.length>=1){
+      thisCarData = fu.activity.slice(-1)[0]
+      thisCarData.model = getModelfromId(thisCarData.car.id);
+      out.push(thisCarData)
+    }
+  }, this);
+  out=convertuser(out)
+  //write out to simulation file
+  var simid = Date.today().toString("yyyy_MM_dd")
+  write.makeSimFiles(simid);//make sure files exist
+  write.timelog(write.folders.sim, "users", out, false)
+  apifunction.runSimulation(simid);
+  return out
+}
+
+exports.convertAppUserstoSimUsers = convertuser = function(actList){
+  var out=[]
+    actList.forEach(function(u) {
+    //  console.log(u)
+      o = {
+        "uid": u.id,
+        "arrivaldatetime": u.current.arrDate,
+        "departuredatetime":u.current.depDate,
+        "vehicleId":u.car.id,
+        "netformcharge": u.current.chargePerc
+      }
+      out.push(o);
+    }, this);
+//console.log(out)
+
+return out;
+  }
+
 
 
 exports.addUser = function (obj, sim) {
@@ -26,18 +68,18 @@ var getModelfromId = exports.getModelfromId = function (id) {
   return o[0]
 }
 
-var createUser = function (userFolder, users, obj) {
-  // console.log("create user",obj)
-  obj.model = getModelfromId(obj.vehicleId);
-  users.push(obj)
-  write.timelog(userFolder, "users", users, false)
-  return true
-}
+// var createUser = function (userFolder, users, obj) {
+//   // console.log("create user",obj)
+//   obj.model = getModelfromId(obj.vehicleId);
+//   users.push(obj)
+//   write.timelog(userFolder, "users", users, false)
+//   return true
+// }
 
-var updateUser = function (userFolder, users, obj, updateIndex) {
-  //console.log("update",obj)
-  users[updateIndex] = obj
-  // console.log("updatelist",obj,users)
-  write.timelog(userFolder, "users", users, false)
-  return true
-}
+// var updateUser = function (userFolder, users, obj, updateIndex) {
+//   //console.log("update",obj)
+//   users[updateIndex] = obj
+//   // console.log("updatelist",obj,users)
+//   write.timelog(userFolder, "users", users, false)
+//   return true
+// }

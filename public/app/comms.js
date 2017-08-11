@@ -1,15 +1,17 @@
 var emit = function(where, what, how){
     return new Promise(function(resolve, reject) {
+        console.log("Emit:",what);
         $.ajax({
             type: how || "POST",
             url: '/'+where,
-            data: what,
+            data: JSON.stringify(what),  //JL -had to stringify the json to get object to work correctly!
             success: function(data){
                 return resolve(data);
             },
             // error: function(err){
             //     reject(err);
             // },
+            contentType:'application/json',
             dataType: 'json'
         });
     });

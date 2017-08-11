@@ -1,18 +1,18 @@
-var express = require('express');
-var path = require('path');
-var router = express.Router();
-var zlib = require('zlib')
-var Ajv = require('ajv');
-
-var fs = require('graceful-fs')
-require('datejs')
+const express = require('express');
+         path = require('path');
+       router = express.Router();
+         zlib = require('zlib')
+          Ajv = require('ajv');
+           fs = require('graceful-fs')
+          MD5 = require('md5')
+                require('datejs')
 var   conf        = require("../sim_modules/config"),
       appDir      = conf.appRoot,
       userDataDir = conf.dataRoot+'/userData/';
 
 var write = require (path.join(appDir,"sim_modules",'logs.js'))
 var users = require (path.join(appDir,"sim_modules",'users.js'))
-var timef = require(path.join(appDir,"sim_modules",'logs.js'))
+//var timef = require(path.join(appDir,"sim_modules",'logs.js'))
 
 /* GET users listing. */
 router.get('/',function(req,res,next){
@@ -25,27 +25,30 @@ router.get('/',function(req,res,next){
   res.send(data);
 });
 //return template format
-router.get('/add', function(req, res, next) {
-  var data = require(path.join(appDir,"data","Users","template.json"))
-  res.send(data);
-});
+// router.get('/add', function(req, res, next) {
+//   var data = require(path.join(appDir,"data","Users","template.json"))
+//   res.send(data);
+// });
 
-router.post('/add',function(req,res,next){
-  var schema = require(path.join(appDir,"data","Users","template.json"))
-  var data = req.body;
-  var ajv = new Ajv({allErrors: true});
-  var valid = ajv.validate(schema, data);
+// router.post('/add',function(req,res,next){
+//   var schema = require(path.join(appDir,"data","Users","template.json"))
+//   var data = req.body;
+//   var ajv = new Ajv({allErrors: true});
+//   var valid = ajv.validate(schema, data);
 
-  output  = valid ? {'Accepted':'check back in a while to once the sim has run again'} : ajv.errorsText(validate.errors)
-  valid?users.addUser(data):false
-  res.send(output);
+//   output  = valid ? {'Accepted':'check back in a while to once the sim has run again'} : ajv.errorsText(validate.errors)
+//   valid?users.addUser(data):false
+//   res.send(output);
 
-});
+// });
 
 router.post('/updateActivity',function(req,res,next){
   res.header("Access-Control-Allow-Origin", "*");
+  console.log("he",req.body)
+  var tID = req.body.id
   if (fs.existsSync(userDataDir+tID+'.json')){
-     tFile = fs.readFileSync(userDataDir+tID+'.json');
+     tFile = JSON.parse(fs.readFileSync(userDataDir+tID+'.json','utf8'));
+    
      tFile.activity.push(req.body).current;
      fs.writeFileSync(userDataDir+tID+'.json', JSON.stringify(tFile));
   }else{
@@ -55,27 +58,28 @@ router.post('/updateActivity',function(req,res,next){
 
 });
 
-router.post('/update', function(req, res, next) {
-  var schema = require(path.join(appDir,"data","Users","template.json"))
-  var data = req.body
-  data.arrivaldatetime = timef.getSimTimefromISOtime(data.HTMLarrivaldatetime);
-  data.departuredatetime = timef.getSimTimefromISOtime(data.HTMLdeparturedatetime);
-  //check if input is valid against schema
-  var ajv = new Ajv({allErrors: true});
-  var validate = ajv.compile(schema);
-  var valid = validate(data);
 
-  output  = valid ? "Accepted:check back in a while to once the sim has run again" : ajv.errorsText(validate.errors)
-  //add to user list
-  valid?users.addUser(data):false
-  res.send(output);
+// router.post('/update', function(req, res, next) {
+//   var schema = require(path.join(appDir,"data","Users","template.json"))
+//   var data = req.body
+//   data.arrivaldatetime = timef.getSimTimefromISOtime(data.HTMLarrivaldatetime);
+//   data.departuredatetime = timef.getSimTimefromISOtime(data.HTMLdeparturedatetime);
+//   //check if input is valid against schema
+//   var ajv = new Ajv({allErrors: true});
+//   var validate = ajv.compile(schema);
+//   var valid = validate(data);
 
-});
+//   output  = valid ? "Accepted:check back in a while to once the sim has run again" : ajv.errorsText(validate.errors)
+//   //add to user list
+//   valid?users.addUser(data):false
+//   res.send(output);
+
+// });
 
 router.post('/generateId', function(req, res){
   res.setHeader('Access-Control-Allow-Origin','*');
   res.setHeader('Content-Type', 'application/json');
-  var tID = encodeURIComponent(req.body.email);
+  var tID = MD5(req.body.email);
   var tFile;
   if (!fs.existsSync(userDataDir)){fs.mkdirSync(userDataDir)} // make folder 
   if (!fs.existsSync(userDataDir+tID+'.json')){
@@ -104,6 +108,18 @@ router.get('/:id/:time',function(req,res,next){
   res.send(output);
 });
 
+router.post('/:id',function(req,res,next){
+  //list all users in current day
+  var simid = Date.today().toString("yyyy_MM_dd")
+  var data = JSON.parse(zlib.unzipSync(fs.readFileSync(path.join(write.folders.veh,req.params.time+".json.gz"))));
+  var userid = req.body.id
+  var time = new Date(req.body.time)
+  // check for user existing
+  output = data.filter(function (el) {return el.nfAppId == userid;})
+
+  res.send(output);
+});
+
 router.get('/:id',function(req,res,next){
   //list all users in current day
   var simid = Date.today().toString("yyyy_MM_dd")
@@ -113,6 +129,27 @@ router.get('/:id',function(req,res,next){
   console.log(userid)
   // check for user existing
   output = userid?data.filter(function (el) {return el.uid == userid;}):data
+//get current time...
+  console.log(output)
+  //
+
+  cTime = parseInt(write.getSimTimefromISOtime(new Date().toISOString()))
+  dTime = parseInt(write.getSimTimefromISOtime(output[0].departuredatetime))
+
+  var cData = JSON.parse(zlib.unzipSync(fs.readFileSync(path.join(write.folders.veh,cTime+".json.gz"))));
+  cData = cData.filter(function (el) {return el.nfAppId == userid;})
+  cData = {charge:cData[0].percent,rate:cData[0].rate}
+  
+  var dData = JSON.parse(zlib.unzipSync(fs.readFileSync(path.join(write.folders.veh,dTime+".json.gz"))));
+  dData = dData.filter(function (el) {return el.nfAppId == userid;})
+  dData = {charge:dData[0].percent,rate:dData[0].rate}
+  
+  output[0].current= cData         
+  output[0].predicted = dData[0]
+  output[0].finance = {saving:100}          
+ output[0].graph = {0:1,1:2}           
+//find current charge
+
   res.send(output);
 });
 

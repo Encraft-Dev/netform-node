@@ -86,3 +86,11 @@ exports.getRealtimefromSimtime = function(simtime){
 	
 	return time
 }
+
+exports.setSimStatus = function(status=0){
+	//write to simstatus file indata
+	var simfile = path.join(config.appRoot,"data","sim_status.json")
+	var simdate = new Date()
+	//console.log(fs.readdirSync(path.join(dataRoot,"userData")).length
+	fs.writeFileSync(simfile,JSON.stringify({"lastrun":simdate.toISOString(),"status":status,Users:fs.readdirSync(path.join(dataRoot,"userData")).length})) // make usersfile 
+}
