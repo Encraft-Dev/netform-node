@@ -50,5 +50,5 @@ var checkUpdate = function(){
 
 $(document).ready(function(){
     getUpdate();
-    setInterval(checkUpdate, 10000);
+    setInterval(checkUpdate, 60000);
 })
