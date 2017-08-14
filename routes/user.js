@@ -121,6 +121,8 @@ router.post('/:id',function(req,res,next){
 });
 
 router.get('/:id',function(req,res,next){
+ 
+  cTime = parseInt(write.getSimTimefromISOtime(new Date().toISOString()))
 
   if(!fs.existsSync(path.join(write.folders.veh,cTime+".json.gz"))){
     res.send({error: 'no data'})
@@ -138,7 +140,6 @@ router.get('/:id',function(req,res,next){
   console.log(output)
   //
 
-  cTime = parseInt(write.getSimTimefromISOtime(new Date().toISOString()))
   dTime = parseInt(write.getSimTimefromISOtime(output[0].departuredatetime))
 
   var cData = JSON.parse(zlib.unzipSync(fs.readFileSync(path.join(write.folders.veh,cTime+".json.gz"))));
