@@ -48,9 +48,11 @@ router.post('/updateActivity',function(req,res,next){
   var tID = req.body.id
   if (fs.existsSync(userDataDir+tID+'.json')){
      tFile = JSON.parse(fs.readFileSync(userDataDir+tID+'.json','utf8'));
-    
+     var simid = Date.today().toString("yyyy_MM_dd")
+     
      tFile.activity.push(req.body.current);
      fs.writeFileSync(userDataDir+tID+'.json', JSON.stringify(tFile));
+     users.getUsersfromUserdata();
   }else{
     res.send({error:'NOt a user'});
   }
