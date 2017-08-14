@@ -49,6 +49,7 @@ router.post('/updateActivity',function(req,res,next){
   if (fs.existsSync(userDataDir+tID+'.json')){
      tFile = JSON.parse(fs.readFileSync(userDataDir+tID+'.json','utf8'));
      var simid = Date.today().toString("yyyy_MM_dd")
+     tFile.car = req.body.car
      req.body.current.car = req.body.car;
      tFile.activity.push(req.body.current);
      fs.writeFileSync(userDataDir+tID+'.json', JSON.stringify(tFile));
