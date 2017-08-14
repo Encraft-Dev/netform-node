@@ -49,7 +49,7 @@ router.post('/updateActivity',function(req,res,next){
   if (fs.existsSync(userDataDir+tID+'.json')){
      tFile = JSON.parse(fs.readFileSync(userDataDir+tID+'.json','utf8'));
     
-     tFile.activity.push(req.body).current;
+     tFile.activity.push(req.body.current);
      fs.writeFileSync(userDataDir+tID+'.json', JSON.stringify(tFile));
   }else{
     res.send({error:'NOt a user'});
