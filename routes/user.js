@@ -125,7 +125,8 @@ router.get('/:id',function(req,res,next){
   cTime = parseInt(write.getSimTimefromISOtime(new Date().toISOString()))
 
   if(!fs.existsSync(path.join(write.folders.veh,cTime+".json.gz"))){
-    res.send({error: 'no data'})
+    res.send({error: 'no data'});
+    return false;
   }
 
   //list all users in current day
