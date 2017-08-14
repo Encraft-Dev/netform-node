@@ -121,6 +121,11 @@ router.post('/:id',function(req,res,next){
 });
 
 router.get('/:id',function(req,res,next){
+
+  if(!fs.existsSync(path.join(write.folders.veh,cTime+".json.gz"))){
+    res.send({error: 'no data'})
+  }
+
   //list all users in current day
   var simid = Date.today().toString("yyyy_MM_dd")
     write.makeSimFiles(simid)
