@@ -38,9 +38,9 @@ var checkUpdate = function(){
     if(currData != 'PAUSED'){        
         emit('api/systemStatus', {}, 'GET')
         .then(function(res){
-            if(res != 'READY' && res != 'SIM RUNNING'){
-                if(moment(currData).isBefore(res)){
-                    getUpdate(res);
+            if(res.status != 1){
+                if(moment(currData).isBefore(res.lastrun)){
+                    getUpdate(res.lastrun);
                 }
             }
         })
@@ -48,6 +48,6 @@ var checkUpdate = function(){
 }
 
 $(document).ready(function(){
-    // getUpdate();
+    getUpdate();
     setInterval(checkUpdate, 10000);
 })
