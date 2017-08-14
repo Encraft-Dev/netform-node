@@ -44,16 +44,24 @@ router.get('/',function(req,res,next){
 
 router.post('/updateActivity',function(req,res,next){
   res.header("Access-Control-Allow-Origin", "*");
-  console.log("he",req.body)
+  // console.log("he",req.body)
   var tID = req.body.id
   if (fs.existsSync(userDataDir+tID+'.json')){
      tFile = JSON.parse(fs.readFileSync(userDataDir+tID+'.json','utf8'));
      var simid = Date.today().toString("yyyy_MM_dd")
      tFile.car = req.body.car
      req.body.current.car = req.body.car;
+     req.body.current.id = req.body.id;
      tFile.activity.push(req.body.current);
-     fs.writeFileSync(userDataDir+tID+'.json', JSON.stringify(tFile));
-     users.getUsersfromUserdata();
+    //  fs.writeFileSync(userDataDir+tID+'.json', JSON.stringify(tFile));
+    fs.writeFile(userDataDir+tID+'.json', JSON.stringify(tFile), 'utf-8', function (err) {
+        if (err) {
+          // res.send("failed to save");
+        } else {
+          // res.send(tFile);
+          users.getUsersfromUserdata();
+        }
+      })
   }else{
     res.send({error:'NOt a user'});
   }
@@ -126,7 +134,7 @@ router.post('/:id',function(req,res,next){
 router.get('/:id',function(req,res,next){
  
   cTime = parseInt(write.getSimTimefromISOtime(new Date().toISOString()))
-
+console.log(cTime)
   if(!fs.existsSync(path.join(write.folders.veh,cTime+".json.gz"))){
     res.send({error: 'no data'});
     return false;
@@ -143,10 +151,14 @@ router.get('/:id',function(req,res,next){
 //get current time...
   console.log(output)
   //
-
+  if(output.length < 1){
+    res.send({});
+    return false;
+  }
   dTime = parseInt(write.getSimTimefromISOtime(output[0].departuredatetime))
 
   var cData = JSON.parse(zlib.unzipSync(fs.readFileSync(path.join(write.folders.veh,cTime+".json.gz"))));
+  console.log(cData)
   cData = cData.filter(function (el) {return el.nfAppId == userid;})
   cData = {charge:cData[0].percent,rate:cData[0].rate}
   

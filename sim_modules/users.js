@@ -14,15 +14,18 @@ exports.getUsersfromUserdata = function(){
   //loop through the available users and a to user array
   var filelist = fs.readdirSync(path.join(dataRoot,"userData"))
   var out = []
-  filelist.forEach(function(f) {
-    var fu = JSON.parse(fs.readFileSync(path.join(dataRoot,"userData",f), "utf8"))
-    //for each get last activity and add to array
-    if(fu.activity.length>=1){
-      thisCarData = fu.activity.slice(-1)[0]
-      thisCarData.model = getModelfromId(thisCarData.car.id);
-      out.push(thisCarData)
+  filelist.forEach(function(f, i) {
+    if(f[0] != '.'){
+      var fu = (JSON.parse(fs.readFileSync(path.join(dataRoot,"userData",f), "utf8")))
+      //for each get last activity and add to array
+      if(fu.activity.length>=1){
+        thisCarData = fu.activity.slice(-1)[0]
+        thisCarData.model = getModelfromId(thisCarData.car.id);
+        out.push(thisCarData)
+      }
     }
-  }, this);
+    // var fu = JSON.parse(fs.readFileSync(path.join(dataRoot,"userData",f), "utf8"))
+  });
   out=convertuser(out)
   //write out to simulation file
   var simid = Date.today().toString("yyyy_MM_dd")
@@ -35,13 +38,13 @@ exports.getUsersfromUserdata = function(){
 exports.convertAppUserstoSimUsers = convertuser = function(actList){
   var out=[]
     actList.forEach(function(u) {
-    //  console.log(u)
+     console.log(u)
       o = {
         "uid": u.id,
-        "arrivaldatetime": u.current.arrDate,
-        "departuredatetime":u.current.depDate,
+        "arrivaldatetime": u.arrDate,
+        "departuredatetime":u.depDate,
         "vehicleId":u.car.id,
-        "netformcharge": u.current.chargePerc
+        "netformcharge": u.chargePerc
       }
       out.push(o);
     }, this);
