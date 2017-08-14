@@ -1,6 +1,5 @@
 var emit = function(where, what, how){
     return new Promise(function(resolve, reject) {
-        console.log("Emit:",what);
         $.ajax({
             type: how || "POST",
             url: '/'+where,
@@ -28,7 +27,7 @@ var currData = null;
 
 var getUpdate = function(newDate){
     currData = 'PAUSED';
-    emit('')
+    emit('user/'+thisCar.id)
     .then(function(res){
         updateChart();
         currData = newDate;
@@ -50,5 +49,5 @@ var checkUpdate = function(){
 
 $(document).ready(function(){
     // getUpdate();
-    // setInterval(checkUpdate, 10000);
+    setInterval(checkUpdate, 10000);
 })
