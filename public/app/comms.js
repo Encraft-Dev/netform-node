@@ -29,7 +29,8 @@ var getUpdate = function(newDate){
     currData = 'PAUSED';
     emit('user/'+thisCar.id, {}, "GET")
     .then(function(res){
-        updateChart();
+        // updateChart();
+        console.log(newDate)
         currData = newDate;
     })
 }
