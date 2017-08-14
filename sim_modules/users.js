@@ -68,18 +68,18 @@ var getModelfromId = exports.getModelfromId = function (id) {
   return o[0]
 }
 
-// var createUser = function (userFolder, users, obj) {
-//   // console.log("create user",obj)
-//   obj.model = getModelfromId(obj.vehicleId);
-//   users.push(obj)
-//   write.timelog(userFolder, "users", users, false)
-//   return true
-// }
+var createUser = function (userFolder, users, obj) {
+  // console.log("create user",obj)
+  obj.model = getModelfromId(obj.vehicleId);
+  users.push(obj)
+  write.timelog(userFolder, "users", users, false)
+  return true
+}
 
-// var updateUser = function (userFolder, users, obj, updateIndex) {
-//   //console.log("update",obj)
-//   users[updateIndex] = obj
-//   // console.log("updatelist",obj,users)
-//   write.timelog(userFolder, "users", users, false)
-//   return true
-// }
+var updateUser = function (userFolder, users, obj, updateIndex) {
+  //console.log("update",obj)
+  users[updateIndex] = obj
+  // console.log("updatelist",obj,users)
+  write.timelog(userFolder, "users", users, false)
+  return true
+}

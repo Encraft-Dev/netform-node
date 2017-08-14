@@ -1,4 +1,5 @@
 var fs = require('graceful-fs')
+ var fsUtils = require("nodejs-fs-utils");
 var zlib = require('zlib')
 var config = require("./config")
 var appDir = config.appRoot//path.dirname(require.main.filename);
@@ -91,6 +92,9 @@ exports.setSimStatus = function(status=0){
 	//write to simstatus file indata
 	var simfile = path.join(config.appRoot,"data","sim_status.json")
 	var simdate = new Date()
+	fsize=0;
+	fsize = (fs.existsSync(path.join(config.dataRoot,"results")))?fsUtils.fsizeSync(path.join(config.dataRoot,"results"))/1000000:0
+	userCount = (fs.existsSync(path.join(dataRoot,"userData")))?fs.readdirSync(path.join(dataRoot,"userData")).length:0
 	//console.log(fs.readdirSync(path.join(dataRoot,"userData")).length
-	fs.writeFileSync(simfile,JSON.stringify({"lastrun":simdate.toISOString(),"status":status,Users:fs.readdirSync(path.join(dataRoot,"userData")).length})) // make usersfile 
+	fs.writeFileSync(simfile,JSON.stringify({"lastrun":simdate.toISOString(),"status":status,Users:userCount,dataSizeonDisk:fsize})) // make usersfile 
 }
