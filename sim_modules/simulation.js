@@ -31,7 +31,7 @@ exports.test = function test() { return 'Hello' }
 
 //set hsoted or localhsot
 
-var isLocal = process.env.OPENSHIFT_NODEJS_IP?false:true;
+var isLocal = false //process.env.OPENSHIFT_NODEJS_IP?false:true;
 
 
 var Sim = Simjs.Sim;
