@@ -177,13 +177,18 @@ exports.simulate = function (simData) {
 			// sysLog.push({Veh:this.vehStatus,Cap:Park.caps(),Park:Park.status()})
 			if(isLocal){
 				write.timelog(write.folders.sys, sim.time(), { Veh: this.vehStatus, Cap: Park.caps(), Park: Park.status() }, true);
-				write.timelog(write.folders.veh, sim.time(), vehicleData, true)
+				
 			}
 			
 			this.vehStatus = [];
-			if(vehicleData.nfAppId!='' && !isLocal){
-					write.timelog(write.folders.veh, sim.time(), vehicleData, true)
+			var vd = vehicleData;
+			if(!isLocal){
+
+				vd = vehicleData.filter(function(el){return el.nfAppId!=''})
+
 			}
+				console.log(vd)
+				write.timelog(write.folders.veh, sim.time(), vd, true)
 			//write.timelog(write.folders.veh, sim.time(), vehicleData, true)
 			vehicleData = [];
 			//request data from vehicle...

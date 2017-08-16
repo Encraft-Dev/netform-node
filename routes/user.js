@@ -160,6 +160,7 @@ console.log(cTime)
   var cData = JSON.parse(zlib.unzipSync(fs.readFileSync(path.join(write.folders.veh,cTime+".json.gz"))));
   console.log(cData)
   cData = cData.filter(function (el) {return el.nfAppId == userid;})
+  console.log(cData)
   cData = {charge:cData[0].percent,rate:cData[0].rate}
   
   var dData = JSON.parse(zlib.unzipSync(fs.readFileSync(path.join(write.folders.veh,dTime+".json.gz"))));

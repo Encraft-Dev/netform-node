@@ -59,7 +59,8 @@ var buildConfig = exports.buildConfig = function (simid) {
 	write.makeSimFiles(simid);
 	var UData = JSON.parse(fs.readFileSync(write.folders.userFile));
 	//process UDATA
-	simconfig.PCusers = UData;
+  simconfig.PCusers = UData;
+  console.log(simconfig)
 	//console.log(JSON.stringify(config))
 	simconfig = apifunction.processUserData(simconfig);//
 	return simconfig ;//res.send(simulation.simulate(req.body,req.query.sId));
