@@ -28,6 +28,12 @@ var CarPark = require(path.join(dataFolder, "profile_parking"));
 var Cp = CarPark.commuterCP
 exports.test = function test() { return 'Hello' }
 
+
+//set hsoted or localhsot
+
+var isLocal = false// process.env.OPENSHIFT_NODEJS_IP?false:true;
+
+
 var Sim = Simjs.Sim;
 Sim.Random = Simjs.Random;
 exports.simulate = function (simData) {
@@ -169,9 +175,16 @@ exports.simulate = function (simData) {
 			genSolar = Park.solarGeneration.periodOutput("May", period)
 			//console.log(Controller.log)
 			// sysLog.push({Veh:this.vehStatus,Cap:Park.caps(),Park:Park.status()})
-			write.timelog(write.folders.sys, sim.time(), { Veh: this.vehStatus, Cap: Park.caps(), Park: Park.status() }, true)
+			if(isLocal){
+				write.timelog(write.folders.sys, sim.time(), { Veh: this.vehStatus, Cap: Park.caps(), Park: Park.status() }, true);
+				write.timelog(write.folders.veh, sim.time(), vehicleData, true)
+			}
+			
 			this.vehStatus = [];
-			write.timelog(write.folders.veh, sim.time(), vehicleData, true)
+			if(vehicleData.nfAppId!='' && !isLocal){
+					write.timelog(write.folders.veh, sim.time(), vehicleData, true)
+			}
+			//write.timelog(write.folders.veh, sim.time(), vehicleData, true)
 			vehicleData = [];
 			//request data from vehicle...
 			this.send({ c: "status", data: this.vehStatus, control: this.Constraints }, 0);

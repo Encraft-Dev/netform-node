@@ -5,13 +5,14 @@ var conf = require("./config");
 var appDir = conf.appRoot; //path.dirname(require.main.filename);
 var dataRoot = conf.dataRoot;
 require('datejs');
-
+var config = require(path.join(appDir,'sim_modules','config'))
 var write = require(path.join(appDir, "sim_modules", 'logs'));
 var users = require(path.join(appDir, "sim_modules", 'users'));
 
 var testData = require(path.join(appDir, 'test', 'testdata.json'))
 var testUsers = require(path.join(appDir, 'test', 'testusers.json'))
 
+var simulation = require(path.join(appDir, 'sim_modules','simulation'))
 
 var rndInt = function (min, max) { return Math.floor(Math.random() * (max - min + 1) + min); }
 
@@ -47,20 +48,26 @@ var processUserData = exports.processUserData = function (obj) {
   return obj
 }
 
-var runSimulation = exports.runSimulation = function (simid) {
-  //post to API route to allow siumulation to run on todays date
+var buildConfig = exports.buildConfig = function (simid) {
+  //check if is test (blank body)
+    //use appropriate config file.
+  ////for test use testdata
+  ////for live use 
+  var simconfig = config.simData
 
-  var postUrl = process.env.OPENSHIFT_APP_DNS || 'localhost:3000';
-  postUrl = "http://" + postUrl + "/api";
-  var requestData = conf.simData;
-  request({
-    url: postUrl,
-    method: "POST",
-    json: requestData
-  },
-    function (error, response, body) {
-      
-      // console.log("received",JSON.parse(JSON.stringify(body)))
-      // body is the decompressed response body 
-    });
+  simconfig.SimID=simid
+	write.makeSimFiles(simid);
+	var UData = JSON.parse(fs.readFileSync(write.folders.userFile));
+	//process UDATA
+	simconfig.PCusers = UData;
+	//console.log(JSON.stringify(config))
+	simconfig = apifunction.processUserData(simconfig);//
+	return simconfig ;//res.send(simulation.simulate(req.body,req.query.sId));
+}
+
+
+
+var runSimulation = exports.runSimulation = function(configfile){
+  console.log("yyyy",configfile)
+  return simulation.simulate(configfile)
 }

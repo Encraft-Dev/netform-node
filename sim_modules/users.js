@@ -31,8 +31,7 @@ exports.getUsersfromUserdata = function(){
   var simid = Date.today().toString("yyyy_MM_dd")
   write.makeSimFiles(simid);//make sure files exist
   write.timelog(write.folders.sim, "users", out, false)
-  apifunction.runSimulation(simid);
-  return out
+  return apifunction.runSimulation(apifunction.buildConfig(simid));
 }
 
 exports.convertAppUserstoSimUsers = convertuser = function(actList){
@@ -62,7 +61,7 @@ exports.addUser = function (obj, sim) {
   var users = JSON.parse(fs.readFileSync(write.folders.userFile, "utf8"));
   userExists = users.findIndex(function (el) { return el.uid == obj.uid; });
   userExists == -1 ? createUser(write.folders.sim, users, obj) : updateUser(write.folders.sim, users, obj, userExists);
-  apifunction.runSimulation(simid);
+  //apifunction.runSimulation(simid);
   return "user added/updated"
 }
 
