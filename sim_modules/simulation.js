@@ -183,11 +183,8 @@ exports.simulate = function (simData) {
 			this.vehStatus = [];
 			var vd = vehicleData;
 			if(!isLocal){
-
 				vd = vehicleData.filter(function(el){return el.nfAppId!=''})
-
 			}
-				console.log(vd)
 				write.timelog(write.folders.veh, sim.time(), vd, true)
 			//write.timelog(write.folders.veh, sim.time(), vehicleData, true)
 			vehicleData = [];
