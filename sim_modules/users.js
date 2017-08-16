@@ -17,6 +17,7 @@ exports.getUsersfromUserdata = function(){
   filelist.forEach(function(f, i) {
     if(f[0] != '.'){
       var fu = (JSON.parse(fs.readFileSync(path.join(dataRoot,"userData",f), "utf8")))
+      console.log(fu)
       //for each get last activity and add to array
       if(fu.activity.length>=1){
         thisCarData = fu.activity.slice(-1)[0]
