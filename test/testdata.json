@@ -1,7 +1,7 @@
 {
     "simID":"test",
     "simLength": "1440",
-    "simSlots": "30",
+    "simSlots": "300",
     "simSeed": "1234",
     "allowConstraints": "on",
     "constraintsExportCap": "500000",
