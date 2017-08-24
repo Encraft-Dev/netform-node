@@ -262,23 +262,33 @@
           emit('user/'+thisCar.id, {}, "GET")
           .then(function(res){
             res = res[0]
-            if(moment().isBefore(res.departuredatetime)){
-              offline = false;
-              chartData.predicted = res.predicted;
-              chartData.current = res.current;
-              chartData.target = {charge: res.netformcharge}
-              $('#returnTime').val(res.departuredatetime);
-              $('#resDate').html(moment(res.departuredatetime).format('HH:mm dd DD/MM/YYYY'))
-              $('#chargePerc').val(res.netformcharge);
-              $('#resCharge').html(res.netformcharge+'%')
-              $( "body" ).css({
-                backgroundColor: "#383838",
-              }, 1000 );
-              $("#splashScreen").fadeOut(3000,function(){
-                transition('login','results', '333', function(){
-                  updateChart()
+            if(res){
+              if(moment().isBefore(res.departuredatetime)){
+                offline = false;
+                chartData.predicted = res.predicted;
+                chartData.current = res.current;
+                chartData.target = {charge: res.netformcharge}
+                $('#returnTime').val(res.departuredatetime);
+                $('#resDate').html(moment(res.departuredatetime).format('HH:mm dd DD/MM/YYYY'))
+                $('#chargePerc').val(res.netformcharge);
+                $('#resCharge').html(res.netformcharge+'%')
+                $( "body" ).css({
+                  backgroundColor: "#383838",
+                }, 1000 );
+                $("#splashScreen").fadeOut(3000,function(){
+                  transition('login','results', '333', function(){
+                    updateChart()
+                  })
                 })
-              })
+              }else{
+                $('#returnTime').val(moment().add(2, 'hours').format('YYYY-MM-DDTHH:mm'));
+                $( "body" ).css({
+                  backgroundColor: "#383838",
+                }, 1000 );
+                $("#splashScreen").fadeOut(3000,function(){
+                  transition('login','input', '336666')
+                })
+              }
             }else{
               $('#returnTime').val(moment().add(2, 'hours').format('YYYY-MM-DDTHH:mm'));
               $( "body" ).css({
