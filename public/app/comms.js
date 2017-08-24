@@ -22,33 +22,41 @@ var emptyProm = function(data){
     })
 }
 
-
-var currData = null;
-
 var getUpdate = function(newDate){
-    currData = 'PAUSED';
+    // currData = 'PAUSED';
     emit('user/'+thisCar.id, {}, "GET")
     .then(function(res){
-        // updateChart();
-        console.log(newDate)
-        currData = newDate;
+        res=res[0]
+        console.log(res)
+        chartData.predicted = res.predicted;
+        chartData.current = res.current;
+        chartData.target = {charge: res.netformcharge}
+        $('#resDate').html(moment(res.departuredatetime).format('HH:mm dd DD/MM/YYYY'))
+        $('#resCharge').html(res.netformcharge+'%')
+        $('#thisCar').html(thisCar.car.make + ' ' + thisCar.car.model);
+        // console.log(newDate)
+        if(!chartData.current.error){
+            updateChart();
+            currData = newDate;
+        }
     })
 }
 
 var checkUpdate = function(){
-    if(currData != 'PAUSED'){        
+    // if(currData != 'PAUSED'){        
         emit('api/systemStatus', {}, 'GET')
         .then(function(res){
             if(res.status != 1){
-                if(moment(currData).isBefore(res.lastrun)){
-                    getUpdate(res.lastrun);
+                if(currData === null || moment(currData).isBefore(res.lastrun)){
+                    if(thisCar.id){
+                        getUpdate(res.lastrun);
+                    }
                 }
             }
         })
-    }
+    // }
 }
 
 $(document).ready(function(){
-    getUpdate();
     setInterval(checkUpdate, 60000);
 })

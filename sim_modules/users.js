@@ -16,6 +16,7 @@ exports.getUsersfromUserdata = function(){
   var out = []
   filelist.forEach(function(f, i) {
     if(f[0] != '.'){
+      console.log(path.join(dataRoot,"userData",f));
       var fu = (JSON.parse(fs.readFileSync(path.join(dataRoot,"userData",f), "utf8")))
       console.log(fu)
       //for each get last activity and add to array
@@ -42,7 +43,7 @@ exports.convertAppUserstoSimUsers = convertuser = function(actList){
       o = {
         "uid": u.id,
         "arrivaldatetime": u.arrDate,
-        "departuredatetime":u.depDate,
+        "departuredatetime":u.retDate,
         "vehicleId":u.car.id,
         "netformcharge": u.chargePerc
       }

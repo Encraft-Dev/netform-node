@@ -14,6 +14,9 @@ var write = require (path.join(appDir,"sim_modules",'logs.js'))
 var users = require (path.join(appDir,"sim_modules",'users.js'))
 //var timef = require(path.join(appDir,"sim_modules",'logs.js'))
 
+var simid = Date.today().toString("yyyy_MM_dd")
+write.makeSimFiles(simid)
+
 /* GET users listing. */
 router.get('/',function(req,res,next){
   //list all users in current day
@@ -46,6 +49,7 @@ router.post('/updateActivity',function(req,res,next){
   res.header("Access-Control-Allow-Origin", "*");
   // console.log("he",req.body)
   var tID = req.body.id
+  // console.log(fs.readFileSync(userDataDir+tID+'.json','utf8'))
   if (fs.existsSync(userDataDir+tID+'.json')){
      tFile = JSON.parse(fs.readFileSync(userDataDir+tID+'.json','utf8'));
      var simid = Date.today().toString("yyyy_MM_dd")
@@ -54,6 +58,7 @@ router.post('/updateActivity',function(req,res,next){
      req.body.current.id = req.body.id;
      tFile.activity.push(req.body.current);
     //  fs.writeFileSync(userDataDir+tID+'.json', JSON.stringify(tFile));
+    console.log(tFile)
     fs.writeFile(userDataDir+tID+'.json', JSON.stringify(tFile), 'utf-8', function (err) {
         if (err) {
           // res.send("failed to save");
@@ -95,6 +100,7 @@ router.post('/generateId', function(req, res){
   if (!fs.existsSync(userDataDir)){fs.mkdirSync(userDataDir)} // make folder 
   if (!fs.existsSync(userDataDir+tID+'.json')){
     tFile = {id: tID, email : req.body.email, phone : req.body.phone, car : {}, activity : [], survey:[]}
+    console.log(tFile)
     fs.writeFileSync(userDataDir+tID+'.json', JSON.stringify(tFile))
    res.send(tFile);
   }else{
@@ -133,8 +139,8 @@ router.post('/:id',function(req,res,next){
 
 router.get('/:id',function(req,res,next){
  
-  cTime = parseInt(write.getSimTimefromISOtime(new Date().toISOString()))
-console.log(cTime)
+  cTime = (parseInt(write.getSimTimefromISOtime(new Date().toISOString()))+1)
+console.log(cTime, write.folders.veh)
   if(!fs.existsSync(path.join(write.folders.veh,cTime+".json.gz"))){
     res.send({error: 'no data'});
     return false;
@@ -158,17 +164,21 @@ console.log(cTime)
   dTime = parseInt(write.getSimTimefromISOtime(output[0].departuredatetime))
 
   var cData = JSON.parse(zlib.unzipSync(fs.readFileSync(path.join(write.folders.veh,cTime+".json.gz"))));
-  console.log(cData)
+  console.log(cData, cTime)
   cData = cData.filter(function (el) {return el.nfAppId == userid;})
   console.log(cData)
-  cData = {charge:cData[0].percent,rate:cData[0].rate}
+  if(cData.length == 0){
+    cData = {error: 'not found'}
+  }else{
+    cData = {charge:cData[0].percent,rate:cData[0].rate}
+  }
   
   var dData = JSON.parse(zlib.unzipSync(fs.readFileSync(path.join(write.folders.veh,dTime+".json.gz"))));
   dData = dData.filter(function (el) {return el.nfAppId == userid;})
   dData = {charge:dData[0].percent,rate:dData[0].rate}
   
   output[0].current= cData         
-  output[0].predicted = dData[0]
+  output[0].predicted = dData
   output[0].finance = {saving:100}          
  output[0].graph = {0:1,1:2}           
 //find current charge
