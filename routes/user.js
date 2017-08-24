@@ -151,11 +151,11 @@ console.log(cTime, write.folders.veh)
     write.makeSimFiles(simid)
   var data = JSON.parse(fs.readFileSync(write.folders.userFile));
   var userid = req.params.id
-  console.log(userid)
+  console.log("userid",userid)
   // check for user existing
   output = userid?data.filter(function (el) {return el.uid == userid;}):data
 //get current time...
-  console.log(output)
+  console.log("user list",output)
   //
   if(output.length < 1){
     res.send({});
