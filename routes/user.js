@@ -58,7 +58,7 @@ router.post('/updateActivity',function(req,res,next){
      req.body.current.id = req.body.id;
      tFile.activity.push(req.body.current);
     //  fs.writeFileSync(userDataDir+tID+'.json', JSON.stringify(tFile));
-    console.log(tFile)
+    console.log("tfile",tFile)
     fs.writeFile(userDataDir+tID+'.json', JSON.stringify(tFile), 'utf-8', function (err) {
         if (err) {
           // res.send("failed to save");
