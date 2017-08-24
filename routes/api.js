@@ -48,7 +48,7 @@ router.get('/userlist', function(req,res){
 
 router.get('/systemStatus', function(req,res){
   res.header("Access-Control-Allow-Origin", "*");  
- 
+ console.log("dataroute",conf.dataRoot)
 //   write.setSimStatus();
   res.send(js.readFileSync(path.join(conf.dataRoot,"sim_status.json")));
 });
