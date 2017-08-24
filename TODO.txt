@@ -1,3 +1,4 @@
+- add multiday functionality
 - Add rate direction arrow to current status
 - Move config to persistent data
 - Move discharge/export eventsto persistant
