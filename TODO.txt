@@ -1,0 +1,5 @@
+- Add rate direction arrow to current status
+- Move config to persistent data
+- Move discharge/export eventsto persistant
+- include financial modelling
+- add user file after sim... add to output so we have history for length of user enagement
