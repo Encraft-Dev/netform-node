@@ -19,12 +19,16 @@ exports.getUsersfromUserdata = function(){
       console.log(path.join(dataRoot,"userData",f));
       var fu = (JSON.parse(fs.readFileSync(path.join(dataRoot,"userData",f), "utf8")))
       console.log(fu)
-      //for each get last activity and add to array
-      if(fu.activity.length>=1){
-        thisCarData = fu.activity.slice(-1)[0]
-        thisCarData.model = getModelfromId(thisCarData.car.id);
-        out.push(thisCarData)
+      try {
+        if(fu.activity.length>=1){
+          thisCarData = fu.activity.slice(-1)[0]
+          thisCarData.model = getModelfromId(thisCarData.car.id);
+          out.push(thisCarData)
+        }
+      } catch (error) {
+        console.log(error)
       }
+      //for each get last activity and add to array
     }
     // var fu = JSON.parse(fs.readFileSync(path.join(dataRoot,"userData",f), "utf8"))
   });
