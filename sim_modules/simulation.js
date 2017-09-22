@@ -274,7 +274,9 @@ console.log("Am i local?",isLocal)
 		setDischargeEvents: function () {
 			//get events from data file..
 					//if config say use type then get that file
-					
+					console.log(config)
+			//load file based on config
+				
 			this.dischargeEvents.push({ type: "Discharge", start: 50, stop: 80, capacity: 20 })
 			this.dischargeEvents.push({ type: "Discharge", start: 90, stop: 200, capacity: 100 })
 			this.dischargeEvents.push({ type: "Discharge", start: 480, stop: 550, capacity: 100 })

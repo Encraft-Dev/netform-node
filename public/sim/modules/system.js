@@ -379,10 +379,18 @@ var processData = function(){
 
 function getSettings(div){
 	out={}
+	events={}
+	this will kill
 		$("#simulationInputs input").each(function(d){
-			out[this.id]=this.value
-			//console.log(out[this.id])
-		})
+			console.log(this.id,$(this).attr('type'))
+				if($(this).attr('type')!="checkbox"){
+					out[this.id]=this.value
+				}
+				else
+				{
+				out[this.id]=this.checked
+				}
+		});
 		return out
 }
 

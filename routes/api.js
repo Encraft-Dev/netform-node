@@ -46,6 +46,16 @@ router.get('/userlist', function(req,res){
 	//	res.send(js.readFileSync(path.join(conf.appRoot,"data","sim_status.json")));
   });
 
+router.get('/eventslist', function(req,res){
+	res.header("Access-Control-Allow-Origin", "*");  
+	var list = fs.readdirSync(path.join(conf.appRoot,"data","events"))
+	list.forEach(function(l,i){
+		list[i]=l.replace(".json","")
+	})
+
+	res.send(list)
+});
+
 router.get('/systemStatus', function(req,res){
 	res.header("Access-Control-Allow-Origin", "*"); 
 	res.header("Content-type", "application/json");   
