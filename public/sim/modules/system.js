@@ -305,6 +305,7 @@ function fireSim(){
 	$(".sim_controls").hide()
 
 	var ts = new Date().getTime()
+	//console.log(data)
 	$.post( "/api?sId="+ts, data)
 		.done(function(d){
 			$(".sim_running").show()
@@ -366,6 +367,7 @@ var updateProgress = function (count,max){
 var processData = function(){
 		system.log.forEach(function(sl){
 			sl.Veh.forEach(function(v){
+				console.log(v)
 				 v.message.model=getModelfromUser(v.s)[0].model
 				 system.veh_maxchargerate =  v.message.model.C_Rate1>=system.veh_maxchargerate?v.message.model.C_Rate1:system.veh_maxchargerate
 				 system.veh_maxcap = v.message.model.MaxCapacity>=system.veh_maxcap?v.message.model.MaxCapacity:system.veh_maxcap

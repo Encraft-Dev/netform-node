@@ -4,3 +4,9 @@
 - Move discharge/export eventsto persistant
 - include financial modelling
 - add user file after sim... add to output so we have history for length of user enagement
+
+
+- add ability to change profiles
+- add ability to captuyre finances
+- add random grid balnacing events profile. (through choose events profile)
+- add charging over cap for grid balancing to algorrythym

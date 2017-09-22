@@ -29,14 +29,15 @@ var Cp = CarPark.commuterCP
 exports.test = function test() { return 'Hello' }
 
 
-//set hsoted or localhsot
-
-var isLocal = false //process.env.OPENSHIFT_NODEJS_IP?false:true;
 
 
 var Sim = Simjs.Sim;
 Sim.Random = Simjs.Random;
 exports.simulate = function (simData) {
+//set hsoted or localhsot
+var isLocal = global.isLocal //false //process.env.OPENSHIFT_NODEJS_IP?false:true;
+console.log("Am i local?",isLocal)
+
 	write.setSimStatus(1)
 	//console.log("full config file",simData)
 	//console.log(simData)
@@ -271,6 +272,9 @@ exports.simulate = function (simData) {
 			//add 
 		},
 		setDischargeEvents: function () {
+			//get events from data file..
+					//if config say use type then get that file
+					
 			this.dischargeEvents.push({ type: "Discharge", start: 50, stop: 80, capacity: 20 })
 			this.dischargeEvents.push({ type: "Discharge", start: 90, stop: 200, capacity: 100 })
 			this.dischargeEvents.push({ type: "Discharge", start: 480, stop: 550, capacity: 100 })
