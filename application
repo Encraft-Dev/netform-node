@@ -17,7 +17,7 @@ var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1';
 var server_dns_hostname = process.env.OPENSHIFT_APP_DNS || 'localhost';
 
 global.isLocal = server_dns_hostname=='localhost'?true:false
-console.log("host:",server_dns_hostname,"is Local",global.isLocal)
+console.log("host:",server_dns_hostname,"| isLocal:",global.isLocal)
 
 app.set('port', server_port);
 

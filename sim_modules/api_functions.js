@@ -69,6 +69,6 @@ var buildConfig = exports.buildConfig = function (simid) {
 
 
 var runSimulation = exports.runSimulation = function(configfile){
-  console.log("config",configfile)
+  console.log("run simulation",configfile)
   return simulation.simulate(configfile)
 }

@@ -28,9 +28,6 @@ var CarPark = require(path.join(dataFolder, "profile_parking"));
 var Cp = CarPark.commuterCP
 exports.test = function test() { return 'Hello' }
 
-
-
-
 var Sim = Simjs.Sim;
 Sim.Random = Simjs.Random;
 exports.simulate = function (simData) {
@@ -223,8 +220,8 @@ console.log("Am i local?",isLocal)
 			//sort added users
 			//add arrival time in ticks
 			//departure time in ticks
-
-			if (simData.eventsDischarge == "on") { this.setDischargeEvents() };//set up discharge requests.
+			console.log(simData)
+			if (simData.eventsSwitch) { this.setDischargeEvents(simData) };//set up discharge requests.
 
 			//console.log("controller started");
 			this.Constraints = { exportCap: simData.constraintsExportCap, importCap: simData.constraintsImportCap }
@@ -271,12 +268,13 @@ console.log("Am i local?",isLocal)
 			//add solar unit
 			//add 
 		},
-		setDischargeEvents: function () {
+		setDischargeEvents: function (data) {
 			//get events from data file..
 					//if config say use type then get that file
-					console.log(config)
+					console.log("events setup",data)
 			//load file based on config
-				
+			event=JSON.parse(fs.readFileSync(path.join(write.folders.data,"events","EFR_narrow.json"),"utf-8"));
+			console.log(event)	
 			this.dischargeEvents.push({ type: "Discharge", start: 50, stop: 80, capacity: 20 })
 			this.dischargeEvents.push({ type: "Discharge", start: 90, stop: 200, capacity: 100 })
 			this.dischargeEvents.push({ type: "Discharge", start: 480, stop: 550, capacity: 100 })

@@ -329,7 +329,7 @@ function fireSim(){
 					//system.log[0]=v;
 					console.log("loaded")
 					//visualise(system.log[0],0)
-					softloadSystem(d[0],0,data.simLength);
+					softloadSystem(d[0],0,data.simLength-1);
 				})
 			.fail(function(jqX,status,err){console.log("error:",err,JSON.stringify(jqX))})
 				
@@ -373,20 +373,18 @@ var processData = function(){
 				 system.veh_maxcap = v.message.model.MaxCapacity>=system.veh_maxcap?v.message.model.MaxCapacity:system.veh_maxcap
 			});
 		})
-
-
 }
 
 function getSettings(div){
 	out={}
 	events={}
-	this will kill
+	
 		$("#simulationInputs input").each(function(d){
 			console.log(this.id,$(this).attr('type'))
 				if($(this).attr('type')!="checkbox"){
 					out[this.id]=this.value
 				}
-				else
+				else //deal with checkboxes
 				{
 				out[this.id]=this.checked
 				}

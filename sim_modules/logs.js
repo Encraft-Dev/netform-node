@@ -14,7 +14,8 @@ var folders = exports.folders = {//requires makesimFiles() to be called at least
 	'user':"",
 	'userFile':"",
 	'veh':"",
-	'sys':""
+	'sys':"",
+	'data':""
 };
 
 
@@ -43,6 +44,7 @@ exports.timelog = function(dirPath,name,data,zip){
 
 exports.makeSimFiles = function(simid){
 	//var simid = Date.today().toString("yyyy_MM_dd")
+	folders.data= path.join(appDir,"data");
 	folders.results = path.join(dataRoot,"results")//check results root exists
 	folders.sim = path.join(folders.results,simid) // check sim folder exists
 	folders.userFile = path.join(folders.sim,"users.json")//ensure users file exists
