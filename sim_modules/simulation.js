@@ -31,9 +31,9 @@ exports.test = function test() { return 'Hello' }
 var Sim = Simjs.Sim;
 Sim.Random = Simjs.Random;
 exports.simulate = function (simData) {
-//set hsoted or localhsot
-var isLocal = global.isLocal //false //process.env.OPENSHIFT_NODEJS_IP?false:true;
-console.log("Am i local?",isLocal)
+	//set hsoted or localhsot
+	var isLocal = global.isLocal //false //process.env.OPENSHIFT_NODEJS_IP?false:true;
+	console.log("Am i local?", isLocal)
 
 	write.setSimStatus(1)
 	//console.log("full config file",simData)
@@ -58,7 +58,7 @@ console.log("Am i local?",isLocal)
 	settings.push(simID)
 	settings.push(simData)
 	settings.PCusers = simData.PCusers// JSON.parse(fs.readFileSync(write.folders.userFile));
-	settings.PCusersSim=[];
+	settings.PCusersSim = [];
 	var sysLog = []
 	//var oData=simData
 	//console.log("========")
@@ -68,7 +68,7 @@ console.log("Am i local?",isLocal)
 	//load PCuser list
 	//console.log(settings.PCusers)
 
-	var Park = new Sim.Facility("park", Sim.Facility.FCFS, simData.simSlots+ settings.PCusers.length)//this manages timing and queuing
+	var Park = new Sim.Facility("park", Sim.Facility.FCFS, simData.simSlots + settings.PCusers.length)//this manages timing and queuing
 	Park.report = function () { console.log(this) };
 	Park.caps = function () {
 		st = sim.entities
@@ -152,13 +152,13 @@ console.log("Am i local?",isLocal)
 		vehlog: [],
 		dischargeEvents: [],
 		Constraints: {},
-		PCusersSim:[],
+		PCusersSim: [],
 		finalize: function () { },//sysLog = this.xlog;console.log("controller shut down")},
 		sendTick: function () {
 			this.setTimer(1).done(function () { this.addPC(); this.sendTick(); })
 		},
 		addPC: function () {
-		//	var pclist = pcUserArray[sim.time()] ? pcUserArray[sim.time()] : []
+			//	var pclist = pcUserArray[sim.time()] ? pcUserArray[sim.time()] : []
 			//console.log("adding",sim.time(),pclist)
 			// pclist.array.forEach(function (pcu) {
 			// 	sim.addEntity(Vehicle);
@@ -173,17 +173,17 @@ console.log("Am i local?",isLocal)
 			genSolar = Park.solarGeneration.periodOutput("May", period)
 			//console.log(Controller.log)
 			// sysLog.push({Veh:this.vehStatus,Cap:Park.caps(),Park:Park.status()})
-			if(isLocal){
+			if (isLocal) {
 				write.timelog(write.folders.sys, sim.time(), { Veh: this.vehStatus, Cap: Park.caps(), Park: Park.status() }, true);
-				
+
 			}
-			
+
 			this.vehStatus = [];
 			var vd = vehicleData;
-			if(!isLocal){
-				vd = vehicleData.filter(function(el){return el.nfAppId!=''})
+			if (!isLocal) {
+				vd = vehicleData.filter(function (el) { return el.nfAppId != '' })
 			}
-				write.timelog(write.folders.veh, sim.time(), vd, true)
+			write.timelog(write.folders.veh, sim.time(), vd, true)
 			//write.timelog(write.folders.veh, sim.time(), vehicleData, true)
 			vehicleData = [];
 			//request data from vehicle...
@@ -242,45 +242,32 @@ console.log("Am i local?",isLocal)
 			// 	}	
 			// 	)
 			// }
-			settings.PCusers.forEach(function(element) {
-				this.setTimer(element.simArrival).done(function(){
+			settings.PCusers.forEach(function (element) {
+				this.setTimer(element.simArrival).done(function () {
 					//console.log("loop", sim.time(),element);
 					sim.addEntity(Vehicle);
 				});
 			}, this);
-				//within vehicle check if a new one exists!!!!!
-				//loop until there are none left
-			//	sim.addEntity("vehicle")
-			//	var pc = write.getSimTimefromISOtime(settings.PCusers[pci].arrivaldatetime)//get basic sim time stamp
-			//	pc.addedToSim = false;
-	
-			// settings.pcUserArray[pc] =	((settings.pcUserArray[pc] == null)? [] : settings.pcUserArray[pc]) ; //set pcuserarray 
-
-			// 	// if (settings.pcUserArray[pc] == null) {
-			// 	// 	settings.pcUserArray[pc] = []
-			// 	// }
-			// 	settings.pcUserArray[pc].push(settings.PCusers[pci])
-			
-
-			//this.askCommand();
-			//fire random events fro discharging and charging...... including how long for...
-			//this.sendTick();
-			//add solar unit
-			//add 
 		},
 		setDischargeEvents: function (data) {
 			//get events from data file..
-					//if config say use type then get that file
-					console.log("events setup",data)
+			//if config say use type then get that file
+			//console.log("events setup",data)
 			//load file based on config
-			event=JSON.parse(fs.readFileSync(path.join(write.folders.data,"events","EFR_narrow.json"),"utf-8"));
-			console.log(event)	
-			this.dischargeEvents.push({ type: "Discharge", start: 50, stop: 80, capacity: 20 })
-			this.dischargeEvents.push({ type: "Discharge", start: 90, stop: 200, capacity: 100 })
-			this.dischargeEvents.push({ type: "Discharge", start: 480, stop: 550, capacity: 100 })
+			event = JSON.parse(fs.readFileSync(path.join(write.folders.data, "events", "EFR_narrow.json"), "utf-8"));
+			//get month from sim data
+			var datemonth = (new Date(data.simDate)).toString("MMM");
+			//add events for correct month			
+			event[datemonth].forEach(function (d) {
+				Controller.dischargeEvents.push({ type: d.type, start: d.start, stop: d.stop, capacity: 100 })
+			});
+
+			//this.dischargeEvents.push({ type: "Discharge", start: 50, stop: 80, capacity: 20 })
+			//this.dischargeEvents.push({ type: "Discharge", start: 90, stop: 200, capacity: 100 })
+			//this.dischargeEvents.push({ type: "Discharge", start: 480, stop: 550, capacity: 100 })
 		},
 		discharge: function () {
-			//function needs to have array of discharge events
+			//function needs to have array of discharge events from controller.dischargeEvents[]
 			//loop through events and discharge as required...
 			disTrigger = false;
 			disCap = 0;
@@ -289,14 +276,15 @@ console.log("Am i local?",isLocal)
 
 				if (sim.time() > d.start && sim.time() < d.stop) {
 					disTrigger = true;
-					disCap = disCap < d.capacity ? disCap : d.capacity;
+					//limit capacity to hard limits
+					disCap = disCap > d.capacity ? disCap : d.capacity;
 				}
 			}
 			if (disTrigger) {
 				this.send({ c: "discharge", data: this.vehStatus, capacity: disCap }, 0)
 			}
 			else { this.send({ c: "hold", data: this.vehStatus }, 0) }
-			this.setTimer(1).done(function () { this.discharge() })
+			this.setTimer(1).done(function () { this.discharge() })//loop with tick
 			//if export cap then ask for each avialable then  share between 
 
 		},
@@ -381,7 +369,7 @@ console.log("Am i local?",isLocal)
 			//console.log("vehadd", sim.time(), this)
 			this.current = random.uniform(1, this.model.MaxCapacity);//current battery charge
 			var useDuration = this.user.duration//TODO - add normal around this number
-		
+
 			this.arrival = sim.time();
 			this.departure = sim.time() + useDuration
 
@@ -770,20 +758,15 @@ console.log("Am i local?",isLocal)
 	sim.simulate(simData.simLength);
 	sim.finalize()
 
-
-	write.timelog(simFolder, "settings", [settings, vehicleslist], false)
+	write.timelog(simFolder, "settings", [settings, vehicleslist, Controller.dischargeEvents], false)
 	console.log("Simulation End")
 	write.setSimStatus(0)
-	return [simID, [settings, vehicleslist]] //Controller.log
+	return [simID, [settings, vehicleslist, Controller.dischargeEvents]] //Controller.log
 
 }//end function
 
 
 function setupModels(simData) {
-
-
 	console.log("___________settting models up")
-
-
 }
 

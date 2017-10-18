@@ -78,26 +78,29 @@
 						 <div class="tab-content container-fluid">
 							<div role="tabpanel" class="tab-pane active" id="sim_settings">
 								<div class="row">
-									 <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 form-group">
+									 <div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 form-group">
 											<input class="form-control" type="text" id="simID" name="simID" value="local"/>
-											<label for="simID">ID for Simulation (currently not used)</label>
+											<label for="simID">ID for Simulation</label>
 									</div>
-									 <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 form-group">
+								
+									 <div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 form-group">
 											<input class="form-control" type="number" id="simLength" name="time" value="1440"/>
 											<label for="time">Length of Simulation (minutes)</label>
 									</div>
-									<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 form-group" >
+									<div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 form-group" >
 											<input class="form-control" type="number" id="simSlots" name="slots" value="25"/>
 											<label for="slots">Available Charging Slots</label>
 									</div>
-									<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 form-group">
+									<div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 form-group">
 											<input class="form-control" type="number" id="simSeed" name="seed" value="1234"/>
 											<label for="seed">Simulation Seed</label>
 									</div>
-									
 								</div><!-- row -->
 								<div class="row">
-									
+									<div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 form-group">
+										<input class="form-control" type="date" id="simDate" name="simDate" value="2017-05-01"/>
+										<label for="simDate">Date to Simulate</label>
+								    </div>
 								</div><!-- row -->
 								<div class="row">
 									
@@ -185,7 +188,7 @@
 		<div class="panel panel-info">
 			<div class="panel-heading">Available Capacity (kWh)</div>
 			<div class="panel-body">
-				<div id="plot_capacity""></div>
+				<div id="plot_capacity"></div>
 			</div>
 		</div>
 	</div>
@@ -204,6 +207,14 @@
 			<div class="panel-heading">Solar Generation (kW)</div>
 			<div class="panel-body">
 				<div id="plot_solar"></div>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-12">
+		<div class="panel panel-info">
+			<div class="panel-heading">Grid Events</div>
+			<div class="panel-body">
+				<div id="plot_events"></div>
 			</div>
 		</div>
 	</div>

@@ -58,7 +58,8 @@ var system = {
 		capacityMax: { name: "Max Capacity (kWh)", x: [], y: [], type: "scatter" },
 		energyFlow: { name: "Import/Export (kW)", x: [], y: [], type: "scatter" },
 		population: { name: "Population", x: [], y: [], type: "scatter" },
-		solar: { name: "Solar generation", x: [], y: [], type: "scatter" }
+		solar: { name: "Solar generation", x: [], y: [], type: "scatter" },
+		events: { name: "Events", x: [], y: [], type: "scatter" }
 	},
 	run: function () { runsystem(system.time) },
 	tick: function (step) {
@@ -223,6 +224,8 @@ function visualise(arr,systemtime){
 	system.plots.population.y=[]
 	system.plots.solar.x=[]
 	system.plots.solar.y=[]
+	system.plots.events.x=[]
+	system.plots.events.y=[]
 
 	for (i=0;i<system.time;i++){
 		t=getTimefromSystem(i)
@@ -250,6 +253,16 @@ function visualise(arr,systemtime){
 
  		system.plots.solar.x.push(t)
  		system.plots.solar.y.push(system.log[i].Park.GenSolar)
+
+		//add events plots
+		system.plots.events.x.push(t)
+		//loop through all events and find relevant
+		ey = 0
+		system.events.forEach(function(e){
+			if(e.start <= i && i <= e.stop){ey=e.capacity*e.type}
+		})
+		system.plots.events.y.push(ey)
+	
 
 	}
 	//system.plots.capacityCurrent.x.push(dt)
@@ -279,6 +292,7 @@ function replot(){
 		Plotly.redraw('plot_energy_flow');
 		Plotly.redraw('plot_population');
 		Plotly.redraw('plot_solar');
+		Plotly.redraw('plot_events');
 }
 function plot(){
 		var layout = {
@@ -295,6 +309,7 @@ function plot(){
 	Plotly.newPlot('plot_energy_flow', [system.plots.energyFlow],layout);
 	Plotly.newPlot('plot_population', [system.plots.population],layout);
 	Plotly.newPlot('plot_solar', [system.plots.solar],layout);
+	Plotly.newPlot('plot_events', [system.plots.events],layout);
 }
 //GUI
 function fireSim(){
@@ -325,6 +340,7 @@ function fireSim(){
 					$(".sim_loading").show()
 					$(".sim_controls").hide()
 					system.vehicleList=d[1][1]
+					system.events=d[1][2]
 					system.time=0;
 					//system.log[0]=v;
 					console.log("loaded")
@@ -367,7 +383,7 @@ var updateProgress = function (count,max){
 var processData = function(){
 		system.log.forEach(function(sl){
 			sl.Veh.forEach(function(v){
-				console.log(v)
+				//console.log(v)
 				 v.message.model=getModelfromUser(v.s)[0].model
 				 system.veh_maxchargerate =  v.message.model.C_Rate1>=system.veh_maxchargerate?v.message.model.C_Rate1:system.veh_maxchargerate
 				 system.veh_maxcap = v.message.model.MaxCapacity>=system.veh_maxcap?v.message.model.MaxCapacity:system.veh_maxcap
