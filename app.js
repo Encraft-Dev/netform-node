@@ -35,7 +35,7 @@ app.use('/helper',helpers);
 app.get("/results/*", function (req, res, next) {
   //leave main settings file uncompressed because chrome and jquery $getJSON apears to have timing issues with gzip
   //pretty damn hacky if you ask me
-  if (req.url.split("/")[3] != "settings.json") {
+  if (req.url.split("/")[3] != "settings.json") { // if is first call fromt sim front end (for setti)
     req.url = req.url + '.gz';
     res.set('Content-Encoding', "gzip");
     res.set("Content-Type", "application/json")

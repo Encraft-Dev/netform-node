@@ -5,33 +5,38 @@
 //START SIMPLE.. 
 
 
-require("datejs");
-fs = require('graceful-fs');
-path = require('path');
-var conf = require("./config");
-var zlib = require('zlib');
-var appDir = conf.appRoot;//path.dirname(require.main.filename);
+			       require("datejs");
+			  fs = require('graceful-fs');
+			path = require('path');
+		var conf = require("./config");
+		var zlib = require('zlib');
+	  var appDir = conf.appRoot;//path.dirname(require.main.filename);
 
-var config = require(path.join(appDir, "sim_modules", "config"));
-var write = require(path.join(appDir, "sim_modules", "logs"));
-var users = require(path.join(appDir, "sim_modules", "users"));
-var Simjs = require(path.join(appDir, "sim_modules", "sim-0.26"));
+//local modules
+	   var config = require(path.join(appDir, "sim_modules", "config"));
+		var write = require(path.join(appDir, "sim_modules", "logs"));
+		var users = require(path.join(appDir, "sim_modules", "users"));
+		var Simjs = require(path.join(appDir, "sim_modules", "sim-0.26"));
 
-
-var dataFolder = path.join(appDir, "data");
-var cModes = require(path.join(dataFolder, "charging_modes"));
-var vArr = require(path.join(dataFolder, "vehicles"));
-var uArr = require(path.join(dataFolder, "user_types"));
+//load up data arrays
+   var dataFolder = path.join(appDir, "data");
+	   var cModes = require(path.join(dataFolder, "charging_modes"));
+	     var vArr = require(path.join(dataFolder, "vehicles"));
+	     var uArr = require(path.join(dataFolder, "user_types"));
 var profile_solar = require(path.join(dataFolder, "profile_solar"));
-var API_MCS24 = require(path.join(dataFolder, "PV_API"));
-var CarPark = require(path.join(dataFolder, "profile_parking"));
-var Cp = CarPark.commuterCP
-exports.test = function test() { return 'Hello' }
+    var API_MCS24 = require(path.join(dataFolder, "PV_API"));
+      var CarPark = require(path.join(dataFolder, "profile_parking"));
+           var Cp = CarPark.commuterCP
 
-var Sim = Simjs.Sim;
-Sim.Random = Simjs.Random;
+exports.test = function test() { return 'Hello' }//pointless test function
+
+//add sim libraries
+		  var Sim = Simjs.Sim;
+       Sim.Random = Simjs.Random;
+
+//main simulation function
 exports.simulate = function (simData) {
-	//set hsoted or localhsot
+	//set hosted or localhost
 	var isLocal = global.isLocal //false //process.env.OPENSHIFT_NODEJS_IP?false:true;
 	console.log("Am i local?", isLocal)
 

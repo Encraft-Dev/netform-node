@@ -8,7 +8,9 @@ var data_folder = process.env.OPENSHIFT_DATA_DIR || appDir;
 
 require("datejs")
 
-var folders = exports.folders = {//requires makesimFiles() to be called at least once udring the simulation/user/data process
+//provided easy?! access to the simulation output file routes (overly complicated)
+////requires makesimFiles() \|/ to be called at least once udring the simulation/user/data process
+var folders = exports.folders = {
 	'results':"",
 	'sim':"",
 	'user':"",
@@ -17,6 +19,33 @@ var folders = exports.folders = {//requires makesimFiles() to be called at least
 	'sys':"",
 	'data':""
 };
+
+//sets up the file system for the simulation...this could probly be done only in the simulation, but hey its now done complicatedly everywhere!!!
+//uses sync version of fs stuff
+exports.makeSimFiles = function(simid){
+	//write paths for folders
+	folders.data= path.join(appDir,"data");
+	folders.results = path.join(dataRoot,"results");//check results root exists
+	folders.sim = path.join(folders.results,simid); // check sim folder exists
+	folders.veh = path.join(folders.sim,"veh");
+	folders.sys = path.join(folders.sim,"system");
+	
+	//write paths for files
+	folders.userFile = path.join(folders.sim,"users.json");//ensure sim users file exists
+	
+	//write out folders
+	if (!fs.existsSync(folders.results)){fs.mkdirSync(folders.results)};
+	if (!fs.existsSync(folders.sim)){fs.mkdirSync(folders.sim)};
+	if (!fs.existsSync(folders.veh)){fs.mkdirSync(folders.veh)};
+	if (!fs.existsSync(folders.sys)){fs.mkdirSync(folders.sys)};
+
+	//write out files
+	// make usersfile with blank array if doesnt exist. users can be added to live sim continously so doesnt get written over
+	if (!fs.existsSync(folders.userFile)){fs.writeFileSync(folders.userFile,"[]")}; 
+
+  return folders.sim ;
+}
+
 
 
 exports.timelog = function(dirPath,name,data,zip){
@@ -42,32 +71,7 @@ exports.timelog = function(dirPath,name,data,zip){
 // 	return resultsF;
 // }
 
-exports.makeSimFiles = function(simid){
-	//var simid = Date.today().toString("yyyy_MM_dd")
-	folders.data= path.join(appDir,"data");
-	folders.results = path.join(dataRoot,"results")//check results root exists
-	folders.sim = path.join(folders.results,simid) // check sim folder exists
-	folders.userFile = path.join(folders.sim,"users.json")//ensure users file exists
-	if (!fs.existsSync(folders.results)){fs.mkdirSync(folders.results)} // make folder 
-	if (!fs.existsSync(folders.sim)){fs.mkdirSync(folders.sim)} // make folder 
-	if (!fs.existsSync(folders.userFile)){fs.writeFileSync(folders.userFile,"[]")} // make usersfile 
 
-  	folders.veh = path.join(folders.sim,"veh")
-	folders.sys = path.join(folders.sim,"system")
-	//var userdir = path.join(simFolder,"PCusers")
-	if (!fs.existsSync(folders.veh)){fs.mkdirSync(folders.veh)}
-	if (!fs.existsSync(folders.sys)){fs.mkdirSync(folders.sys)}
-	//if (!fs.existsSync(userdir)){fs.mkdirSync(userdir)}
-
-
-  //make test folders for test
-//   folder.test = path.join(folders.results,"test")
-//   folders.testUserFile = path.join(folders.test,"users.json")//ensure users file exists 
-//   if (!fs.existsSync(folders.test)){fs.mkdirSync(folders.test)} // make folder 
-//   if (!fs.existsSync(folders.testUserFile)){fs.writeFileSync(folders.testUserFile,"[]")} // make usersfile 
-
-  return folders.sim ;//true;
-}
 
 
 exports.getSimTimefromISOtime = function(ISOtime){

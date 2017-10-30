@@ -3,11 +3,10 @@ const     fs = require('graceful-fs');
         conf = require("./config");
       appDir = conf.appRoot; //path.dirname(require.main.filename);
     dataRoot = conf.dataRoot;          
-    write    = require(path.join(appDir, "sim_modules", 'logs'));
-    models   = require(path.join(appDir, "data", 'vehicles.json'));
+       write = require(path.join(appDir, "sim_modules", 'logs'));
+      models = require(path.join(appDir, "data", 'vehicles.json'));
  apifunction = require(path.join(appDir, 'sim_modules','api_functions'));
                require('datejs');
-
 
 
 exports.getUsersfromUserdata = function(){
@@ -37,6 +36,7 @@ exports.getUsersfromUserdata = function(){
   var simid = Date.today().toString("yyyy_MM_dd")
   write.makeSimFiles(simid);//make sure files exist
   write.timelog(write.folders.sim, "users", out, false)
+  
   return apifunction.runSimulation(apifunction.buildConfig(simid));
 }
 
@@ -71,7 +71,7 @@ exports.addUser = function (obj, sim) {
   return "user added/updated"
 }
 
-var getModelfromId = exports.getModelfromId = function (id) {
+exports.getModelfromId = getModelfromId = function (id) {
   o = models.filter(function (el) { return el.id == id; })
   return o[0]
 }
