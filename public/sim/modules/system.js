@@ -415,7 +415,7 @@ function saveSettingsfile(){
 	 var data = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(out))
 	 var dl = document.createElement('a');
   	dl.setAttribute('href', data);
- 	dl.setAttribute('download',$("#seed").val()+".nfm");
+ 	dl.setAttribute('download',$("#simID").val()+".nfm");
   	dl.click();
 }
 

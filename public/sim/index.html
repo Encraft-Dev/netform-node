@@ -21,6 +21,21 @@
 	/*yeti override...*/
 	.tab-pane{padding-top:40px;}
 	.loading {height:80px;}
+	.btn-file input[type=file] {
+		position: absolute;
+		top: 0;
+		right: 0;
+		min-width: 100%;
+		min-height: 100%;
+		font-size: 100px;
+		text-align: right;
+		filter: alpha(opacity=0);
+		opacity: 0;
+		outline: none;
+		background: white;
+		cursor: inherit;
+		display: block;
+	}
 </style>
 </head>
 <body >
@@ -32,14 +47,16 @@
 			<div id="simulation">
 				<div class="form">
 					<div class="row">
-						<div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
-							<button type="button" id="fileSave" class="btn btn-default">
-								<span class="glyphicon glyphicon-save"></span>
+						<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
+							<button type="button" title="Save configuration file" id="fileSave" class="btn btn-default">
+								<span class="glyphicon glyphicon-floppy-save"></span>
 							</button>
-							<label class="btn btn-default btn-file">
-									<span class="glyphicon glyphicon-open"></span>
-									<input class="form-control" type="file" id="fileInput" style="display: none;" />
-							</label>
+						
+								<label class="btn btn-default btn-file">
+									<span class="glyphicon glyphicon-floppy-open">
+										<input class="form-control" type="file" id="fileInput" style="display: none;" />
+									</span>
+								</label>
 						</div>
 
 						<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
@@ -152,7 +169,10 @@
 								<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 form-group">
 										<input class="form-control" type="number" id="solarCap" name="solar_cap" value="200" />
 										<label for="solar_cap">Solar Peak Capacity kW</label>
-										<input hidden id="solarOut" type="number" value="175800"/>
+								</div>
+								<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 form-group" hidden>
+										<input  class="form-control" id="solarOut" type="number" value="175800"/>
+										<label for="solarOut">Annual solar generation kWh</label>
 								</div>
 							</div><!-- tab panel -->
 							<div role="tabpanel"  class="tab-pane" id="sim_scenarios">	
@@ -305,7 +325,10 @@ $("#exportCap").change(function(){systemControl("export_cap",$("#exportCap").val
 $("#importCap").change(function(){systemControl("import_cap",$("#importCap").val())})
 $("#solarCap").change(function(){
 		systemControl("solar_cap",$("#solarCap").val());
-		solarMCSAPI($("#solarCap").val(),"solarOut")
+	
+		$("#solarOut").val($("#solarCap").val() * 879) //use simple conversion....could be changed to reflect location
+		systemControl("solar_output",$("#solarOut").val());
+		//solarMCSAPI($("#solarCap").val(),"solarOut") // could use msc api... but meh..
 	});
 $("#importCap").val(system.control.import_cap)
 $("#exportCap").val(system.control.export_cap)

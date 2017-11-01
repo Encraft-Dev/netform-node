@@ -49,54 +49,85 @@ The simulation itself takes a config object which is built in various ways depen
     "solarOut": "175800" // annual output of installed solar
 }
 ```
-### simulation detail
+### Simulation principle
 
 The simulation is based on a facility (car park) being filled with entities (vehicles). A controller acts as a timekeeper, by broadcasting status command messages and collating replies broadcast from vehicles, and acting as an oracle for external information such solar generation, current constriants and grid signals.
 
-Vehicles arrive at times normally distributed (randomly) around a parking profile. Each vehicle is assigned a car model and user profile (unless a live user). The user profile defines length of time the vehicle will stay and the users required charge on departure. The vehicle profile defines charging modes abd battry capacity. Each vehicle initiated with the calculation to optimise their charging in line with the whole facility.
+Vehicles arrive at times normally distributed (randomly) around a parking profile. Each vehicle is assigned a car model and user profile (unless a live user). The user profile defines length of time the vehicle will stay and the users required charge on departure. The vehicle profile defines charging modes abd battry capacity. Each vehicle initiated with the calculation to optimise their charging in line with the whole facility.  The 'Netform' algorythm takes user requirements and constraints to calcuate the optimal charging strategy.
 
 The simulation works on a tick basis with vehicles being polled for their state and predicted requirements every minute. The vehicles then receive the full predicted data packet from all actors and calculate their response. They then change charging rate to meet calculation. This is where the blockchain integration could be built within the call response and smart contract in the vehicle itself.
 
 The charging response is built with a time lag (currently it takes 5 mins to adjust charging rate) and once a vehilce has reached 80% it reduces it charging rate to a lower mode.
 
+## Front ends
+
+The simulation will work with a number of front end as it is api based.
+
+### Sim
+
+The sim frontend allows user to change simulation config and also provides a graphic and navigatable visualisation of the results. Configuration can be saved and reloaded for later use.
+
+### App
+
+The app frontend provides a way of live users interacting with a simulation of parking and testing the customers response to various drivers including price, time and charge state at return.
+
+## Results
+
+Results are output to a results folder. This is not included in the git and is created on the fly as required. The result folder contains a subfolder for each unquie simID that has been run.
+
+If the simulation is run on localhost then all data is kept, if run on a server then a minimal set of data is kept to reduce write times.
+
+The results structure is as follows
+
+```Results/system``` folder contains gzipped files saving the state of the simulation at each tick point.     
+
+```Results/veh``` folder contains the state of all vehicles at each tick point. if the simulation is online then 
+
+```Results\settings``` file contains the complete setting and profile data used  in the simulation
+
+```Results\users``` file contains the live users added to the simulation. This will be blank is a standard simulation is carried out.
+
+
 ## Folders
 
 ### Data 
 
-    Contains static data files including 
-        * events configurations 
-        * parking profiles 
-        * Solar profiles 
-        * Vehicle profiles
-        * User Profiles.
+Contains static data files including 
 
-    It also contains a single status rewritable file
+* events configurations 
+* parking profiles 
+* Solar profiles 
+* Vehicle profiles
+* User Profiles.
+
+It also contains a single status rewritable file
 
 ### Public
 
-    Public contains all the public static route html code. 
-    currently contains
-        * App - Mobile app interface
-        * Sim - simulation frontend
+Public contains all the public static route html code. 
+
+* App - Mobile app interface
+* Sim - simulation frontend
 
 ### Routes
 
-    Contains all the routes for functionality, currently
+Contains all the routes for functionality, currently
 
-        * api -main simulation and associated functions
-        * helpers - helper functions to aid in getting data (times) in the correct format
-        * testuser - a testing route to add users
-        * user - manage live users when using live app (not used when using simulation frontend)
+* api -main simulation and associated functions
+* helpers - helper functions to aid in getting data (times) in the correct format
+* testuser - a testing route to add users
+* user - manage live users when using live app (not used when using simulation frontend)
 
 ### Sim_modules
 
-    simulation code anc configuration
-        * api_functions - input, checking and setup functions for simulation
-        * config - base configs
-        * log.js - logging, file writing, folder location and saving
-        * sim-0.26 - simulation engine
-        * simulation - netform simulation code
-        * users - functions to deal with users, from testing and live. - parses users to simulation format
+Simulation code and configuration
+
+* api_functions - input, checking and setup functions for simulation
+* config - base configs
+* log.js - logging, file writing, folder location and saving
+* sim-0.26 - simulation engine
+* simulation - netform simulation code
+* users - functions to deal with users, from testing and live. - parses users to simulation format
 
 ### Test
 
@@ -104,5 +135,7 @@ The charging response is built with a time lag (currently it takes 5 mins to adj
 
 ### views 
      
-    legacy nonesence from original scaffolding!!!!
+    legacy nonesence from original scaffolding!!!! deleteing this seem to break the world..
+
+
 
