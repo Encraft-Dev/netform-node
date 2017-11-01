@@ -137,11 +137,11 @@ Simulation code and configuration
 
 ### Test
 
-    data used for testing
+* data used for testing
 
 ### views 
      
-    legacy nonesence from original scaffolding!!!! deleteing this seem to break the world..
+* legacy nonesence from original scaffolding!!!! deleteing this seem to break the world..
 
 
 
