@@ -90,6 +90,12 @@ The results structure is as follows
 
 ## Folders
 
+### Results 
+Generated on first run. Contains simulation results
+
+### userData
+Generated when required. Contains live userdata from app frontend. Is used to uniquely identify live users
+
 ### Data 
 
 Contains static data files including 
