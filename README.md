@@ -2,6 +2,30 @@
 
 Netform is a vehicle to grid simulator that allows underatanding of constraints, energy flows and control algorythms that effect of multiple electric vehicles in a single geographic location.
 
+## Installation
+
+Clone the repo and install the required node modules 
+```javascript
+npm install 
+```
+Run the application
+```javascript
+npm run debug
+```
+Navigate to
+```
+https://localhost:3000/sim
+```
+
+Currently enviroment varibles are set up to run locally or on an openshift 2 node cartridge. The follwing lines in ```application``` provide control
+
+```javascript
+15 var server_port = normalizePort(process.env.OPENSHIFT_NODEJS_PORT || '3000');
+16 var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1';
+17 var server_dns_hostname = process.env.OPENSHIFT_APP_DNS || 'localhost';
+```
+
+
 
 
 ## Folders
