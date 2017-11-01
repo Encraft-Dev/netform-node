@@ -1,7 +1,7 @@
-# netform-node
-node version of netform code
+# Netform
 
-Quick description of how the whole thing works
+Netform is a vehicle to grid simulator that allows underatanding of constraints, energy flows and control algorythms that effect of multiple electric vehicles in a single geographic location.
+
 
 
 ## Folders
@@ -51,4 +51,3 @@ Quick description of how the whole thing works
      
     legacy nonesence from original scaffolding!!!!
 
-    
