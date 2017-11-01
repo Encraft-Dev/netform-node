@@ -73,8 +73,17 @@ exports.simulate = function (simData) {
 	//load PCuser list
 	//console.log(settings.PCusers)
 
-	var Park = new Sim.Facility("park", Sim.Facility.FCFS, simData.simSlots + settings.PCusers.length)//this manages timing and queuing
+
+	//initial simulation objects
+
+	//park is facility that allows entities to arrive a depart. park object manages timing and queueing ...
+	// also records statistical data for later
+	var Park = new Sim.Facility("park", Sim.Facility.FCFS, simData.simSlots + settings.PCusers.length) //set up facility with extra slots for live users
+	
+	//simple call to get the object for debug
 	Park.report = function () { console.log(this) };
+	
+	//get current energy flow and battery capacity based on active vehicles (entities)
 	Park.caps = function () {
 		st = sim.entities
 		ca = 0;
@@ -89,9 +98,10 @@ exports.simulate = function (simData) {
 		}
 		return { currentCap: cu, maximumCap: ca };
 	};
-	Park.status = function () {
 
-		f = this.free //number of aviable slots
+	//get current status of facility
+	Park.status = function () {
+		f = this.free //number of avialable slots
 		q = this.queue.data.length//population in queue
 		ps = this.stats.population - q;
 		pq = q;
@@ -111,14 +121,14 @@ exports.simulate = function (simData) {
 		//console.log(id,q,sim.time(),this.queue.data)
 		return q;
 	};
+
+	//add other energy sources and uses. - currently only solar
 	Park.solarGeneration = {
 		profile: {},
 		init: function () {
 			//get profile and adjust for system size.
 			//turn daily into actual..
-			////get system size from data settings file
-
-
+			//get system size from data settings file
 			for (i = 0; i < profile_solar.length; i++) {
 				monthly = profile_solar[i].Monthly * simData.solarOut
 				data = [];
@@ -131,7 +141,7 @@ exports.simulate = function (simData) {
 			}
 		},
 		periodOutput: function (month, period) {
-			//console.log(this.profile[month],this.profile[month].data[10])
+			//get output for simualation period from input profile (ie which 30 minute interval for solar)
 			return this.profile[month].data[period] / Date.getDaysInMonth(2017, Date.getMonthNumberFromName(month))
 		},
 		tickOutput: function (month, tick) {
@@ -144,11 +154,10 @@ exports.simulate = function (simData) {
 			return this.profile[month].data[period] / Date.getDaysInMonth(2017, Date.getMonthNumberFromName(month))
 		}
 	}
+	//add static battery storage -- TBC
 	Park.batteryStorage = {}
-	Park.solarGeneration.init();
-	//var SlotStore = new Sim.Sto
-
-
+	//initialise facility extras 
+	Park.solarGeneration.init(); 
 
 	//controller - starts,stops and provided global functions for the sim
 	var Controller = {
@@ -162,7 +171,7 @@ exports.simulate = function (simData) {
 		sendTick: function () {
 			this.setTimer(1).done(function () { this.addPC(); this.sendTick(); })
 		},
-		addPC: function () {
+		addPC: function () {//pretty sure this is dead....
 			//	var pclist = pcUserArray[sim.time()] ? pcUserArray[sim.time()] : []
 			//console.log("adding",sim.time(),pclist)
 			// pclist.array.forEach(function (pcu) {
@@ -171,7 +180,8 @@ exports.simulate = function (simData) {
 
 
 		},
-		askStatus: function () {
+		//primary function to get info from simulation
+		askStatus: function () { 
 			//console.log(this)
 			period = Math.floor(sim.time() / 30)
 			period = period > 47 ? 0 : period
@@ -235,18 +245,7 @@ exports.simulate = function (simData) {
 			this.discharge();//set discharge going
 			this.periodTick();//set half houly update going
 			this.sendTick();//set minute events
-			//set timer for each new PCusers
-			//console.log(settings.PCusers)
-			// pcUserArray = []
-			// for (var pci = 0; pci < settings.PCusers.length; pci++) {
-			// 	//set each of the vehciles at this time running.....
-			// 	//console.log("veh",settings.PCusers[pci])
-			// 	this.setTimer(settings.PCusers.simArrival).done(
-			// 	function(){
-			// 		console.log("hello",sim.time())
-			// 	}	
-			// 	)
-			// }
+		
 			settings.PCusers.forEach(function (element) {
 				this.setTimer(element.simArrival).done(function () {
 					//console.log("loop", sim.time(),element);
@@ -339,27 +338,9 @@ exports.simulate = function (simData) {
 		facilitySlot: 0,
 		command: 0, //default is charge //will need to object at some point to enable fast,slow chage and discharge/ currently is  
 		start: function () {
-			//stats_vehicles.record(number_of_vehicles,sim.time());
-			//get vehicle type,set user and current state of charge
-			//this.model = this.model == "" ? vArr[(random.random() * (vArr.length - 1)).toFixed(0)] : vArr[this.model]
-
-			//for simtime see if any PC
-			//if is then filter by added? choose first PC
-			//once added change the added? factor to true,
-			// var pcFresh=[]
-			// if (pcUserArray[sim.time()]) {
-			// 	pcFresh = pcUserArray[sim.time()].filter(function (x) { return x.addedToSim == false })
-			// }
-
-			// console.log(pcFresh)
-			// pcfresh.forEach(function(pcV) {
-			// 	console.log(pcV)	
-			// });
-
+		
 			//using the sim,time  find if this is a user vehicle
 			var isPCarray = settings.PCusers.filter(function (el) { return el.simArrival == sim.time() })
-
-			//console.log("vehadd", sim.time(), isPCarray)
 
 			if (isPCarray.length == 1) {
 				this.model = isPCarray[0].model
@@ -464,12 +445,6 @@ exports.simulate = function (simData) {
 						}
 					};
 
-					//l=live?this.negotiation():false
-					//modulation_rate=live?this.netformModulation:1; //set the factor is live run, use 1 if prediction run.
-					//rate=modulation_rate*rate
-					//chargeStatus=modulation_status
-					//if(this.id==2){console.log(sim.time(),live,this.current,rate,modulation_rate,chargeStatus,this.netformFactor())}
-
 					current += rate / 60;
 
 					if (current > this.model.MaxCapacity && rate > 0) {
@@ -517,6 +492,7 @@ exports.simulate = function (simData) {
 				default:
 			}
 		},
+//************************************************************************************/
 		negotiation: function (cStatus, cRate) {
 			v = this.NF_vehStatus
 			//if(this.id==4){console.log(v)}
@@ -553,12 +529,8 @@ exports.simulate = function (simData) {
 				};
 
 			}
-			//(this.id==6&&sim.time()>475&&sim.time()<490)?console.log(sim.time(),cStatus,this.statusCode):false
 			//check against capacity (import)
 			//if(this.Constraints[0])
-			//
-			//
-			//
 			//
 			//Cap scenario
 			//1. NF is below; others are above>>modulate others
@@ -616,12 +588,11 @@ exports.simulate = function (simData) {
 
 			//this.id==2?
 			return { rate: this.netformModulation, status: this.netformStatus }
-			//if(this.id==4){console.log(nfList,nfRate,list,rate,aRate)}
-			//this is the key to the whole thing.
+		
+			//***************this is the key to the whole thing.
 			//we need to check everyone is happy with what they are going to do......
 			//
 			//1. add up netforms
-
 			//2. if import headroom then modulate everyone else to keep under headroom 
 			//3. if no import headroom then get excess from netforms
 			//4. discharge all at modulated rate for cover excess.
@@ -650,6 +621,7 @@ exports.simulate = function (simData) {
 			this.netFFPredicted = ((time_to_full) / (time_to_depart - 1)).toFixed(3)
 			return this.netFF//true;
 		},
+//************************************************************************************* */
 		selfCharge: function () {//if not given any commands then charge if netform requires.
 			//this should override any message commands..
 			//this.netformFactor();
@@ -769,7 +741,6 @@ exports.simulate = function (simData) {
 	return [simID, [settings, vehicleslist, Controller.dischargeEvents]] //Controller.log
 
 }//end function
-
 
 function setupModels(simData) {
 	console.log("___________settting models up")
