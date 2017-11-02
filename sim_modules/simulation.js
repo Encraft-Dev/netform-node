@@ -379,7 +379,6 @@ exports.simulate = function (simData) {
 			this.selfCharge();
 		},
 		charge: function (live) {//live uses NF modulator, and updates this..  --- not live updates predition object..
-			//if(this.id==2){console.log(live,sim.time(),this.current,this.prediction)}
 			switch (this.statusCode) {
 				case 1: //on charge point
 					//capture current conditions for prediction run/
@@ -405,8 +404,6 @@ exports.simulate = function (simData) {
 					chargeStatus = live ? neg.status : chargeStatus;
 					netformModulation = live ? neg.rate : 1;
 
-					//this.id==2&&live?console.log(sim.time(),this.netFF,this.netFFPredicted,netformModulation):false
-					//(this.id==6&&sim.time()>500&&sim.time()<550&&live)?console.log(sim.time(),chargeStatus,neg.rate,rate):false;
 					if (this.model.MinCharge <= current && current <= this.model.MaxCapacity) {// if able to charge/discharge.
 						//	this.chargeStatus = this.command;//accept request // following  if statements  qualify
 						//rd=1//rate direction + charging - discharging and ramp time
