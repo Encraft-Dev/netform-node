@@ -595,29 +595,38 @@ exports.simulate = function (simData) {
 			//4. discharge all at modulated rate for cover excess.
 
 		},
-		netformFactor: function () {
-			time_to_depart = this.onSlotTime + this.user.duration - sim.time(); //this.arrival+this.user.duration-sim.time();//user.timeend-system.time;
+netformFactor: function () {
+	//quite simply NF = (time to required charge/ time to departure time)
+	//this returns the personal netform factor for this vehicle given its user requirements.
 
-			//include top RDC current drop
-			charge_throttle_threshold = this.model.MaxCapacity * this.model.C_RDC
-			remain_charge_high = charge_throttle_threshold - this.current
+	time_to_depart = this.onSlotTime + this.user.duration - sim.time(); 
 
-			remain_time_high = remain_charge_high > 0 ?
-				remain_charge_high / (this.model.C_Rate1 / 60) :
-				0;
+	//if the charge is above high rate threshold (C_RDC) then only a slow charge is possible and rate is throttled
+	charge_throttle_threshold = this.model.MaxCapacity * this.model.C_RDC
+	remain_charge_high = charge_throttle_threshold - this.current
 
-			remain_charge_low = this.current >= charge_throttle_threshold ?
-				this.model.MaxCapacity - this.current :
-				this.model.MaxCapacity - charge_throttle_threshold;
+	//split up charging in the two rate regions (RDC)
+	
+	//main region
+	remain_time_high = remain_charge_high > 0 ?
+		remain_charge_high / (this.model.C_Rate1 / 60) :
+		0;
+	
+		//throttled region
+	remain_charge_low = this.current >= charge_throttle_threshold ?
+		this.model.MaxCapacity - this.current :
+		this.model.MaxCapacity - charge_throttle_threshold;
 
-			remain_time_low = remain_charge_low / (this.model.C_Rate2 / 60)
-			time_to_full = remain_time_low + remain_time_high
+	remain_time_low = remain_charge_low / (this.model.C_Rate2 / 60)
+	time_to_full = remain_time_low + remain_time_high
 
-			//nff= (time_to_full/time_to_depart).toFixed(3)
-			this.netFF = (time_to_full / time_to_depart).toFixed(3)//nff  //time_to_end //nF //(1/nF).toFixed(2)
-			this.netFFPredicted = ((time_to_full) / (time_to_depart - 1)).toFixed(3)
-			return this.netFF//true;
-		},
+
+
+	//nff= (time_to_full/time_to_depart).toFixed(3)
+	this.netFF = (time_to_full / time_to_depart).toFixed(3)//nff  //time_to_end //nF //(1/nF).toFixed(2)
+	this.netFFPredicted = ((time_to_full) / (time_to_depart - 1)).toFixed(3)
+	return this.netFF//true;
+},
 //************************************************************************************* */
 		selfCharge: function () {//if not given any commands then charge if netform requires.
 			//this should override any message commands..
